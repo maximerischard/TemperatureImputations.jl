@@ -38,14 +38,8 @@ function add_ts_hours!(df::DataFrame)
     return df
 end
 function read_Stations(isdSubset)
-
-    # Restrict to IOWA
-    isdSubset=isdList[[(usaf in (725450,725460,725480,725485)) for usaf in isdList[:USAF].values],:]
-
     station_IDs = [(get(r[:USAF]), get(r[:WBAN])) for r in eachrow(isdSubset)]
-
     hourly_ls = [read_station(sid[1], sid[2], i) for (i,sid) in enumerate(station_IDs)]
-
     hourly_cat = vcat(hourly_ls)
     add_ts_hours!(hourly_cat)
     return hourly_cat
