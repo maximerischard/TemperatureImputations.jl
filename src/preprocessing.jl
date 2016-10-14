@@ -1,4 +1,5 @@
 using DataFrames
+using Base.Dates: Hour, Day, Date
 
 function read_station(usaf::Int, wban::Int, id::Int)
     fn = @sprintf("%d.%d.processed.2015.2015.csv", usaf, wban)
@@ -43,4 +44,14 @@ function read_Stations(isdSubset)
     hourly_cat = vcat(hourly_ls)
     add_ts_hours!(hourly_cat)
     return hourly_cat
+end
+function test_data(hourly::DataFrame, istation::Int, hr_measure::Hour)
+    hourly_test = hourly[hourly[:station].values .== istation,:]
+    hourly_test[:ts_day] = [measurement_date(t, hr_measure) for t in hourly_test[:ts].values]
+    TnTx = DataFrames.by(hourly_test, :ts_day, df -> DataFrame(
+        Tn=minimum(df[:temp].values), 
+        Tx=maximum(df[:temp].values),
+        times_p_day=nrow(df),
+    ))
+    return TnTx
 end
