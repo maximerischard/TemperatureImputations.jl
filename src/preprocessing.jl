@@ -1,9 +1,9 @@
 using DataFrames
 using Base.Dates: Hour, Day, Date
 
-function read_station(usaf::Int, wban::Int, id::Int)
+function read_station(usaf::Int, wban::Int, id::Int; data_dir::String=".")
     fn = @sprintf("%d.%d.processed.2015.2015.csv", usaf, wban)
-    station_data = readtable("data2015/"fn, header=false, 
+    station_data = readtable(join((data_dir, "/data2015/",fn)), header=false, 
         names=[:year, :month, :day, :hour, :min, :seconds, :temp])
     station_data[:temp][isnan(station_data[:temp].values)].isnull[:] = true
     station_data = station_data[!station_data[:temp].isnull & !isnan(station_data[:temp].values) ,:]    
@@ -19,9 +19,9 @@ function read_station(usaf::Int, wban::Int, id::Int)
     station_data[:station] = id
     return station_data
 end
-function read_isdList()
+function read_isdList(;data_dir::String=".")
     # Read stations data
-    isdList=readtable("isdList.csv")
+    isdList=readtable(join((data_dir,"/isdList.csv")))
 
     # Project onto Euclidean plane
     epsg=Proj4.Projection(Proj4.epsg[2794])
@@ -38,9 +38,9 @@ function add_ts_hours!(df::DataFrame)
     df[:ts_hours] = ts_vec
     return df
 end
-function read_Stations(isdSubset)
+function read_Stations(isdSubset; data_dir::String=".")
     station_IDs = [(get(r[:USAF]), get(r[:WBAN])) for r in eachrow(isdSubset)]
-    hourly_ls = [read_station(sid[1], sid[2], i) for (i,sid) in enumerate(station_IDs)]
+    hourly_ls = [read_station(sid[1], sid[2], i; data_dir=data_dir) for (i,sid) in enumerate(station_IDs)]
     hourly_cat = vcat(hourly_ls)
     add_ts_hours!(hourly_cat)
     return hourly_cat

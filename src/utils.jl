@@ -10,4 +10,3 @@ function measurement_date(t::DateTime, hr_measure::Hour)
         return Date(t)+Day(1)
     end
 end
-
