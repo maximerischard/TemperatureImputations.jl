@@ -1,5 +1,6 @@
 module TempModel
     using GaussianProcesses
+    using PDMats
     using Optim
     include("GPrealisations.jl")
     include("utils.jl")

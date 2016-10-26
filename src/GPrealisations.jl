@@ -2,6 +2,7 @@ using GaussianProcesses: Mean, Kernel, evaluate, metric
 import GaussianProcesses: optimize!, get_optim_target
 import GaussianProcesses: num_params, set_params!, get_params, update_mll!
 import GaussianProcesses: update_mll_and_dmll!
+using Optim: minimizer
 
 type GPRealisations
     reals::Vector{GP}
@@ -145,7 +146,7 @@ function optimize!(gpr::GPRealisations; noise::Bool=true, mean::Bool=true, kern:
     func = get_optim_target(gpr, noise=noise, mean=mean, kern=kern)
     init = get_params(gpr;  noise=noise, mean=mean, kern=kern)  # Initial hyperparameter values
     results=optimize(func,init; method=method, kwargs...)                     # Run optimizer
-    set_params!(gpr, results.minimum, noise=noise,mean=mean,kern=kern)
+    set_params!(gpr, minimizer(results), noise=noise,mean=mean,kern=kern)
     update_mll!(gpr)
     return results
 end

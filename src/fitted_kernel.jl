@@ -1,6 +1,6 @@
-using GaussianProcesses: FixedPeriodic, RQIso, SEIso, set_params!, Masked
+using GaussianProcesses: RQIso, SEIso, set_params!, Masked
 # Temporal
-k1 = FixedPeriodic(0.0,0.0,log(24.0))
+k1 = fix(Periodic(0.0,0.0,log(24.0)), :lp)
 k2 = RQIso(0.0,0.0,0.0)
 k3 = SEIso(0.0,0.0)
 k4 = RQIso(0.0,0.0,0.0)
