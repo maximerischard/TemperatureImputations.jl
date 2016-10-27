@@ -4,7 +4,7 @@ function variogram(times, values, bins)
     n = length(times)
     for (i, t1) in enumerate(times)
         ibin = 1
-        for j in i:n
+        for j in i+1:n
             Δt = times[j] - t1
             while Δt>bins[ibin]
                 ibin += 1
