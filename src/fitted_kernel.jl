@@ -1,19 +1,18 @@
 using GaussianProcesses: RQIso, SEIso, set_params!, Masked
 # Temporal
-k1 = fix(Periodic(0.0,0.0,log(24.0)), :lp)
-k2 = RQIso(0.0,0.0,0.0)
-k3 = SEIso(0.0,0.0)
-k4 = RQIso(0.0,0.0,0.0)
-k5 = RQIso(0.0,0.0,0.0)
-k6 = SEIso(0.0,0.0)
-k_time=k1+k2+k3+k4+k5+k6
-# hyperparameters fitted in JuliaGP_timeseries_chunks.ipynb
-hyp=[-1.4693,-0.0806483,1.0449,1.50786,1.10795,-1.38548,-1.22736,-1.05138,3.09723,1.28737,2.84127,3.64666,0.469691,3.00962,7.70695,-5.39838]
-set_params!(k_time, hyp[2:end])
-
-# Spatial
-k_spatial = SEIso(log(2*10^5), log(1.0))
-hyp=[-1.5875,11.2445,0.132749]
-set_params!(k_spatial, hyp[2:3])
-logNoise=hyp[1]
-k_spatiotemporal = Masked(k_time, [1]) * Masked(k_spatial, [2,3])
+ksp1 = SEIso(log(2*10^5), log(1.0))
+ksp2 = SEIso(log(2*10^5), log(1.0))
+ksp3 = SEIso(log(2*10^5), log(1.0))
+ksp4 = SEIso(log(2*10^5), log(1.0))
+ksp5 = SEIso(log(2*10^5), log(1.0))
+ksp6 = SEIso(log(2*10^5), log(1.0))
+k_means = SEIso(log(10^4), log(10.0))
+k_spatiotemporal_3 = fix(Masked(k1, [1])) * fix(Masked(ksp1, [2,3]), :lσ) +
+                     fix(Masked(k2, [1])) * fix(Masked(ksp2, [2,3]), :lσ) +
+                     fix(Masked(k3, [1])) * fix(Masked(ksp3, [2,3]), :lσ) +
+                     fix(Masked(k4, [1])) * fix(Masked(ksp4, [2,3]), :lσ) +
+                     fix(Masked(k5, [1])) * fix(Masked(ksp5, [2,3]), :lσ) +
+                     fix(Masked(k6, [1])) * fix(Masked(ksp6, [2,3]), :lσ) +
+                     fix(Masked(k_means, [2,3]))
+hyp = [14.9184,9.8588,10.6024,15.1699,13.6829,12.2061]
+set_params!(k_spatiotemporal_3, hyp)

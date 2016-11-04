@@ -79,7 +79,7 @@ function update_mll_and_dmll!(gpr::GPRealisations; kwargs...)
         Kgrads[gp.nobsv] = Array(Float64, gp.nobsv, gp.nobsv)
         ααinvcKIs[gp.nobsv] = Array(Float64, gp.nobsv, gp.nobsv)
     end
-    return update_mll_and_dmll!(gpr, Kgrads, ααinvcKIs)
+    return update_mll_and_dmll!(gpr, Kgrads, ααinvcKIs; kwargs...)
 end
 
 function get_optim_target(gpr::GPRealisations; noise::Bool=true, mean::Bool=true, kern::Bool=true)
