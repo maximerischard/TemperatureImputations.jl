@@ -90,3 +90,15 @@ function get_imputation_model()
     stanmodel = Stanmodel(name="imputation", model=imputation_model)
     return stanmodel
 end
+
+"""
+ convenience function to extract the imputed temperatures
+ from the STAN model object
+"""
+function get_temperatures(sim::Mamba.Chains)
+    temp_varnames=[@sprintf("temp_impt.%d", i) for i in 1:imputation_data["Nimpt"]]
+    
+    mu_samples=getindex(sim, :, "mu", :).value
+    temp_samples=getindex(sim, :, temp_varnames, :).value
+    temp_impute=broadcast(+, mu_samples, temp_samples)
+end
