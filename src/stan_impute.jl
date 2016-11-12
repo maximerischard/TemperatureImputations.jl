@@ -22,7 +22,7 @@ function prep_data(nearby_pred::NearbyPrediction, TnTx::DataFrame,
         "impt_times_p_day" => window_TnTx[:times_p_day].values,
         "predicted_mean" => μ_window,
         "predicted_cov" => Σ_window.mat,
-        "predicted_cov_chol" => full(Σ_window.chol[:U]),
+        "predicted_cov_chol" => full(Σ_window.chol[:L]),
         "k_softmax" => 10.0,
     )
     return imputation_data
@@ -61,28 +61,29 @@ function get_imputation_model()
         real<lower=0> k_softmax;
     }
     parameters {
-        vector[Nimpt] temp_impt;
+        vector[Nimpt] w_uncorr;
         real mu;
     }
     transformed parameters {
+        vector[Nimpt] temp_impt;
         real Tsoftmax[N_TxTn];
         real Tsoftmin[N_TxTn];  
+        temp_impt = mu + predicted_mean + predicted_cov_chol*w_uncorr;
         {
             int istart;
             istart = 1;
             for (i in 1:N_TxTn){
                 int ntimes;
                 ntimes = impt_times_p_day[i];
-                Tsoftmin[i] = softmin(segment(temp_impt,istart,ntimes)+mu, k_softmax);
-                Tsoftmax[i] = softmax(segment(temp_impt,istart,ntimes)+mu, k_softmax);
+                Tsoftmin[i] = softmin(segment(temp_impt,istart,ntimes), k_softmax);
+                Tsoftmax[i] = softmax(segment(temp_impt,istart,ntimes), k_softmax);
                 istart = istart + ntimes;
             }
         }
     }
     model {
-        // temp_impt ~ multi_normal(predicted_mean, predicted_cov);
+        w_uncorr ~ normal(0,1);
         mu ~ normal(0, 100.0);
-        temp_impt ~ multi_normal_cholesky(predicted_mean, predicted_cov_chol);
         Tn ~ normal(Tsoftmin, 0.1);
         Tx ~ normal(Tsoftmax, 0.1);
     }
@@ -97,8 +98,6 @@ end
 """
 function get_temperatures(sim::Mamba.Chains)
     temp_varnames=[@sprintf("temp_impt.%d", i) for i in 1:imputation_data["Nimpt"]]
-    
-    mu_samples=getindex(sim, :, "mu", :).value
     temp_samples=getindex(sim, :, temp_varnames, :).value
-    temp_impute=broadcast(+, mu_samples, temp_samples)
+    return temp_samples
 end
