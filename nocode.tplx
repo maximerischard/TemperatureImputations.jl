@@ -1,0 +1,102 @@
+
+% Inherit from the specified cell style.
+((* extends 'article.tplx' *))
+
+((* block docclass *))
+\documentclass[letter]{article}
+((* endblock docclass *))
+
+((* block packages *))
+% \usepackage{stix}
+% \usepackage[scr]{rsfso}
+% \usepackage{bm}
+((( super() )))
+((* endblock packages *))
+
+((* block definitions *))
+    ((( super() )))
+    \newcommand{\genericdel}[3]{%
+      \left#1#3\right#2
+    }
+    \newcommand{\del}[1]{\genericdel(){#1}}
+    \newcommand{\sbr}[1]{\genericdel[]{#1}}
+    \newcommand{\cbr}[1]{\genericdel\{\}{#1}}
+    \DeclareMathOperator*{\argmin}{arg\,min}
+    \DeclareMathOperator*{\argmax}{arg\,max}
+    \let\Pr\relax
+    \DeclareMathOperator{\Pr}{\mathbb{P}}
+    \DeclareMathOperator{\E}{\mathbb{E}}
+    \DeclareMathOperator{\V}{\mathbb{V}}
+    \DeclareMathOperator{\cov}{{cov}}
+    \DeclareMathOperator{\var}{{var}}
+    \DeclareMathOperator{\Ind}{\mathbb{I}}
+    \DeclareMathOperator*{\sgn}{{sgn}}
+   % \DeclareMathOperator{\invchi}{\mathrm{Inv-\chi}^2}}
+   \DeclareMathOperator{\normal}{\mathcal{N}}
+   \DeclareMathOperator{\unif}{Uniform}
+   \DeclareMathOperator{\GP}{\mathcal{GP}}
+   \newcommand{\Tn}{\mathrm{T}_{n}}
+   \newcommand{\Tx}{\mathrm{T}_{x}}
+   \newcommand{\station}[1]{\mathrm{station}\sbr{#1}}
+   \newcommand{\xvec}{\mathbf{x}}
+   \newcommand{\indep}{\perp}
+   \newcommand{\iid}{iid}
+   \newcommand{\trans}{^{\intercal}}
+   \newcommand{\sigmaf}{\sigma_{\mathrm{GP}}}
+   \newcommand{\sigman}{\sigma_{\epsilon}}
+   \newcommand{\degreeC}{^\circ \mathrm{C}}
+
+	\providecommand{\tightlist}{%
+  	  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+((* endblock definitions *))
+
+((* block author *))\author{Maxime Rischard}((* endblock author *))
+
+% Render markdown
+((* block markdowncell scoped *))
+
+    ((*- if "DeclareMathOperator" in cell.source -*))
+    ((*- elif "Table of Contents" in cell.source -*))
+    ((* else *))
+    	((( cell.source | citation2latex | strip_files_prefix | markdown2latex )))
+    ((* endif *))
+
+((* endblock markdowncell *))
+((* block predoc *))
+    ((( super() )))
+	\tableofcontents
+((* endblock predoc *))
+((*- block figure scoped -*))
+    \begin{center}
+    \adjustimage{max size={0.6\linewidth}{0.5\paperheight}}{((( filename )))}
+    \end{center}
+    { \hspace*{\fill} \\}
+((*- endblock figure -*))
+
+% suppress input block
+((* block input_group *))
+((* endblock input_group *))
+
+% suppress output prompts (like '[19]:' at the start of an output block)
+((* block execute_result scoped *))
+    ((*- for type in output.data | filter_data_type -*))
+        ((*- if type in ['text/plain']*))
+         \begin{Verbatim}[commandchars=\\\{\}]
+((( output.data['text/plain'] | escape_latex | ansi2latex )))
+			\end{Verbatim}
+        ((* else -*))
+    		((* block data_priority scoped *))
+    			((( super() )))
+    		((* endblock *))
+        ((*- endif -*))
+    ((*- endfor -*))
+((* endblock execute_result *))
+
+% suppress undesired output
+((* block error *))
+((* endblock error *))
+((* block traceback_line *))
+((* endblock traceback_line *))
+
+((* block stream *))
+((* endblock stream *))
