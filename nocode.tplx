@@ -98,6 +98,8 @@
    \newcommand{\degreeC}{^\circ \mathrm{C}}
    \newcommand{\miss}{\mathrm{miss}}
    \newcommand{\obs}{\mathrm{obs}}
+   \DeclareMathOperator{\softmax}{smoothmax}
+   \DeclareMathOperator{\softmin}{smoothmin}
 
 	\providecommand{\tightlist}{%
   	  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
