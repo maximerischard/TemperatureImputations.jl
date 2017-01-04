@@ -3,6 +3,7 @@ import GaussianProcesses: optimize!, get_optim_target
 import GaussianProcesses: num_params, set_params!, get_params, update_mll!
 import GaussianProcesses: update_mll_and_dmll!
 using Optim: minimizer
+import NLopt
 
 type GPRealisations
     reals::Vector{GP}
@@ -149,4 +150,37 @@ function optimize!(gpr::GPRealisations; noise::Bool=true, mean::Bool=true, kern:
     set_params!(gpr, minimizer(results), noise=noise,mean=mean,kern=kern)
     update_mll!(gpr)
     return results
+end
+
+function optimize_NLopt(gpr::GPRealisations; noise::Bool=true, mean::Bool=true, kern::Bool=true,
+                    method=:LD_BFGS, kwargs...)
+    target = get_optim_target(gpr, noise=noise, mean=mean, kern=kern)
+    init_x = get_params(gpr;  noise=noise, mean=mean, kern=kern)  # Initial hyperparameter values
+    function myfunc(x::Vector, grad::Vector)
+        if length(grad) > 0
+            target.g!(x, grad)
+        end
+
+        count += 1
+        y = target.f(x)
+        if y < best_y
+            best_y = y
+            best_x[:] = x
+        end
+        return y
+    end
+
+    nparams = length(init_x)
+    opt = Opt(method, nparams)
+
+    lower = Array(Float64, nparams)
+    upper = Array(Float64, nparams)
+    lower = init_x - 3.0
+    upper = init_x + 3.0
+    lower_bounds!(opt, lower)
+    upper_bounds!(opt, upper)
+    xtol_rel!(opt, x_tol)
+    ftol_rel!(opt, f_tol)
+    min_objective!(opt, myfunc)
+    (minf,minx,ret) = NLopt.optimize(opt, init_x)
 end
