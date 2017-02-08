@@ -153,9 +153,12 @@ function optimize!(gpr::GPRealisations; noise::Bool=true, mean::Bool=true, kern:
 end
 
 function optimize_NLopt(gpr::GPRealisations; noise::Bool=true, mean::Bool=true, kern::Bool=true,
-                    method=:LD_BFGS, kwargs...)
+                    method=:LD_LBFGS, x_tol=1e-10, f_tol=1e-10)
     target = get_optim_target(gpr, noise=noise, mean=mean, kern=kern)
     init_x = get_params(gpr;  noise=noise, mean=mean, kern=kern)  # Initial hyperparameter values
+    count = 0
+    best_x = copy(init_x)
+    best_y = Inf
     function myfunc(x::Vector, grad::Vector)
         if length(grad) > 0
             target.g!(x, grad)
@@ -171,16 +174,17 @@ function optimize_NLopt(gpr::GPRealisations; noise::Bool=true, mean::Bool=true, 
     end
 
     nparams = length(init_x)
-    opt = Opt(method, nparams)
+    opt = NLopt.Opt(method, nparams)
 
     lower = Array(Float64, nparams)
     upper = Array(Float64, nparams)
     lower = init_x - 3.0
     upper = init_x + 3.0
-    lower_bounds!(opt, lower)
-    upper_bounds!(opt, upper)
-    xtol_rel!(opt, x_tol)
-    ftol_rel!(opt, f_tol)
-    min_objective!(opt, myfunc)
+    NLopt.lower_bounds!(opt, lower)
+    NLopt.upper_bounds!(opt, upper)
+    NLopt.xtol_rel!(opt, x_tol)
+    NLopt.ftol_rel!(opt, f_tol)
+    NLopt.min_objective!(opt, myfunc)
     (minf,minx,ret) = NLopt.optimize(opt, init_x)
+    return minf,minx,ret,count
 end
