@@ -17,7 +17,8 @@ function predict_from_nearby(hourly_data::DataFrame, stationDF::DataFrame,
     hourly_test  = hourly_data[hourly_data[:station].values.==target,:]
 
     train_subset = subset(hourly_train,from,to)
-    avgtemp=by(train_subset, :station, df->DataFrame(avgtemp=mean(df[:temp].values)))
+    avgtemp=DataFrames.by(train_subset, :station, 
+            df->DataFrame(avgtemp=mean(df[:temp].values)))
     train_subset = join(train_subset, avgtemp, on=:station)
 
     train_X_PRJ = stationDF[:X_PRJ].values[train_subset[:station].values]
@@ -31,6 +32,6 @@ function predict_from_nearby(hourly_data::DataFrame, stationDF::DataFrame,
     test_X = [test_subset[:ts_hours].values test_X_PRJ test_Y_PRJ]
 
     train_GP = GP(train_X', train_Y, MeanZero(), k, logNoise);
-    test_pred=predict(train_GP, test_X'; full_cov=true);
+    test_pred=GaussianProcesses.predict(train_GP, test_X'; full_cov=true);
     return NearbyPrediction(test_subset[:ts].values, test_pred[1], test_pred[2])
 end

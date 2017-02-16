@@ -25,6 +25,7 @@ k_spatiotemporal = fix(Masked(k1, [1])) * fix(Masked(ksp1, [2,3]), :lσ) +
                      fix(Masked(k5, [1])) * fix(Masked(ksp5, [2,3]), :lσ) +
                      fix(Masked(k6, [1])) * fix(Masked(ksp6, [2,3]), :lσ) +
                      fix(Masked(k_means, [2,3]))
-hyp = [-1.59982,14.9184,9.8588,10.6024,15.1699,13.6829,12.2061]
+# parameters fitted in JuliaGP_spatial4.ipynb (I think)
+hyp = [-1.60354,15.4259,9.86874,9.12749,16.4496,15.0163,12.2061]
 set_params!(k_spatiotemporal, hyp[2:end])
 logNoise=hyp[1]
