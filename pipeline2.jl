@@ -1,0 +1,177 @@
+
+CMDSTAN_HOME
+
+saved_dir = pwd()"/saved/"
+
+using Stan
+using DataFrames
+using GaussianProcesses
+using Proj4
+using PDMats: PDMat
+using DataFrames: head
+using Base.Dates: Day, Hour
+;
+
+using JLD
+
+using GaussianProcesses: SumKernel
+
+include("src/utils.jl")
+include("src/preprocessing.jl")
+
+isdList=read_isdList()
+isdSubset=isdList[[(usaf in (725450,725460,725480,725485)) for usaf in isdList[:USAF].values],:]
+isdSubset
+
+hourly_cat=read_Stations(isdSubset)
+itest=3
+test_usaf=get(isdSubset[itest,:USAF])
+hr_measure = Hour(17)
+
+TnTx = test_data(hourly_cat, itest, hr_measure)
+
+module TempModel
+    using PDMats: PDMat
+    using DataFrames
+    using Mamba
+    using GaussianProcesses: GP, Kernel, MeanZero, predict
+    using Base.Dates: Day, Hour
+    using Stan
+    using DataFrames: DataFrame, by
+
+    include("src/utils.jl")
+    include("src/predict_from_nearby.jl")
+    include("src/stan_impute.jl")
+end
+
+type FittingWindow
+    start_date::Date
+    end_date::Date
+end
+
+function predictions_fname(usaf::Int, fw::FittingWindow)
+    return @sprintf("predictions_from_nearby/%d_%s_to_%s.jld", 
+                    usaf, fw.start_date, fw.end_date)
+end
+
+# copy-pasted from pipeline1.jl
+nearby_windows = FittingWindow[]
+dt_start=DateTime(2015,1,1,0,0,0)
+increm=get(maximum(hourly_cat[:ts])-minimum(hourly_cat[:ts])) / 15
+window=3*increm
+while true
+    dt_end=dt_start+window
+    sdate = Date(dt_start)
+    edate = Date(dt_end)
+    fwindow = FittingWindow(sdate,edate)
+    println(fwindow)
+    push!(nearby_windows, fwindow)
+    if dt_end >= get(maximum(hourly_cat[:ts]))
+        break
+    end
+    dt_start+=increm
+end
+
+""" 
+    Is window A inside of window B?
+"""
+function a_isinside_b(a::FittingWindow, b::FittingWindow)
+    start_after = a.start_date >= b.start_date
+    end_before = a.end_date <= b.end_date
+    return start_after & end_before
+end
+"""
+    How much buffer time is there on either side of the window?
+"""
+function buffer(a::FittingWindow, b::FittingWindow)
+    start_diff = abs(a.start_date - b.start_date)
+    end_diff = abs(a.end_date - b.end_date)
+    return min(start_diff, end_diff)
+end
+""" 
+    Amongst a list of candidate windows `cand`, find the window that includes `wind`
+    with the largest buffer on either sides.
+"""
+function find_best_window(wind::FittingWindow, cands::Vector{FittingWindow})
+    incl_wdows = [fw for fw in cands if a_isinside_b(wind, fw)]
+    buffers = [buffer(wind, fw) for fw in incl_wdows]
+    imax = indmax(buffers)
+    best_window = incl_wdows[imax]
+    return best_window
+end
+
+stan_start = Date(2015,4,20)
+stan_days = Base.Dates.Day(9)
+stan_end = stan_start + stan_days
+stan_window = FittingWindow(stan_start, stan_end)
+
+best_window = find_best_window(stan_window, nearby_windows)
+
+nearby_pred=load(join((saved_dir,predictions_fname(test_usaf, best_window))))["nearby_pred"];
+
+imputation_data=TempModel.prep_data(nearby_pred, TnTx, stan_window.start_date, hr_measure, stan_days)
+
+imputation_model = TempModel.get_imputation_model();
+
+function stan_dirname(usaf::Int, fw::FittingWindow)
+    return @sprintf("stan_fit/%d_%s_to_%s/", 
+                    usaf, fw.start_date, fw.end_date)
+end
+
+stan_dirname(test_usaf, stan_window)
+
+stan_dir = join((saved_dir,stan_dirname(test_usaf, stan_window)))
+dir_exists = isdir(stan_dir)
+if !dir_exists
+    mkdir(stan_dir)
+end
+
+?chmod
+
+for fname in ("imputation","imputation_build.log","imputation_run.log","imputation.hpp","imputation.stan")
+    cp("tmp/imputation", join((stan_dir,fname)), remove_destination=true)
+end
+chmod(join((stan_dir,"imputation")), 0o744)
+
+imputation_model.tmpdir = stan_dir;
+
+@time sim1 = stan(
+    imputation_model, 
+    [imputation_data], 
+    stan_dir,
+    CmdStanDir=Stan.CMDSTAN_HOME, 
+    summary=false, 
+    diagnostics=false
+    )
+println("=========")
+
+for window_days in (4:9)
+    println("=========")
+    @printf("%d days\n", window_days)
+    imputation_data=TempModel.prep_data(nearby_pred, TnTx, Date(2015,3,1), Hour(17), Day(window_days))
+    @time sim1 = stan(
+        imputation_model, 
+        [imputation_data],        
+        CmdStanDir=Stan.CMDSTAN_HOME, 
+        summary=false, 
+        diagnostics=false
+        )
+    println("=========")
+end
+
+import PyPlot; plt=PyPlot
+using LaTeXStrings
+plt.rc("figure", dpi=300.0)
+plt.rc("figure", figsize=(12,8))
+plt.rc("savefig", dpi=300.0)
+plt.rc("text", usetex=true)
+plt.rc("font", family="serif")
+plt.rc("font", serif="Palatino")
+;
+
+days = collect(4:9)
+times = [275.296992, 359.682704, 449.193007, 602.574764,819.474179,918.361229]
+plt.plot(days, times)
+plt.ylim(0,1000)
+plt.xlim(0,9)
+plt.plot((0,9),(0,918.361229), ":", color="black")
