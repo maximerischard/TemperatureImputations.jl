@@ -1,7 +1,23 @@
+doc = """
+    Impute hourly temperatures based on nearby hourly temperature records and on
+    local Tn and Tx records. The posterior based on nearby hourly temperatures only
+    has already been computed, with posterior means and covariances saved
+    in saved/predictions_from_nearby.
+    This script constrains those posteriors to be within the measured Tn&Tx.
 
-CMDSTAN_HOME
+    Usage:
+        pipeline2.jl <saved_dir> <windownum>
+"""
+using DocOpt
+arguments = docopt(doc)
 
-saved_dir = pwd()"/saved/"
+saved_dir = arguments["<saved_dir>"]
+saved_dir = Pkg.dir(saved_dir)
+if !endswith(saved_dir, "/")
+    saved_dir = join((saved_dir,"/"))
+end
+println("directory for saved files: ", saved_dir)
+windownum = parse(Int, arguments["<windownum>"])
 
 using Stan
 using DataFrames
@@ -10,11 +26,11 @@ using Proj4
 using PDMats: PDMat
 using DataFrames: head
 using Base.Dates: Day, Hour
-;
-
 using JLD
-
 using GaussianProcesses: SumKernel
+
+stan_days = Day(9)
+stan_increment = Day(3)
 
 include("src/utils.jl")
 include("src/preprocessing.jl")
@@ -64,7 +80,6 @@ while true
     sdate = Date(dt_start)
     edate = Date(dt_end)
     fwindow = FittingWindow(sdate,edate)
-    println(fwindow)
     push!(nearby_windows, fwindow)
     if dt_end >= get(maximum(hourly_cat[:ts]))
         break
@@ -100,12 +115,14 @@ function find_best_window(wind::FittingWindow, cands::Vector{FittingWindow})
     return best_window
 end
 
-stan_start = Date(2015,4,20)
-stan_days = Base.Dates.Day(9)
+janfirst = Date(2015,1,1)
+stan_start = janfirst + (windownum-1)*stan_increment
 stan_end = stan_start + stan_days
 stan_window = FittingWindow(stan_start, stan_end)
+println("STAN fitting window: ", stan_window)
 
 best_window = find_best_window(stan_window, nearby_windows)
+println("using nearby-predictions from: ", best_window)
 
 nearby_pred=load(join((saved_dir,predictions_fname(test_usaf, best_window))))["nearby_pred"];
 
@@ -118,15 +135,11 @@ function stan_dirname(usaf::Int, fw::FittingWindow)
                     usaf, fw.start_date, fw.end_date)
 end
 
-stan_dirname(test_usaf, stan_window)
-
 stan_dir = join((saved_dir,stan_dirname(test_usaf, stan_window)))
 dir_exists = isdir(stan_dir)
 if !dir_exists
     mkdir(stan_dir)
 end
-
-?chmod
 
 for fname in ("imputation","imputation_build.log","imputation_run.log","imputation.hpp","imputation.stan")
     cp("tmp/imputation", join((stan_dir,fname)), remove_destination=true)
@@ -144,34 +157,3 @@ imputation_model.tmpdir = stan_dir;
     diagnostics=false
     )
 println("=========")
-
-for window_days in (4:9)
-    println("=========")
-    @printf("%d days\n", window_days)
-    imputation_data=TempModel.prep_data(nearby_pred, TnTx, Date(2015,3,1), Hour(17), Day(window_days))
-    @time sim1 = stan(
-        imputation_model, 
-        [imputation_data],        
-        CmdStanDir=Stan.CMDSTAN_HOME, 
-        summary=false, 
-        diagnostics=false
-        )
-    println("=========")
-end
-
-import PyPlot; plt=PyPlot
-using LaTeXStrings
-plt.rc("figure", dpi=300.0)
-plt.rc("figure", figsize=(12,8))
-plt.rc("savefig", dpi=300.0)
-plt.rc("text", usetex=true)
-plt.rc("font", family="serif")
-plt.rc("font", serif="Palatino")
-;
-
-days = collect(4:9)
-times = [275.296992, 359.682704, 449.193007, 602.574764,819.474179,918.361229]
-plt.plot(days, times)
-plt.ylim(0,1000)
-plt.xlim(0,9)
-plt.plot((0,9),(0,918.361229), ":", color="black")
