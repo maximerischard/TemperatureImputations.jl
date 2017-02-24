@@ -14,6 +14,7 @@
 \usepackage[T1]{fontenc}
 % Nicer default font than Computer Modern for most use cases
 \usepackage{palatino}
+\usepackage{eulervm}
 
 % Basic figure setup, for now with no caption control since it's done
 % automatically by Pandoc (which extracts ![](path) syntax from Markdown).
@@ -80,16 +81,19 @@
     \DeclareMathOperator{\V}{\mathbb{V}}
     \DeclareMathOperator{\cov}{{cov}}
     \DeclareMathOperator{\var}{{var}}
+    \DeclareMathOperator{\mse}{{MSE}}
     \DeclareMathOperator{\Ind}{\mathbb{I}}
     \DeclareMathOperator*{\sgn}{{sgn}}
    % \DeclareMathOperator{\invchi}{\mathrm{Inv-\chi}^2}}
    \DeclareMathOperator{\normal}{\mathcal{N}}
    \DeclareMathOperator{\unif}{Uniform}
    \DeclareMathOperator{\GP}{\mathcal{GP}}
-   \newcommand{\Tn}{\mathrm{T}_{n}}
-   \newcommand{\Tx}{\mathrm{T}_{x}}
+   \newcommand{\T}{\mathrm{T}}
+   \newcommand{\Tn}{\T_{n}}
+   \newcommand{\Tx}{\T_{x}}
    \newcommand{\station}[1]{\mathrm{station}\sbr{#1}}
-   \newcommand{\xvec}{\mathbf{x}}
+   \newcommand{\xvec}{\mathbold{x}}
+	\newcommand{\hvec}{\mathbold{h}}
    \newcommand{\indep}{\perp}
    \newcommand{\iid}{iid}
    \newcommand{\trans}{^{\intercal}}
@@ -98,6 +102,7 @@
    \newcommand{\degreeC}{^\circ \mathrm{C}}
    \newcommand{\miss}{\mathrm{miss}}
    \newcommand{\obs}{\mathrm{obs}}
+	\newcommand{\error}{\mathrm{err}}
    \DeclareMathOperator{\softmax}{smoothmax}
    \DeclareMathOperator{\softmin}{smoothmin}
 

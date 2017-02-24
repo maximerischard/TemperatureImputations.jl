@@ -23,6 +23,7 @@
 \usepackage[T1]{fontenc}
 % Nicer default font than Computer Modern for most use cases
 \usepackage{palatino}
+\usepackage{eulervm}
 
 % Basic figure setup, for now with no caption control since it's done
 % automatically by Pandoc (which extracts ![](path) syntax from Markdown).
@@ -166,69 +167,69 @@
     \PY@it{\PY@bf{\PY@ff{#1}}}}}}}
 \def\PY#1#2{\PY@reset\PY@toks#1+\relax+\PY@do{#2}}
 
-\expandafter\def\csname PY@tok@gi\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.00,0.63,0.00}{##1}}}
-\expandafter\def\csname PY@tok@se\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.73,0.40,0.13}{##1}}}
-\expandafter\def\csname PY@tok@nl\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.63,0.63,0.00}{##1}}}
-\expandafter\def\csname PY@tok@ow\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.67,0.13,1.00}{##1}}}
-\expandafter\def\csname PY@tok@kn\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
-\expandafter\def\csname PY@tok@cpf\endcsname{\let\PY@it=\textit\def\PY@tc##1{\textcolor[rgb]{0.25,0.50,0.50}{##1}}}
-\expandafter\def\csname PY@tok@kc\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
-\expandafter\def\csname PY@tok@no\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.53,0.00,0.00}{##1}}}
-\expandafter\def\csname PY@tok@s\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
-\expandafter\def\csname PY@tok@gp\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.00,0.50}{##1}}}
-\expandafter\def\csname PY@tok@kr\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
-\expandafter\def\csname PY@tok@sd\endcsname{\let\PY@it=\textit\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
-\expandafter\def\csname PY@tok@nd\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.67,0.13,1.00}{##1}}}
-\expandafter\def\csname PY@tok@gu\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.50,0.00,0.50}{##1}}}
-\expandafter\def\csname PY@tok@gd\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.63,0.00,0.00}{##1}}}
-\expandafter\def\csname PY@tok@c\endcsname{\let\PY@it=\textit\def\PY@tc##1{\textcolor[rgb]{0.25,0.50,0.50}{##1}}}
-\expandafter\def\csname PY@tok@sx\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
-\expandafter\def\csname PY@tok@mo\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
-\expandafter\def\csname PY@tok@c1\endcsname{\let\PY@it=\textit\def\PY@tc##1{\textcolor[rgb]{0.25,0.50,0.50}{##1}}}
-\expandafter\def\csname PY@tok@gs\endcsname{\let\PY@bf=\textbf}
-\expandafter\def\csname PY@tok@mb\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
-\expandafter\def\csname PY@tok@sr\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.40,0.53}{##1}}}
-\expandafter\def\csname PY@tok@ni\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.60,0.60,0.60}{##1}}}
-\expandafter\def\csname PY@tok@mh\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
-\expandafter\def\csname PY@tok@il\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
-\expandafter\def\csname PY@tok@nt\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
-\expandafter\def\csname PY@tok@ne\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.82,0.25,0.23}{##1}}}
-\expandafter\def\csname PY@tok@ss\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.10,0.09,0.49}{##1}}}
-\expandafter\def\csname PY@tok@si\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.73,0.40,0.53}{##1}}}
-\expandafter\def\csname PY@tok@nc\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.00,1.00}{##1}}}
-\expandafter\def\csname PY@tok@kt\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.69,0.00,0.25}{##1}}}
-\expandafter\def\csname PY@tok@gr\endcsname{\def\PY@tc##1{\textcolor[rgb]{1.00,0.00,0.00}{##1}}}
-\expandafter\def\csname PY@tok@sc\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
-\expandafter\def\csname PY@tok@vi\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.10,0.09,0.49}{##1}}}
-\expandafter\def\csname PY@tok@sb\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
-\expandafter\def\csname PY@tok@ge\endcsname{\let\PY@it=\textit}
-\expandafter\def\csname PY@tok@na\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.49,0.56,0.16}{##1}}}
-\expandafter\def\csname PY@tok@nv\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.10,0.09,0.49}{##1}}}
-\expandafter\def\csname PY@tok@m\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
-\expandafter\def\csname PY@tok@cm\endcsname{\let\PY@it=\textit\def\PY@tc##1{\textcolor[rgb]{0.25,0.50,0.50}{##1}}}
-\expandafter\def\csname PY@tok@o\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
-\expandafter\def\csname PY@tok@vg\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.10,0.09,0.49}{##1}}}
-\expandafter\def\csname PY@tok@gt\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.00,0.27,0.87}{##1}}}
-\expandafter\def\csname PY@tok@nf\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.00,0.00,1.00}{##1}}}
-\expandafter\def\csname PY@tok@cs\endcsname{\let\PY@it=\textit\def\PY@tc##1{\textcolor[rgb]{0.25,0.50,0.50}{##1}}}
-\expandafter\def\csname PY@tok@bp\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
-\expandafter\def\csname PY@tok@err\endcsname{\def\PY@bc##1{\setlength{\fboxsep}{0pt}\fcolorbox[rgb]{1.00,0.00,0.00}{1,1,1}{\strut ##1}}}
-\expandafter\def\csname PY@tok@sh\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
-\expandafter\def\csname PY@tok@w\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.73,0.73}{##1}}}
-\expandafter\def\csname PY@tok@cp\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.74,0.48,0.00}{##1}}}
-\expandafter\def\csname PY@tok@go\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.53,0.53,0.53}{##1}}}
-\expandafter\def\csname PY@tok@s2\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
-\expandafter\def\csname PY@tok@vc\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.10,0.09,0.49}{##1}}}
-\expandafter\def\csname PY@tok@s1\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
-\expandafter\def\csname PY@tok@gh\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.00,0.50}{##1}}}
-\expandafter\def\csname PY@tok@nn\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.00,1.00}{##1}}}
-\expandafter\def\csname PY@tok@nb\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
-\expandafter\def\csname PY@tok@ch\endcsname{\let\PY@it=\textit\def\PY@tc##1{\textcolor[rgb]{0.25,0.50,0.50}{##1}}}
-\expandafter\def\csname PY@tok@mi\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
-\expandafter\def\csname PY@tok@mf\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
 \expandafter\def\csname PY@tok@kp\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\expandafter\def\csname PY@tok@sr\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.40,0.53}{##1}}}
+\expandafter\def\csname PY@tok@kc\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\expandafter\def\csname PY@tok@ni\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.60,0.60,0.60}{##1}}}
+\expandafter\def\csname PY@tok@no\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.53,0.00,0.00}{##1}}}
+\expandafter\def\csname PY@tok@mf\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
+\expandafter\def\csname PY@tok@bp\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\expandafter\def\csname PY@tok@cs\endcsname{\let\PY@it=\textit\def\PY@tc##1{\textcolor[rgb]{0.25,0.50,0.50}{##1}}}
+\expandafter\def\csname PY@tok@cpf\endcsname{\let\PY@it=\textit\def\PY@tc##1{\textcolor[rgb]{0.25,0.50,0.50}{##1}}}
+\expandafter\def\csname PY@tok@il\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
+\expandafter\def\csname PY@tok@gt\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.00,0.27,0.87}{##1}}}
+\expandafter\def\csname PY@tok@kr\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\expandafter\def\csname PY@tok@ne\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.82,0.25,0.23}{##1}}}
 \expandafter\def\csname PY@tok@kd\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\expandafter\def\csname PY@tok@s1\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
+\expandafter\def\csname PY@tok@si\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.73,0.40,0.53}{##1}}}
+\expandafter\def\csname PY@tok@mh\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
+\expandafter\def\csname PY@tok@ow\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.67,0.13,1.00}{##1}}}
+\expandafter\def\csname PY@tok@nv\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.10,0.09,0.49}{##1}}}
+\expandafter\def\csname PY@tok@nn\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.00,1.00}{##1}}}
+\expandafter\def\csname PY@tok@sh\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
+\expandafter\def\csname PY@tok@mo\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
+\expandafter\def\csname PY@tok@gd\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.63,0.00,0.00}{##1}}}
+\expandafter\def\csname PY@tok@gs\endcsname{\let\PY@bf=\textbf}
+\expandafter\def\csname PY@tok@m\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
+\expandafter\def\csname PY@tok@vc\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.10,0.09,0.49}{##1}}}
+\expandafter\def\csname PY@tok@na\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.49,0.56,0.16}{##1}}}
+\expandafter\def\csname PY@tok@nt\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\expandafter\def\csname PY@tok@mb\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
+\expandafter\def\csname PY@tok@go\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.53,0.53,0.53}{##1}}}
+\expandafter\def\csname PY@tok@o\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
+\expandafter\def\csname PY@tok@sb\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
+\expandafter\def\csname PY@tok@ss\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.10,0.09,0.49}{##1}}}
+\expandafter\def\csname PY@tok@gu\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.50,0.00,0.50}{##1}}}
+\expandafter\def\csname PY@tok@nf\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.00,0.00,1.00}{##1}}}
+\expandafter\def\csname PY@tok@err\endcsname{\def\PY@bc##1{\setlength{\fboxsep}{0pt}\fcolorbox[rgb]{1.00,0.00,0.00}{1,1,1}{\strut ##1}}}
+\expandafter\def\csname PY@tok@se\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.73,0.40,0.13}{##1}}}
+\expandafter\def\csname PY@tok@gh\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.00,0.50}{##1}}}
+\expandafter\def\csname PY@tok@gi\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.00,0.63,0.00}{##1}}}
+\expandafter\def\csname PY@tok@ge\endcsname{\let\PY@it=\textit}
+\expandafter\def\csname PY@tok@cp\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.74,0.48,0.00}{##1}}}
+\expandafter\def\csname PY@tok@s\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
+\expandafter\def\csname PY@tok@kn\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
 \expandafter\def\csname PY@tok@k\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\expandafter\def\csname PY@tok@c1\endcsname{\let\PY@it=\textit\def\PY@tc##1{\textcolor[rgb]{0.25,0.50,0.50}{##1}}}
+\expandafter\def\csname PY@tok@ch\endcsname{\let\PY@it=\textit\def\PY@tc##1{\textcolor[rgb]{0.25,0.50,0.50}{##1}}}
+\expandafter\def\csname PY@tok@c\endcsname{\let\PY@it=\textit\def\PY@tc##1{\textcolor[rgb]{0.25,0.50,0.50}{##1}}}
+\expandafter\def\csname PY@tok@cm\endcsname{\let\PY@it=\textit\def\PY@tc##1{\textcolor[rgb]{0.25,0.50,0.50}{##1}}}
+\expandafter\def\csname PY@tok@sd\endcsname{\let\PY@it=\textit\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
+\expandafter\def\csname PY@tok@mi\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
+\expandafter\def\csname PY@tok@w\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.73,0.73}{##1}}}
+\expandafter\def\csname PY@tok@sx\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\expandafter\def\csname PY@tok@gp\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.00,0.50}{##1}}}
+\expandafter\def\csname PY@tok@gr\endcsname{\def\PY@tc##1{\textcolor[rgb]{1.00,0.00,0.00}{##1}}}
+\expandafter\def\csname PY@tok@vg\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.10,0.09,0.49}{##1}}}
+\expandafter\def\csname PY@tok@s2\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
+\expandafter\def\csname PY@tok@kt\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.69,0.00,0.25}{##1}}}
+\expandafter\def\csname PY@tok@nd\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.67,0.13,1.00}{##1}}}
+\expandafter\def\csname PY@tok@sc\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
+\expandafter\def\csname PY@tok@nl\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.63,0.63,0.00}{##1}}}
+\expandafter\def\csname PY@tok@nb\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\expandafter\def\csname PY@tok@nc\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.00,1.00}{##1}}}
+\expandafter\def\csname PY@tok@vi\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.10,0.09,0.49}{##1}}}
 
 \def\PYZbs{\char`\\}
 \def\PYZus{\char`\_}
@@ -271,16 +272,19 @@
     \DeclareMathOperator{\V}{\mathbb{V}}
     \DeclareMathOperator{\cov}{{cov}}
     \DeclareMathOperator{\var}{{var}}
+    \DeclareMathOperator{\mse}{{MSE}}
     \DeclareMathOperator{\Ind}{\mathbb{I}}
     \DeclareMathOperator*{\sgn}{{sgn}}
    % \DeclareMathOperator{\invchi}{\mathrm{Inv-\chi}^2}}
    \DeclareMathOperator{\normal}{\mathcal{N}}
    \DeclareMathOperator{\unif}{Uniform}
    \DeclareMathOperator{\GP}{\mathcal{GP}}
-   \newcommand{\Tn}{\mathrm{T}_{n}}
-   \newcommand{\Tx}{\mathrm{T}_{x}}
+   \newcommand{\T}{\mathrm{T}}
+   \newcommand{\Tn}{\T_{n}}
+   \newcommand{\Tx}{\T_{x}}
    \newcommand{\station}[1]{\mathrm{station}\sbr{#1}}
-   \newcommand{\xvec}{\mathbf{x}}
+   \newcommand{\xvec}{\mathbold{x}}
+	\newcommand{\hvec}{\mathbold{h}}
    \newcommand{\indep}{\perp}
    \newcommand{\iid}{iid}
    \newcommand{\trans}{^{\intercal}}
@@ -289,6 +293,7 @@
    \newcommand{\degreeC}{^\circ \mathrm{C}}
    \newcommand{\miss}{\mathrm{miss}}
    \newcommand{\obs}{\mathrm{obs}}
+	\newcommand{\error}{\mathrm{err}}
    \DeclareMathOperator{\softmax}{smoothmax}
    \DeclareMathOperator{\softmin}{smoothmin}
 
@@ -497,7 +502,7 @@ specification, we add a mean temperature for each station
 \(\mu_{\station{i}}\), and iid measurement noise \(\epsilon_i\).
 
 \begin{align}
-    T_i &= \mu_{\station{i}} + f(\xvec_i, t_i) + \epsilon_i\\
+    \T_i &= \mu_{\station{i}} + f(\xvec_i, t_i) + \epsilon_i\\
     f(\xvec_i, t_i) &\sim \GP\del{0, k_{st}(\xvec,\xvec',t,t')}\\
     \epsilon_i &\overset{\iid}{\sim} \normal\del{0,\sigman^2}\\
 \end{align}
@@ -594,24 +599,24 @@ covariance matrix.}
 Once we have a spatio-temporal Gaussian process model with optimized
 covariance parameters, we can use it to generate predictions at the
 station where we aim to generate imputations based on nearby
-measurements. Gaussian processes make this a straightforward analytical
-procedure. We'll denote the temperatures we wish to impute as
-\(T_\miss{}\) at times \(t_\miss\) and location \(\xvec_\miss\) and
-those observed at nearby stations as \(T_\obs{}\), at times \(t_\obs\)
-and locations \(X_\obs\). Under the spatio-temporal model, \(T_\miss\)
-and \(T_\obs\) are jointly multivariate normal, with mean zero and
+measurements. Gaussian processes make this a closed-form procedure.
+We'll denote the temperatures we wish to impute as \(\T_\miss{}\) at
+times \(t_\miss\) and location \(\xvec_\miss\) and those observed at
+nearby stations as \(\T_\obs{}\), at times \(t_\obs\) and locations
+\(X_\obs\). Under the spatio-temporal model, \(\T_\miss\) and
+\(\T_\obs\) are jointly multivariate normal, with mean zero and
 covariance given by \(k_{st}(\xvec,\xvec',t,t')\). Standard results for
 conditioning within multivariate normals then yields
 
 \begin{align}
-    T_\miss \mid T_\obs &\sim \normal\del{\mu_{\miss \mid \obs}, \Sigma_{\miss \mid \obs}}\,, \\
-    \mu_{\miss \mid \obs} &= \cov\del{T_\miss, T_\obs} \cov\del{T_\obs, T_\obs}^{-1} T_\obs\,, \\
-    \Sigma_{\miss \mid \obs} &= \cov\del{T_\miss,T_\miss} - \cov\del{T_\miss, T_\obs} \cov\del{T_\obs, T_\obs}^{-1} \cov\del{T_\obs, T_\miss}\,. \\ %_
+    \T_\miss \mid \T_\obs &\sim \normal\del{\mu_{\miss \mid \obs}, \Sigma_{\miss \mid \obs}}\,, \\
+    \mu_{\miss \mid \obs} &= \E \del{\T_\miss \mid \T_\obs} = \cov\del{\T_\miss, \T_\obs} \cov\del{\T_\obs, \T_\obs}^{-1} \T_\obs\,, \\
+    \Sigma_{\miss \mid \obs} &= \var \del{\T_\miss \mid \T_\obs} = \cov\del{\T_\miss,\T_\miss} - \cov\del{\T_\miss, \T_\obs} \cov\del{\T_\obs, \T_\obs}^{-1} \cov\del{\T_\obs, \T_\miss}\,. \\ %_
 \end{align}
 
 All covariance matrices can be obtained by plugging into \(k_{st}\). For
-example, the \(ij\)th entry of \(\cov\del{T_\miss, T_\obs}\) is given by
-\(k_{st}(\xvec_\miss,X_\obs\sbr{j},t_\miss\sbr{i},t_\obs\sbr{j})\),
+example, the \(ij\)th entry of \(\cov\del{\T_\miss, \T_\obs}\) is given
+by \(k_{st}(\xvec_\miss,X_\obs\sbr{j},t_\miss\sbr{i},t_\obs\sbr{j})\),
 where \(X_\obs\sbr{j}\) gives the spatial covariates of the \(j\)th
 observation, and \(t_\obs\sbr{j}\) its time.
 
@@ -650,19 +655,21 @@ sample from the posterior distribution for the parameters and latent
 variables. In our case, the observations are the daily maxima and
 minima, the only parameter is the average temperature at the station of
 interest \(\mu_\miss\), and the latent variables are the missing
-unobserved hourly temperatures \(T_\miss\).
+unobserved hourly temperatures \(\T_\miss\).
 
 {[}Serious notation problems here:{]}
 
 \begin{align}
     \mu_\miss &\sim \normal\del{0,100} \\
     f_\miss &\sim \normal\del{\mu_{\miss \mid \obs}, \Sigma_{\miss \mid \obs}} \\
-    T_\miss &\sim \mu_\miss + f_\miss \\
-    \Tx\sbr{d} &= \max\cbr{ T_{\miss,i}: t_{miss,i} \in d } \\
-    \Tn\sbr{d} &= \min\cbr{ T_{\miss,i}: t_{miss,i} \in d } \\
+    \T_\miss &\sim \mu_\miss + f_\miss \\
+    \Tx\sbr{d} &= \max\cbr{ \T_{\miss,i}: t_{miss,i} \in d } \\
+    \Tn\sbr{d} &= \min\cbr{ \T_{\miss,i}: t_{miss,i} \in d } \\
 \end{align}
+    
 
-The problem lies in the sharpness of the \(\max\) and \(\min\)
+
+    	The problem lies in the sharpness of the \(\max\) and \(\min\)
 functions. At each step of the markov chain, a proposal is made for
 \(T_\miss\). If the daily maxima and minima of this proposal coincide
 exactly with the measurements, then its posterior probability is finite.
@@ -720,15 +727,123 @@ infer the mean. Because we actually have hourly data for Waterloo, yet
 only fed our algorithm a reduction of this data to daily extremes, we
 can also plot the hidden temperatures, and see how faithfully the
 imputations reproduce them. We see that the imputations indeed track the
-truth very closely. The error bars satisfyingly narrow and widen in
-accordance to the amount of information available at each moments. On
-May 27th, we can see that the imputations capture the fact that the
-\(\Tx\) record \emph{could} have been set early in the measurement
-window, but more likely at its very end.
+true measurements very closely. The error bars satisfyingly narrow and
+widen in accordance to the amount of information available at each
+moments. On May 27th, we can see that the imputations capture the fact
+that the \(\Tx\) record \emph{could} have been set early in the
+measurement window, but more likely at its very end.
     
 
 
     	\section{Model diagnostic}\label{model-diagnostic}
+
+\subsection{Variogram}\label{variogram}
+
+We can visually inspect our model by plotting temporal and spatial
+semi-variograms. The semi-variogram of a stationary spatio-temporal
+function \(Y(\xvec,t)\) is a function of the spatial lag \(\hvec\) and
+the temporal lag \(r\)
+
+\begin{equation}
+    \gamma\del{\hvec,r} = \frac{1}{2} \E\sbr{\del{Y\del{\xvec,t}-Y\del{\xvec+\hvec,t+r}}^2} = \var\del{ Y\del{\xvec,t}} - \cov\del{ \del{Y\del{\xvec,t}} , Y\del{\xvec+\hvec,t+r}}\,.
+\end{equation}
+
+For a Gaussian Process model, with a stationary kernel
+\(k(\hvec,r)=k(\xvec,\xvec+\hvec,t,t+r)\) this can be expressed in terms
+of the observation noise \(\sigman\) and \(k(\cdot,\cdot)\), as
+
+\begin{equation}
+    \label{eq:gp_variogram}
+    \gamma\del{\hvec,r} = \sigman^2 + k\del{0,0} - k(\hvec,r)\,.
+\end{equation}
+
+Furthermore, the semi-variogram can be estimated empirically, be
+averaging the square differences of any two observations that are
+separated by \(\hvec\) in space, and \(r\) in time (or, in practice,
+within half a bin width of \(\hvec\) and \(r\)). By comparing the
+empirical variogram to the variogram of our fitted \(\GP\) model, we
+obtain a visual diagnosis of the model.
+
+In our Iowa example, there are only four possible locations. For each
+location, we plot the empirical temporal variogram
+\(\hat\gamma\del{0,r}\). For any pair of stations separated by \(\hvec\)
+(fixed), we can also plot \(\hat\gamma\del{\hvec,r}\). We then overlay
+the model's semi-variogram obtained through equation
+\eqref{eq:gp_variogram}, resulting in Figure\textasciitilde{}(XX).
+
+\begin{figure}
+\centering
+\includegraphics{figures/spatial_variogram.png}
+\caption{Semi-variogram}
+\end{figure}
+    
+
+
+    	\subsection{Error and expected error}\label{error-and-expected-error}
+
+In the previous section, we laid out our imputation strategy, and we
+visually checked that the imputations appear reasonable.
+
+To quantify the predictive accuracy, we compare the posterior mean
+temperature to the truth, and obtain the empirical mean squared error as
+
+\begin{equation}
+    \mse\del{\error \mid \T_\obs,\Tx,\Tn} = \frac{1}{N} \sum_{i=1}^N \sbr{\E\del{\T_{\miss,i} \mid \T_\obs,\Tx,\Tn} - \T_{\miss,i}}^2\,.
+\end{equation}
+
+This equation is for the final predictions obtained using nearby hourly
+temperatures and local daily maxima and minima. A similar diagnostic can
+be computed for the intermediary predictions, excluding the local
+\(\Tx\) and \(\Tn\). At that stage, we are not concerned with any
+overall bias in the predicted temperatures, so we instead obtain on the
+sample variance of the errors as
+
+\begin{equation}
+    \var\del{\error \mid \T_\obs} = \var_i \cbr{\E\del{\T_{\miss,i} \mid \T_\obs} - \T_{\miss,i}}\,.
+\end{equation}
+
+\begin{longtable}[]{@{}llllll@{}}
+\toprule
+Model & Likelihood & Var(err) & E(Var(err)) & MSE(err) &
+E(MSE(err))\tabularnewline
+\midrule
+\endhead
+SE x SE & 55,614 & 1.565 & 0.855 & 1.435 & 0.680\tabularnewline
+SExSE + diurnal & 54,472 & 1.414 & 0.959 & 1.275 & 0.747\tabularnewline
+Sum of products & 47,082 & 1.244 & 2.031 & \textasciitilde{}1.181 &
+\textasciitilde{}0.959\tabularnewline
+SoP, fixed variance & 48,589 & 3.813 & 7.619 & &\tabularnewline
+(time sum) x SE & 52,467 & 1.439 & 17.996 & &\tabularnewline
+\bottomrule
+\end{longtable}
+
+For our purposes, it isn't sufficient for the spatio-temporal model to
+yield good predictions; we also require a good estimate of its own
+accuracy. We estimate the expected MSE and predictive variance sampling
+\(K\) random draws \(\T^k_\miss\) from the posterior distribution, again
+conditioned on \(\T_\obs\) after fitting the spatio-temporal Gaussian
+process model, and on \(\T_\obs\), \(\Tx\) and \(\Tn\) after
+incorporating the local data using Stan. The draws are from a
+multivariate normal distribution in the first case, and the MCMC samples
+obtained through Stan in the second case. We then evaluate the variance
+between the samples and the posterior mean as
+
+\begin{align}
+    \E \del{\var\del{\error \mid \cdot}} &= \frac{1}{K} \sum_{k=1}^K \var_i \cbr{\T^{(k)}_{\miss,i} - \E\del{\T_{\miss,i} \mid \cdot}}
+\end{align}
+
+When evaluating models, we want the errors to be small, and so the
+empirical error variance and MSE to be low. A well-calibrated model
+should also have the expected error variances
+\(\E \del{\var\del{\error \mid \cdot}}\) close to their empirical
+values.
+
+These diagnostics for our first spatio-temporal model, the product of
+squared exponentials, are found in the first row of Table X. The
+empirical error variance using only nearby measurements is already low,
+with typical errors of order \(\sqrt{1.565}=1.25\,\degreeC\).
+Incorporating the local measurements reduces it further to
+\(\sqrt{1.435}=1.20\,\degreeC\)
     
 
 
