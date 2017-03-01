@@ -6,18 +6,16 @@ doc = """
     This script constrains those posteriors to be within the measured Tn&Tx.
 
     Usage:
-        pipeline2.jl <saved_dir> <windownum>
+        pipeline2.jl <saved_dir> <windownum> <model>
 """
 using DocOpt
 arguments = docopt(doc)
 
 saved_dir = arguments["<saved_dir>"]
 saved_dir = Pkg.dir(saved_dir)
-if !endswith(saved_dir, "/")
-    saved_dir = join((saved_dir,"/"))
-end
 println("directory for saved files: ", saved_dir)
 windownum = parse(Int, arguments["<windownum>"])
+GPmodel = arguments["<model>"]
 
 using Stan
 using DataFrames
@@ -124,7 +122,10 @@ println("STAN fitting window: ", stan_window)
 best_window = find_best_window(stan_window, nearby_windows)
 println("using nearby-predictions from: ", best_window)
 
-nearby_pred=load(join((saved_dir,predictions_fname(test_usaf, best_window))))["nearby_pred"];
+nearby_pred=load(Pkg.dir(saved_dir,
+                        predictions_fname(test_usaf, best_window),
+                        GPmodel
+                ))["nearby_pred"];
 
 imputation_data=TempModel.prep_data(nearby_pred, TnTx, stan_window.start_date, hr_measure, stan_days)
 
@@ -135,22 +136,22 @@ function stan_dirname(usaf::Int, fw::FittingWindow)
                     usaf, fw.start_date, fw.end_date)
 end
 
-stan_dir = join((saved_dir,stan_dirname(test_usaf, stan_window)))
+stan_dir = Pkg.dir(saved_dir,stan_dirname(test_usaf, stan_window), GPmodel)
 dir_exists = isdir(stan_dir)
 if !dir_exists
     mkdir(stan_dir)
 end
 
 for fname in ("imputation","imputation_build.log","imputation_run.log","imputation.hpp","imputation.stan")
-    file_path = join((saved_dir,"../tmp/",fname))
+    file_path = Pkg.dir(saved_dir,"../tmp/",fname)
     if isfile(file_path)
-        cp(file_path, join((stan_dir,fname)), remove_destination=true)
+        cp(file_path, Pkg.dir(stan_dir,fname), remove_destination=true)
     else
         println(file_path, "NOT FOUND")
     end
 end
-if isfile(join((stan_dir,"imputation")))
-    chmod(join((stan_dir,"imputation")), 0o744)
+if isfile(Pkg.dir(stan_dir,"imputation"))
+    chmod(Pkg.dir(stan_dir,"imputation"), 0o744)
 end
 
 imputation_model.tmpdir = stan_dir;
