@@ -142,9 +142,16 @@ if !dir_exists
 end
 
 for fname in ("imputation","imputation_build.log","imputation_run.log","imputation.hpp","imputation.stan")
-    cp("tmp/imputation", join((stan_dir,fname)), remove_destination=true)
+    file_path = join((saved_dir,"../tmp/",fname))
+    if isfile(file_path)
+        cp(file_path, join((stan_dir,fname)), remove_destination=true)
+    else
+        println(file_path, "NOT FOUND")
+    end
 end
-chmod(join((stan_dir,"imputation")), 0o744)
+if isfile(join((stan_dir,"imputation")))
+    chmod(join((stan_dir,"imputation")), 0o744)
+end
 
 imputation_model.tmpdir = stan_dir;
 
