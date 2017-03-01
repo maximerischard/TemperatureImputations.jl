@@ -139,14 +139,14 @@ function get_optim_target(gpr::GPRealisations; noise::Bool=true, mean::Bool=true
         mll_and_dmll!(hyp::Vector{Float64}, grad::Vector{Float64})
     end
 
-    func = DifferentiableFunction(mll, dmll!, mll_and_dmll!)
+    func = OnceDifferentiable(mll, dmll!, mll_and_dmll!)
     return func
 end
 function optimize!(gpr::GPRealisations; noise::Bool=true, mean::Bool=true, kern::Bool=true,
                     method=ConjugateGradient(), kwargs...)
     func = get_optim_target(gpr, noise=noise, mean=mean, kern=kern)
     init = get_params(gpr;  noise=noise, mean=mean, kern=kern)  # Initial hyperparameter values
-    results=optimize(func,init; method=method, kwargs...)                     # Run optimizer
+    results=optimize(func,init,method, Optim.Options(;kwargs...))  # Run optimizer
     set_params!(gpr, minimizer(results), noise=noise,mean=mean,kern=kern)
     update_mll!(gpr)
     return results
@@ -186,5 +186,8 @@ function optimize_NLopt(gpr::GPRealisations; noise::Bool=true, mean::Bool=true, 
     NLopt.ftol_rel!(opt, f_tol)
     NLopt.min_objective!(opt, myfunc)
     (minf,minx,ret) = NLopt.optimize(opt, init_x)
+
+    set_params!(gpr, minx, noise=noise,mean=mean,kern=kern)
+    update_mll!(gpr)
     return minf,minx,ret,count
 end
