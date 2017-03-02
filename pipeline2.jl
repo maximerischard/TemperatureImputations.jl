@@ -12,7 +12,7 @@ using DocOpt
 arguments = docopt(doc)
 
 saved_dir = arguments["<saved_dir>"]
-saved_dir = Pkg.dir(saved_dir)
+saved_dir = joinpath(saved_dir)
 println("directory for saved files: ", saved_dir)
 windownum = parse(Int, arguments["<windownum>"])
 GPmodel = arguments["<model>"]
@@ -64,7 +64,7 @@ type FittingWindow
 end
 
 function predictions_fname(usaf::Int, fw::FittingWindow)
-    return @sprintf("predictions_from_nearby/%d_%s_to_%s.jld", 
+    return @sprintf("%d_%s_to_%s.jld", 
                     usaf, fw.start_date, fw.end_date)
 end
 
@@ -122,9 +122,10 @@ println("STAN fitting window: ", stan_window)
 best_window = find_best_window(stan_window, nearby_windows)
 println("using nearby-predictions from: ", best_window)
 
-nearby_pred=load(Pkg.dir(saved_dir,
+nearby_pred=load(joinpath(saved_dir,
+                        "predictions_from_nearby",
+                        GPmodel,
                         predictions_fname(test_usaf, best_window),
-                        GPmodel
                 ))["nearby_pred"];
 
 imputation_data=TempModel.prep_data(nearby_pred, TnTx, stan_window.start_date, hr_measure, stan_days)
@@ -132,26 +133,25 @@ imputation_data=TempModel.prep_data(nearby_pred, TnTx, stan_window.start_date, h
 imputation_model = TempModel.get_imputation_model();
 
 function stan_dirname(usaf::Int, fw::FittingWindow)
-    return @sprintf("stan_fit/%d_%s_to_%s/", 
+    return @sprintf("%d_%s_to_%s/", 
                     usaf, fw.start_date, fw.end_date)
 end
 
-stan_dir = Pkg.dir(saved_dir,stan_dirname(test_usaf, stan_window), GPmodel)
-dir_exists = isdir(stan_dir)
-if !dir_exists
-    mkdir(stan_dir)
+stan_dir = joinpath(saved_dir,"stan_fit", GPmodel, stan_dirname(test_usaf, stan_window))
+if !isdir(stan_dir)
+    mkpath(stan_dir)
 end
 
 for fname in ("imputation","imputation_build.log","imputation_run.log","imputation.hpp","imputation.stan")
-    file_path = Pkg.dir(saved_dir,"../tmp/",fname)
+    file_path = joinpath(saved_dir,"../tmp/",fname)
     if isfile(file_path)
-        cp(file_path, Pkg.dir(stan_dir,fname), remove_destination=true)
+        cp(file_path, joinpath(stan_dir,fname), remove_destination=true)
     else
         println(file_path, "NOT FOUND")
     end
 end
-if isfile(Pkg.dir(stan_dir,"imputation"))
-    chmod(Pkg.dir(stan_dir,"imputation"), 0o744)
+if isfile(joinpath(stan_dir,"imputation"))
+    chmod(joinpath(stan_dir,"imputation"), 0o744)
 end
 
 imputation_model.tmpdir = stan_dir;

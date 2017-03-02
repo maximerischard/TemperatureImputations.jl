@@ -11,5 +11,5 @@
 
 source ~/julia_modules.sh
 cd /n/regal/pillai_lab/mrischard/temperature_model/
-julia pipeline2.jl /n/regal/pillai_lab/mrischard/temperature_model/saved ${SLURM_ARRAY_TASK_ID} fixed_var
+julia pipeline2.jl /n/regal/pillai_lab/mrischard/temperature_model/saved ${SLURM_ARRAY_TASK_ID} sumprod
 

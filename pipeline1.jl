@@ -7,6 +7,7 @@ doc = """
         pipeline1.jl <model>
 """
 using DocOpt
+arguments = docopt(doc)
 GPmodel = arguments["<model>"]
 module TempModel
     using TimeSeries
@@ -24,9 +25,11 @@ end
 
 using JLD
 
-if model=="fixed_var"
+global k_spatiotemporal
+global logNoise
+if GPmodel=="fixed_var"
     k_spatiotemporal,logNoise = TempModel.fitted_sptemp_fixedσ()
-elseif model=="sumprod"
+elseif GPmodel=="sumprod"
     k_spatiotemporal,logNoise = TempModel.fitted_sptemp_sumprod()
 else
     error(@sprintf("unknown model: %s", GPmodel))
@@ -47,14 +50,14 @@ window=3*increm
 
 while true
     dt_end=dt_start+window
-    nearby_pred = TempModel.predict_from_nearby(hourly_cat, isdSubset, 
-        TempModel.k_spatiotemporal, TempModel.logNoise,
-        itest, dt_start, dt_end)
-    saved_dir = Pkg.dir("./saved/predict_from_nearby", GPmodel)
+    saved_dir = joinpath(pwd(), "saved/predictions_from_nearby", GPmodel)
     if !isdir(saved_dir)
         mkdir(saved_dir)
     end
-    save(Pkg.dir(saved_dir,
+    nearby_pred = TempModel.predict_from_nearby(hourly_cat, isdSubset, 
+        k_spatiotemporal, logNoise,
+        itest, dt_start, dt_end)
+    save(joinpath(saved_dir,
                  @sprintf("%d_%s_to_%s.jld", 
                     test_usaf, 
                     Date(dt_start), 
