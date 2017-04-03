@@ -28,7 +28,9 @@ using JLD
 global k_spatiotemporal
 global logNoise
 if GPmodel=="fixed_var"
-    k_spatiotemporal,logNoise = TempModel.fitted_sptemp_fixedσ()
+    k_spatiotemporal,logNoise = TempModel.fitted_sptemp_fixedvar()
+elseif GPmodel=="free_var"
+    k_spatiotemporal,logNoise = TempModel.fitted_sptemp_freevar()
 elseif GPmodel=="sumprod"
     k_spatiotemporal,logNoise = TempModel.fitted_sptemp_sumprod()
 else

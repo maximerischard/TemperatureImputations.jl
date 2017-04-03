@@ -17,7 +17,7 @@ function fitted_temporal()
     return k_time, logNoise
 end
 
-function fitted_sptemp_fixedσ()
+function fitted_sptemp_fixedvar()
     k1 = fix(Periodic(0.0,0.0,log(24.0)), :lp)
     k2 = RQIso(0.0,0.0,0.0)
     k3 = SEIso(0.0,0.0)
@@ -52,6 +52,29 @@ function fitted_sptemp_fixedσ()
     set_params!(k_spatiotemporal, hyp[2:end])
     logNoise=hyp[1]
     return k_spatiotemporal, logNoise
+end
+
+function fitted_sptemp_freevar()
+    k_time,_ = fitted_temporal()
+    k1,k2,k3,k4,k5,k6=k_time.kerns
+    ksp1 = SEIso(log(2*10^5), log(1.0))
+    ksp2 = SEIso(log(2*10^5), log(1.0))
+    ksp3 = SEIso(log(2*10^5), log(1.0))
+    ksp4 = SEIso(log(2*10^5), log(1.0))
+    ksp5 = SEIso(log(2*10^5), log(1.0))
+    ksp6 = SEIso(log(2*10^5), log(1.0))
+    k_means = SEIso(log(10^4), log(10.0))
+	k_spatiotemporal = fix(Masked(k1, [1])) * Masked(ksp1, [2,3]) +
+                     	 fix(Masked(k2, [1])) * Masked(ksp2, [2,3]) +
+                     	 fix(Masked(k3, [1])) * Masked(ksp3, [2,3]) +
+                     	 fix(Masked(k4, [1])) * Masked(ksp4, [2,3]) +
+                     	 fix(Masked(k5, [1])) * Masked(ksp5, [2,3]) +
+                     	 fix(Masked(k6, [1])) * Masked(ksp6, [2,3]) +
+                     	 fix(Masked(k_means, [2,3]))
+	hyp = [-1.65029,14.2398,0.111707,11.5002,-0.0791469,8.76624,0.126258,14.4041,0.147028,13.0326,-0.635492,12.2061,-8.08864e-7]
+	set_params!(k_spatiotemporal, hyp[2:end])
+	logNoise=hyp[1]
+	return k_spatiotemporal, logNoise
 end
 
 function fitted_sptemp_sumprod()
