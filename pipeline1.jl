@@ -33,6 +33,8 @@ elseif GPmodel=="free_var"
     k_spatiotemporal,logNoise = TempModel.fitted_sptemp_freevar()
 elseif GPmodel=="sumprod"
     k_spatiotemporal,logNoise = TempModel.fitted_sptemp_sumprod()
+elseif GPmodel=="SExSE"
+    k_spatiotemporal,logNoise = TempModel.fitted_sptemp_SExSE()
 else
     error(@sprintf("unknown model: %s", GPmodel))
 end
