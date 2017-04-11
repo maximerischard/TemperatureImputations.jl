@@ -139,14 +139,15 @@ function get_optim_target(gpr::GPRealisations; noise::Bool=true, mean::Bool=true
         mll_and_dmll!(hyp::Vector{Float64}, grad::Vector{Float64})
     end
 
-    func = OnceDifferentiable(mll, dmll!, mll_and_dmll!)
+    func = OnceDifferentiable(mll, dmll!, mll_and_dmll!,
+        get_params(gpr, noise=noise, mean=mean, kern=kern))
     return func
 end
 function optimize!(gpr::GPRealisations; noise::Bool=true, mean::Bool=true, kern::Bool=true,
-                    method=ConjugateGradient(), kwargs...)
+                    method=ConjugateGradient(), options=Optim.Options())
     func = get_optim_target(gpr, noise=noise, mean=mean, kern=kern)
     init = get_params(gpr;  noise=noise, mean=mean, kern=kern)  # Initial hyperparameter values
-    results=optimize(func,init,method, Optim.Options(;kwargs...))  # Run optimizer
+    results=optimize(func,init,method, options)  # Run optimizer
     set_params!(gpr, minimizer(results), noise=noise,mean=mean,kern=kern)
     update_mll!(gpr)
     return results

@@ -117,3 +117,17 @@ function fitted_sptemp_SExSE()
     logNoise=hyp[1] 
     return k_spatiotemporal, logNoise
 end
+
+function fitted_sptemp_diurnal()
+    k_time = SEIso(0.0,0.0)
+    k_spatial = fix(SEIso(log(2*10^5), log(1.0)), :lσ)
+    k_periodic = fix(Periodic(log(1.0), -1.0, log(24.0)), :lp)
+    k_diurndecay = fix(SEIso(log(10^5), 0.0), :lσ)
+    k_means = SEIso(log(10^4), log(10.0))
+    k_spatiotemporal = Masked(k_time, [1]) * Masked(k_spatial, [2,3]) + 
+        fix(Masked(k_means, [2,3])) +
+        Masked(k_periodic, [1]) * Masked(k_diurndecay, [2,3])
+    hyp = [-0.82337,1.02776,1.14186,11.9454,-0.383965,0.858384,14.1618]
+    set_params!(k_spatiotemporal, hyp[2:end])
+    logNoise=hyp[1]
+end
