@@ -26,9 +26,8 @@ function prep_data(nearby_pred::NearbyPrediction, TnTx::DataFrame,
         "predicted_cov" => Σ_window.mat,
         "predicted_cov_chol" => full(Σ_window.chol[:L]),
         "k_softmax" => 10.0,
-        "ts" => ts_window,
     )
-    return imputation_data
+    return imputation_data, ts_window
 end
 
 function get_imputation_model()
