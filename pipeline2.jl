@@ -128,7 +128,7 @@ nearby_pred=load(joinpath(saved_dir,
                         predictions_fname(test_usaf, best_window),
                 ))["nearby_pred"];
 
-imputation_data=TempModel.prep_data(nearby_pred, TnTx, stan_window.start_date, hr_measure, stan_days)
+imputation_data, ts_window = TempModel.prep_data(nearby_pred, TnTx, stan_window.start_date, hr_measure, stan_days)
 
 imputation_model = TempModel.get_imputation_model();
 
@@ -141,6 +141,8 @@ stan_dir = joinpath(saved_dir,"stan_fit", GPmodel, stan_dirname(test_usaf, stan_
 if !isdir(stan_dir)
     mkpath(stan_dir)
 end
+
+writecsv(joinpath(stan_dir,"timestamps.csv"), ts_window'')
 
 for fname in ("imputation","imputation_build.log","imputation_run.log","imputation.hpp","imputation.stan")
     file_path = joinpath(saved_dir,"../tmp/",fname)
