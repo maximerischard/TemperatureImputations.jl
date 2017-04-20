@@ -37,6 +37,8 @@ elseif GPmodel=="SExSE"
     k_spatiotemporal,logNoise = TempModel.fitted_sptemp_SExSE()
 elseif GPmodel=="diurnal"
     k_spatiotemporal,logNoise = TempModel.fitted_sptemp_diurnal()
+elseif GPmodel=="simpler"
+    k_spatiotemporal,logNoise = TempModel.fitted_sptemp_simpler()
 else
     error(@sprintf("unknown model: %s", GPmodel))
 end

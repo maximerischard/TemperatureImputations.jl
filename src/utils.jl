@@ -1,7 +1,7 @@
 using Base.Dates: Day, Hour
 
 function measurement_date(t::DateTime, hr_measure::Hour)
-    if Hour(t) < hr_measure
+    if Hour(t) <= hr_measure
         # if the time now is before the measurement time,
         # this temperature is part of today's record
         return Date(t)

@@ -2,15 +2,17 @@ using Base.Dates: Day, Hour
 
 function prep_data(nearby_pred::NearbyPrediction, TnTx::DataFrame, 
                 date_start::Date, hr_measure::Hour, impute_window::Day)
-    window_start = DateTime(date_start) + hr_measure
-    window_end = window_start + impute_window
-    in_window = (nearby_pred.ts .> window_start) & (nearby_pred.ts .<= window_end)
+    #=window_start = DateTime(date_start) + hr_measure - Day(1)=#
+    #=window_end = window_start + impute_window=#
+    date_end = date_start + impute_window - Day(1)
+    in_window = [(date_start <= measurement_date(ts, hr_measure) <= date_end) for ts in nearby_pred.ts]
     ts_window = nearby_pred.ts[in_window]
     μ_window = nearby_pred.μ[in_window]
     Σ_window = PDMat(nearby_pred.Σ.mat[in_window,in_window])
     
+    # for each 
     ts_window_day = [measurement_date(dt, hr_measure) for dt in ts_window]
-    window_days = sort(unique(ts_window_day))
+    window_days = collect(date_start:Day(1):date_end)
     window_TnTx=TnTx[[d ∈ window_days for d in TnTx[:ts_day].values],:]
     day_impute = convert(Vector{Int}, ts_window_day .- minimum(ts_window_day))+1
     imputation_data = Dict(
@@ -24,6 +26,7 @@ function prep_data(nearby_pred::NearbyPrediction, TnTx::DataFrame,
         "predicted_cov" => Σ_window.mat,
         "predicted_cov_chol" => full(Σ_window.chol[:L]),
         "k_softmax" => 10.0,
+        "ts" => ts_window,
     )
     return imputation_data
 end
