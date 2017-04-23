@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH -J stan_pipelin2     # name for job array
+#SBATCH -J stan_pipeline2_sumprod     # name for job array
 #SBATCH -p general    #Partition
 #SBATCH -t 0-12:00:00         #Running time of 1 day
 #SBATCH --mem-per-cpu 2000   # request 4GB memory
