@@ -10,6 +10,17 @@ type NearbyPrediction
     Σ::PDMat{Float64,Array{Float64,2}}
 end
 
+function add_diag!(Σ::PDMats.PDMat, a::Float64)
+    mat = Σ.mat
+    for i in 1:size(mat,1)
+        mat[i,i] += a
+    end
+    copy!(Σ.chol.factors, mat)
+    cholfact!(Σ.chol.factors, Symbol(Σ.chol.uplo))
+    @assert sumabs(mat .- full(Σ.chol)) < 1e-8
+    return Σ
+end
+
 function predict_from_nearby(hourly_data::DataFrame, stationDF::DataFrame, 
         k::Kernel, logNoise::Float64, 
         target::Int, from::DateTime, to::DateTime)
@@ -33,5 +44,6 @@ function predict_from_nearby(hourly_data::DataFrame, stationDF::DataFrame,
 
     train_GP = GP(train_X', train_Y, MeanZero(), k, logNoise);
     test_pred=GaussianProcesses.predict(train_GP, test_X'; full_cov=true);
+    add_diag!(test_pred[2], exp(2*logNoise))
     return NearbyPrediction(test_subset[:ts].values, test_pred[1], test_pred[2])
 end
