@@ -24,6 +24,7 @@
 % Nicer default font than Computer Modern for most use cases
 \usepackage{palatino}
 \usepackage{eulervm}
+\usepackage[bb=boondox]{mathalfa}
 
 % Basic figure setup, for now with no caption control since it's done
 % automatically by Pandoc (which extracts ![](path) syntax from Markdown).
@@ -72,6 +73,7 @@
 \usepackage[normalem]{ulem} % ulem is needed to support strikethroughs (\sout)
                             % normalem makes italics be italics, not underlines
 \usepackage{newunicodechar}
+\usepackage{natbib}
 
 
     
@@ -167,73 +169,73 @@
     \PY@it{\PY@bf{\PY@ff{#1}}}}}}}
 \def\PY#1#2{\PY@reset\PY@toks#1+\relax+\PY@do{#2}}
 
-\expandafter\def\csname PY@tok@sx\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
-\expandafter\def\csname PY@tok@dl\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
-\expandafter\def\csname PY@tok@vg\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.10,0.09,0.49}{##1}}}
-\expandafter\def\csname PY@tok@cpf\endcsname{\let\PY@it=\textit\def\PY@tc##1{\textcolor[rgb]{0.25,0.50,0.50}{##1}}}
-\expandafter\def\csname PY@tok@ch\endcsname{\let\PY@it=\textit\def\PY@tc##1{\textcolor[rgb]{0.25,0.50,0.50}{##1}}}
-\expandafter\def\csname PY@tok@nc\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.00,1.00}{##1}}}
-\expandafter\def\csname PY@tok@sd\endcsname{\let\PY@it=\textit\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
-\expandafter\def\csname PY@tok@m\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
-\expandafter\def\csname PY@tok@sc\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
-\expandafter\def\csname PY@tok@gu\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.50,0.00,0.50}{##1}}}
 \expandafter\def\csname PY@tok@gi\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.00,0.63,0.00}{##1}}}
-\expandafter\def\csname PY@tok@ss\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.10,0.09,0.49}{##1}}}
-\expandafter\def\csname PY@tok@c\endcsname{\let\PY@it=\textit\def\PY@tc##1{\textcolor[rgb]{0.25,0.50,0.50}{##1}}}
-\expandafter\def\csname PY@tok@vm\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.10,0.09,0.49}{##1}}}
-\expandafter\def\csname PY@tok@il\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
-\expandafter\def\csname PY@tok@kc\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
-\expandafter\def\csname PY@tok@kr\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
-\expandafter\def\csname PY@tok@sh\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
-\expandafter\def\csname PY@tok@gs\endcsname{\let\PY@bf=\textbf}
-\expandafter\def\csname PY@tok@err\endcsname{\def\PY@bc##1{\setlength{\fboxsep}{0pt}\fcolorbox[rgb]{1.00,0.00,0.00}{1,1,1}{\strut ##1}}}
-\expandafter\def\csname PY@tok@mi\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
-\expandafter\def\csname PY@tok@c1\endcsname{\let\PY@it=\textit\def\PY@tc##1{\textcolor[rgb]{0.25,0.50,0.50}{##1}}}
-\expandafter\def\csname PY@tok@nt\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
-\expandafter\def\csname PY@tok@k\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
-\expandafter\def\csname PY@tok@s\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
-\expandafter\def\csname PY@tok@mf\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
-\expandafter\def\csname PY@tok@se\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.73,0.40,0.13}{##1}}}
 \expandafter\def\csname PY@tok@gd\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.63,0.00,0.00}{##1}}}
-\expandafter\def\csname PY@tok@fm\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.00,0.00,1.00}{##1}}}
-\expandafter\def\csname PY@tok@o\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
-\expandafter\def\csname PY@tok@nf\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.00,0.00,1.00}{##1}}}
-\expandafter\def\csname PY@tok@sa\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
-\expandafter\def\csname PY@tok@mo\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
-\expandafter\def\csname PY@tok@ow\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.67,0.13,1.00}{##1}}}
-\expandafter\def\csname PY@tok@gr\endcsname{\def\PY@tc##1{\textcolor[rgb]{1.00,0.00,0.00}{##1}}}
-\expandafter\def\csname PY@tok@nl\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.63,0.63,0.00}{##1}}}
-\expandafter\def\csname PY@tok@nn\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.00,1.00}{##1}}}
-\expandafter\def\csname PY@tok@vi\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.10,0.09,0.49}{##1}}}
-\expandafter\def\csname PY@tok@nb\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
-\expandafter\def\csname PY@tok@sb\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
-\expandafter\def\csname PY@tok@nd\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.67,0.13,1.00}{##1}}}
-\expandafter\def\csname PY@tok@cs\endcsname{\let\PY@it=\textit\def\PY@tc##1{\textcolor[rgb]{0.25,0.50,0.50}{##1}}}
-\expandafter\def\csname PY@tok@cp\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.74,0.48,0.00}{##1}}}
-\expandafter\def\csname PY@tok@mb\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
-\expandafter\def\csname PY@tok@sr\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.40,0.53}{##1}}}
-\expandafter\def\csname PY@tok@mh\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
-\expandafter\def\csname PY@tok@no\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.53,0.00,0.00}{##1}}}
-\expandafter\def\csname PY@tok@gh\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.00,0.50}{##1}}}
-\expandafter\def\csname PY@tok@cm\endcsname{\let\PY@it=\textit\def\PY@tc##1{\textcolor[rgb]{0.25,0.50,0.50}{##1}}}
-\expandafter\def\csname PY@tok@bp\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
 \expandafter\def\csname PY@tok@gt\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.00,0.27,0.87}{##1}}}
-\expandafter\def\csname PY@tok@na\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.49,0.56,0.16}{##1}}}
-\expandafter\def\csname PY@tok@kt\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.69,0.00,0.25}{##1}}}
-\expandafter\def\csname PY@tok@go\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.53,0.53,0.53}{##1}}}
-\expandafter\def\csname PY@tok@kd\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\expandafter\def\csname PY@tok@vm\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.10,0.09,0.49}{##1}}}
 \expandafter\def\csname PY@tok@nv\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.10,0.09,0.49}{##1}}}
-\expandafter\def\csname PY@tok@gp\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.00,0.50}{##1}}}
-\expandafter\def\csname PY@tok@ne\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.82,0.25,0.23}{##1}}}
-\expandafter\def\csname PY@tok@ni\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.60,0.60,0.60}{##1}}}
-\expandafter\def\csname PY@tok@ge\endcsname{\let\PY@it=\textit}
-\expandafter\def\csname PY@tok@w\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.73,0.73}{##1}}}
+\expandafter\def\csname PY@tok@err\endcsname{\def\PY@bc##1{\setlength{\fboxsep}{0pt}\fcolorbox[rgb]{1.00,0.00,0.00}{1,1,1}{\strut ##1}}}
+\expandafter\def\csname PY@tok@sx\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\expandafter\def\csname PY@tok@sd\endcsname{\let\PY@it=\textit\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
+\expandafter\def\csname PY@tok@sa\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
+\expandafter\def\csname PY@tok@cm\endcsname{\let\PY@it=\textit\def\PY@tc##1{\textcolor[rgb]{0.25,0.50,0.50}{##1}}}
+\expandafter\def\csname PY@tok@gh\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.00,0.50}{##1}}}
+\expandafter\def\csname PY@tok@nt\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\expandafter\def\csname PY@tok@mi\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
+\expandafter\def\csname PY@tok@o\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
+\expandafter\def\csname PY@tok@sr\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.40,0.53}{##1}}}
+\expandafter\def\csname PY@tok@cp\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.74,0.48,0.00}{##1}}}
+\expandafter\def\csname PY@tok@kt\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.69,0.00,0.25}{##1}}}
+\expandafter\def\csname PY@tok@gr\endcsname{\def\PY@tc##1{\textcolor[rgb]{1.00,0.00,0.00}{##1}}}
 \expandafter\def\csname PY@tok@kp\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
-\expandafter\def\csname PY@tok@vc\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.10,0.09,0.49}{##1}}}
-\expandafter\def\csname PY@tok@kn\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
-\expandafter\def\csname PY@tok@si\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.73,0.40,0.53}{##1}}}
-\expandafter\def\csname PY@tok@s1\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
+\expandafter\def\csname PY@tok@nn\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.00,1.00}{##1}}}
+\expandafter\def\csname PY@tok@dl\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
+\expandafter\def\csname PY@tok@cpf\endcsname{\let\PY@it=\textit\def\PY@tc##1{\textcolor[rgb]{0.25,0.50,0.50}{##1}}}
+\expandafter\def\csname PY@tok@nl\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.63,0.63,0.00}{##1}}}
+\expandafter\def\csname PY@tok@ge\endcsname{\let\PY@it=\textit}
 \expandafter\def\csname PY@tok@s2\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
+\expandafter\def\csname PY@tok@ch\endcsname{\let\PY@it=\textit\def\PY@tc##1{\textcolor[rgb]{0.25,0.50,0.50}{##1}}}
+\expandafter\def\csname PY@tok@m\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
+\expandafter\def\csname PY@tok@fm\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.00,0.00,1.00}{##1}}}
+\expandafter\def\csname PY@tok@nf\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.00,0.00,1.00}{##1}}}
+\expandafter\def\csname PY@tok@sh\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
+\expandafter\def\csname PY@tok@ni\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.60,0.60,0.60}{##1}}}
+\expandafter\def\csname PY@tok@ss\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.10,0.09,0.49}{##1}}}
+\expandafter\def\csname PY@tok@s1\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
+\expandafter\def\csname PY@tok@kr\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\expandafter\def\csname PY@tok@gs\endcsname{\let\PY@bf=\textbf}
+\expandafter\def\csname PY@tok@go\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.53,0.53,0.53}{##1}}}
+\expandafter\def\csname PY@tok@se\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.73,0.40,0.13}{##1}}}
+\expandafter\def\csname PY@tok@mb\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
+\expandafter\def\csname PY@tok@mh\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
+\expandafter\def\csname PY@tok@k\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\expandafter\def\csname PY@tok@vg\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.10,0.09,0.49}{##1}}}
+\expandafter\def\csname PY@tok@ow\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.67,0.13,1.00}{##1}}}
+\expandafter\def\csname PY@tok@kn\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\expandafter\def\csname PY@tok@nb\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\expandafter\def\csname PY@tok@vi\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.10,0.09,0.49}{##1}}}
+\expandafter\def\csname PY@tok@sb\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
+\expandafter\def\csname PY@tok@c\endcsname{\let\PY@it=\textit\def\PY@tc##1{\textcolor[rgb]{0.25,0.50,0.50}{##1}}}
+\expandafter\def\csname PY@tok@no\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.53,0.00,0.00}{##1}}}
+\expandafter\def\csname PY@tok@mf\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
+\expandafter\def\csname PY@tok@gp\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.00,0.50}{##1}}}
+\expandafter\def\csname PY@tok@si\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.73,0.40,0.53}{##1}}}
+\expandafter\def\csname PY@tok@bp\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\expandafter\def\csname PY@tok@nc\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.00,1.00}{##1}}}
+\expandafter\def\csname PY@tok@kd\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\expandafter\def\csname PY@tok@vc\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.10,0.09,0.49}{##1}}}
+\expandafter\def\csname PY@tok@cs\endcsname{\let\PY@it=\textit\def\PY@tc##1{\textcolor[rgb]{0.25,0.50,0.50}{##1}}}
+\expandafter\def\csname PY@tok@il\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
+\expandafter\def\csname PY@tok@c1\endcsname{\let\PY@it=\textit\def\PY@tc##1{\textcolor[rgb]{0.25,0.50,0.50}{##1}}}
+\expandafter\def\csname PY@tok@sc\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
+\expandafter\def\csname PY@tok@kc\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\expandafter\def\csname PY@tok@ne\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.82,0.25,0.23}{##1}}}
+\expandafter\def\csname PY@tok@nd\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.67,0.13,1.00}{##1}}}
+\expandafter\def\csname PY@tok@s\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
+\expandafter\def\csname PY@tok@w\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.73,0.73}{##1}}}
+\expandafter\def\csname PY@tok@mo\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
+\expandafter\def\csname PY@tok@gu\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.50,0.00,0.50}{##1}}}
+\expandafter\def\csname PY@tok@na\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.49,0.56,0.16}{##1}}}
 
 \def\PYZbs{\char`\\}
 \def\PYZus{\char`\_}
@@ -294,21 +296,25 @@
    \newcommand{\trans}{^{\intercal}}
    \newcommand{\sigmaf}{\sigma_{\mathrm{GP}}}
    \newcommand{\sigman}{\sigma_{\epsilon}}
-   \newcommand{\degreeC}{{}^\circ \mathrm{C}}
+   \newcommand{\degreeC}{{}^{\circ}~\mathrm{C}}
    \newcommand{\miss}{\mathrm{miss}}
-   \newcommand{\obs}{\mathrm{obs}}
-	\newcommand{\error}{\mathrm{err}}
-   \DeclareMathOperator{\softmax}{smoothmax}
-   \DeclareMathOperator{\softmin}{smoothmin}
+   \newcommand{\obs}{\mathrm{nearby}}
+   \newcommand{\error}{\mathrm{err}}
+   \newcommand{\hour}{\mathtt{hour}}
+   \DeclareMathOperator*{\softmax}{smoothmax}
+   \DeclareMathOperator*{\softmin}{smoothmin}
 
-	\DeclareMathOperator{\kSESE}{k_{\mathtt{SExSE}}}
+   \DeclareMathOperator{\kSESE}{k_{\mathtt{SExSE}}}
    \DeclareMathOperator{\kdiurn}{k_{\mathtt{SESE_24}}}
    \DeclareMathOperator{\ksumprod}{k_{\mathtt{sumprod}}}
+   \newcommand{\iday}{\mathtt{day}}
+   \newcommand{\dayset}[1]{\cbr{i}_{#1}}
 
 	\providecommand{\tightlist}{%
   	  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
 
 	\newunicodechar{°}{\textdegree}
+	\renewcommand{\cite}[1]{\citep{#1}}
 
 
     
@@ -347,25 +353,27 @@
 
 
     	\section{Introduction}\label{introduction}
+    
 
-\begin{itemize}
-\tightlist
-\item
-  explain the problem we're trying to solve
-\end{itemize}
+Long, high-quality records of temperature provide an important basis for our understanding of climate variability and change. Historically, there has been a focus on monthly-average temperature records, which are sufficient for certain analyses, such as quantifying long-term changes in temperature. As our knowledge of climate change expands, however, there is increasing interest in understanding changes in temperature on shorter timescales, with a particular focus on extreme events. To do so, it is necessary to utilize higher-resolution temperature data. 
 
-\subsection{bias in recorded daily minima and maxima induced by time of
-measurement}\label{bias-in-recorded-daily-minima-and-maxima-induced-by-time-of-measurement}
+Recent work has led to the development of the Global Historical Climatology Network-Daily (GHCND) database \citep{menne2012overview}, which contains, among other variables, daily maximum and minimum temperatures from weather stations around the globe. The database draws from a range of different sources, and the data within it undergoes basic quality control to remove erroneous values. 
 
-\begin{itemize}
-\tightlist
-\item
-  explain
-\item
-  demonstrate using hourly temperatures from one station: reduce to
-  daily min and max and show difference as a function of measurement
-  hour
-\end{itemize}
+The current quality control methodology, however, does not account for so-called `inhomogeneities'. Inhomogeneities result from changes in measurement practices that impact the recorded temperatures. For temperature, known inhomogeneities include (a) changes in the time of observation, (b) changes in the thermometer technology, (c) station relocation, and (d) changes in land use around a station \citep{menne2009us}. While these inhomogeneities have a small effect on, e.g., the estimation of global mean temperature, they can have a large effect on estimation of temperature variability and change at a more local scale.
+
+There is a large body of work focused on homogenizing monthly-average temperatures \citep[e.g.,][]{karl1986model, easterling1996development, peterson1998homogeneity, ducre2003comparison, menne2009homogenization, vincent2012second}, resulting in widely available, large-scale homogenized monthly temperature datasets. Homogenization typically proceeds through identifying non-climatic `breakpoints' in a given time series through comparison with neighboring stations. Once a breakpoint is identified, the measurements recorded after the breakpoint are adjusted in some way to reduce or remove the inhomogeneity. Most applications of these methods, however, focus on adjusting the mean state of the data rather than the shape of the distribution \citep[see][and references therein]{della2006method}. While this may be sufficient for monthly data, it is known that certain changes in measurement practices affect different percentiles of daily temperature in different ways. To address this issue, some homogenization methods have also employed percentile matching techniques, wherein the adjustment to a timeseries after a breakpoint is a function of percentile \citep{della2006method, trewin2013daily}. 
+
+Here, we focus primarily on addressing the time of observation bias, as well as its time trend, its because of its known impact on the distribution of daily maximum and minimum temperature (Tx and Tn) measurements. The bias exists because Tx and Tn are often recorded by an observer who visits a weather station every 24 hours, and notes the maximum and minimum temperatures measured by the thermometer over the previous 24 hours. Ideally, the observer would visit the station at midnight, and the highest and lowest temperatures over the past 24 hours would typically be representative of the high and low during the prior day. For convenience, however, most observers record data at a daytime hour instead. As can be seen in Fig.~XX, measurements recorded in the early morning may not properly register the low of the night before if it was unusually warm. Similarly, measurements recorded in the late afternoon may not properly register the high of the prior day if it was usually cool. In both cases, this will lead to a reduction in the variance of Tx and Tn distributions, but the effect will be greater at low (high) percentiles for Tx (Tn). 
+
+If the time of observation remained constant over time, the bias would still exist, but it would not be linked to spurious trends in the data. However, there have been known (and likely unknown) changes in the time of observation. In the United States, for example, observers were instructed to switch from recording data in the afternoon to recording data in the morning beginning in the 1950s. This change has led to an apparent decrease in both Tx and Tn over time \citep{menne2009us}. 
+
+The goal of our approach is to infer the true Tx and Tn values throughout the data records, thereby correcting both the variance biases and the spurious trends. This stands in constrast to previous work, which has focused primarily on addressing spurious trends. We approach the problem as a missing data problem, wherein we are trying to recover the values of Tx and Tn that may have been overwritten due to measurement practices. Furthermore, by employing a Gaussian process framework and nearby stations with hourly data, we are able to simulate multiple realizations of temperature timeseries at each station, thereby providing estimates of uncertainty.
+    	\subsection{Illustration of bias induces by measurement
+hour}\label{illustration-of-bias-induces-by-measurement-hour}
+    
+
+
+    	Here's a citation \cite{baker1975effect} and maybe another one.
     
 
 
@@ -383,9 +391,9 @@ On most days, the ideal measurement and the actual measurement coincide:
 the triangle is on that day's line. But there are also several misses.
 The most blatant example occurs on April 3rd, where the peak of the
 diurnal cycle is 7.2°C and occurs at 21:00 UTC. However, because the
-previous day was much warmer, the day's \(\Tx\) record of 15.6°C is
+previous day was much warmer, the day's \(\Tx\) record of 16.1°C is
 reached immediately after the previous day's measurement. The measured
-\(\Tx\) therefore overestimates the diurnal cycle's peak by 8.4°C.
+\(\Tx\) therefore overestimates the diurnal cycle's peak by 8.9°C.
     
 
 
@@ -393,7 +401,7 @@ reached immediately after the previous day's measurement. The measured
     			
     \begin{figure}[tbh]
     \begin{center}
-    \adjustimage{max size={0.8\linewidth}{0.5\paperheight}}{TemperatureImputations_files/TemperatureImputations_6_0.png}
+    \adjustimage{max size={0.8\linewidth}{0.5\paperheight}}{TemperatureImputations_files/TemperatureImputations_9_0.png}
     \end{center}
     { \hspace*{\fill} \\}
 	\end{figure}
@@ -403,7 +411,7 @@ reached immediately after the previous day's measurement. The measured
     			
     \begin{figure}[tbh]
     \begin{center}
-    \adjustimage{max size={0.8\linewidth}{0.5\paperheight}}{TemperatureImputations_files/TemperatureImputations_7_0.png}
+    \adjustimage{max size={0.8\linewidth}{0.5\paperheight}}{TemperatureImputations_files/TemperatureImputations_10_0.png}
     \end{center}
     { \hspace*{\fill} \\}
 	\end{figure}
@@ -413,7 +421,7 @@ reached immediately after the previous day's measurement. The measured
     			
     \begin{figure}[tbh]
     \begin{center}
-    \adjustimage{max size={0.8\linewidth}{0.5\paperheight}}{TemperatureImputations_files/TemperatureImputations_8_0.png}
+    \adjustimage{max size={0.8\linewidth}{0.5\paperheight}}{TemperatureImputations_files/TemperatureImputations_11_0.png}
     \end{center}
     { \hspace*{\fill} \\}
 	\end{figure}
@@ -624,11 +632,15 @@ nearby stations as \(\T_\obs{}\), at times \(t_\obs\) and locations
 covariance given by \(k_{st}(\xvec,\xvec',t,t')\). Standard results for
 conditioning within multivariate normals then yields
 
-\begin{align}
+\begin{equation}
+\begin{split}
     \T_\miss \mid \T_\obs &\sim \normal\del{\mu_{\miss \mid \obs}, \Sigma_{\miss \mid \obs}}\,, \\
-    \mu_{\miss \mid \obs} &= \E \del{\T_\miss \mid \T_\obs} = \cov\del{\T_\miss, \T_\obs} \cov\del{\T_\obs, \T_\obs}^{-1} \T_\obs\,, \\
-    \Sigma_{\miss \mid \obs} &= \var \del{\T_\miss \mid \T_\obs} = \cov\del{\T_\miss,\T_\miss} - \cov\del{\T_\miss, \T_\obs} \cov\del{\T_\obs, \T_\obs}^{-1} \cov\del{\T_\obs, \T_\miss}\,. \\ %_
-\end{align}
+    \mu_{\miss \mid \obs} &= \E \del{\T_\miss \mid \T_\obs} \\
+        &= \cov\del{\T_\miss, \T_\obs} \cov\del{\T_\obs, \T_\obs}^{-1} \T_\obs\,, \\
+    \Sigma_{\miss \mid \obs} &= \var \del{\T_\miss \mid \T_\obs} \\
+        &= \cov\del{\T_\miss,\T_\miss} - \cov\del{\T_\miss, \T_\obs} \cov\del{\T_\obs, \T_\obs}^{-1} \cov\del{\T_\obs, \T_\miss}\,. \\ %_
+\end{split}
+\end{equation}
 
 All covariance matrices can be obtained by plugging into \(k_{st}\). For
 example, the \(ij\)th entry of \(\cov\del{\T_\miss, \T_\obs}\) is given
@@ -640,29 +652,56 @@ In Figure X, we show an example of predictions obtained from this
 spatio-temporal model. We witheld measurements from the Waterloo
 Municipal Airport, and then used data from three nearby stations between
 May 25, 2015 and June 3, 2015 to predict the Waterloo temperatures
-during the same time window. This setup allows us to gauge the quality
-of the predictions.
+during the same time window. This allows us to assess the quality of the
+predictions on this example.
     
 
 
     	Our aim, however, isn't just to predict temperatures at a location with
 no measurements, but rather to impute hourly temperatures at a location
-with accurate measurements of the daily temperature extremes. Those
-measurements can be thought of as constraints on the predictions. A
-\(\Tx\) record means that in the 24 hours before the measurements, the
-temperature reached \(\Tx\) but never exceeded it. Conceptually, we
-could therefore implement a valid imputation algorithm by drawing random
-samples from the posterior predictive multivariate normal distribution
-obtained from nearby measurements, and only keeping the samples that
-satisfy this constraint. Unfortunately, the probability of a random draw
-exactly satisfying such a constraint is zero, and so there would need to
-be some tolerance for overshooting or undershooting each day's \(\Tn\)
-and \(\Tx\) constraints. Imputing longer periods would then require
-either increasing the number of samples exponentially, or further
-loosening this tolerance. Ultimately, this rejection sampling strategy
-is therefore bound to fail.
+with accurate measurements of the daily temperature extrema. To
+incorporate the additional information, we can use Bayes' theorem
+conditionally on \(\T_\obs\)
 
-Instead, we used the probabilistic programming language Stan to draw
+\begin{equation}
+\begin{split}
+    \Pr\del{\T_\miss \mid \T_\obs, \Tn, \Tx} &\propto \Pr\del{\T_\miss \mid \T_\obs} \Pr\del{\Tn, \Tx \mid \T_\miss, \T_\obs} 
+\end{split}
+\end{equation}
+
+so that the posterior using nearby measurements becomes the prior for
+the second stage of the analysis.
+
+In fact \(\Tn\) and \(\Tx\) act as constraints on the predictions. For
+example, a \(\Tx\) record means that in the 24 hours before the
+measurements, the temperature reached \(\Tx\) but never exceeded it.
+This means \(\Tn\) and \(\Tx\) are deterministic functions of
+\(\T_\miss\), and therefore
+
+\begin{equation}
+\Pr\del{\Tn, \Tx \mid \T_\miss, \T_\obs} = \Pr\del{\Tn, \Tx \mid \T_\miss} = \left\{
+\begin{split}
+    1 & \,\text{ if the constraint is satisfied,} \\
+    0 & \,\text{ otherwise.}
+\end{split}
+\right.
+\end{equation}
+    
+
+
+    	Conceptually, we could therefore implement a valid imputation algorithm
+by drawing random samples from the posterior predictive multivariate
+normal distribution \(\T_\miss \mid \T_\obs\) obtained from nearby
+measurements, and only keeping the samples that satisfy this constraint.
+Unfortunately, the probability of a random draw exactly satisfying such
+a sharp constraint is zero, and so some tolerance would need to be
+introduced for overshooting or undershooting each day's \(\Tn\) and
+\(\Tx\) constraints. Imputing longer periods would then require either
+increasing the number of samples exponentially, or further loosening
+this tolerance. Ultimately, this rejection sampling strategy is
+therefore bound to fail.
+
+Instead, we use the probabilistic programming language Stan to draw
 samples from the constrained predictive distribution. In Stan, we
 specify a probabilistic data-generating process for the observed
 temperatures, based on parameters and latent variables with accompanying
@@ -672,27 +711,33 @@ variables. In our case, the observations are the daily maxima and
 minima, the only parameter is the average temperature at the station of
 interest \(\mu_\miss\), and the latent variables are the missing
 unobserved hourly temperatures \(\T_\miss\).
-
-{[}Serious notation problems here:{]}
-
-\begin{align}
-    \mu_\miss &\sim \normal\del{0,100} \\
-    f_\miss &\sim \normal\del{\mu_{\miss \mid \obs}, \Sigma_{\miss \mid \obs}} \\
-    \T_\miss &\sim \mu_\miss + f_\miss \\
-    \Tx\sbr{d} &= \max\cbr{ \T_{\miss,i}: t_{miss,i} \in d } \\
-    \Tn\sbr{d} &= \min\cbr{ \T_{\miss,i}: t_{miss,i} \in d } \\
-\end{align}
     
 
 
-    	The problem lies in the sharpness of the \(\max\) and \(\min\)
-functions. At each step of the markov chain, a proposal is made for
-\(T_\miss\). If the daily maxima and minima of this proposal coincide
-exactly with the measurements, then its posterior probability is finite.
-Otherwise it is exactly zero, with gradient also zero. HMC works by
-exploiting the gradient of the posterior, and therefore fails to
-converge in this situation, for reasons similar to the failure of the
-naive rejection sampler.
+    	To summarize, the probabilistic model that we wish to draw posterior
+imputations of \(\T_\miss\) from is given in \eqref{eq:idealmodel}.
+
+\begin{equation}
+\label{eq:idealmodel}
+\begin{aligned}
+    \mu_\miss &\sim \normal\del{0,100} & \text{ (vague prior on mean temperature)} \\
+    f_\miss &\sim \normal\del{\mu_{\miss \mid \obs}, \Sigma_{\miss \mid \obs}} & \text{ (posterior from $\T_\obs$ becomes prior)} \\
+    \T_\miss &= \mu_\miss + f_\miss \\
+    \Tx\sbr{\iday} &= \max_{i \in \dayset{\iday}}\cbr{ \T_{\miss,i}} & \text{ (observe maximum in 24hr window)}\\
+    \Tn\sbr{\iday} &= \min_{i \in \dayset{\iday}}\cbr{ \T_{\miss,i}} & \text{ (observe minimum in 24hr window)}\\
+    \dayset{\iday} &= \cbr{i : \iday-1+\frac{\hour}{24} \lt t_{\miss,i} \le \iday + \frac{\hour}{24}} & \text{ (indices of times in the 24hr window)}
+\end{aligned}
+\end{equation}
+    
+
+
+    	The problem caused by the sharp constraint remains. At each step of the
+Markov chain, a proposal is made for \(T_\miss\). If the daily maxima
+and minima of this proposal coincide exactly with the measurements, then
+its posterior probability is finite. Otherwise it is exactly zero, with
+gradient also zero. HMC works by exploiting the gradient of the
+posterior, and therefore fails to converge in this situation, for
+reasons similar to the failure of the naive rejection sampler.
 
 \begin{figure}
 \centering
@@ -706,10 +751,12 @@ functions with the \(\softmax\) and \(\softmin\) functions, which take
 real inputs \(x_1, \ldots, x_p\) and a sharpness parameter \(k\) and
 return
 
-\begin{align}
+\begin{equation}
+\begin{split}
     \softmax\del{x_1, \ldots, x_p ; k} &= \frac{1}{k} \log\del{\sum_{i=1}^p e^{kx_i}} \\
     \softmin\del{x_1, \ldots, x_p ; k} &= -\softmax\del{-x_1, \ldots, -x_p; k}
-\end{align}
+\end{split}
+\end{equation}
 
 As \(k \rightarrow \infty\), \(\softmax\) becomes the maximum, and
 \(\softmin\) becomes the minimum. Lower values of \(k\) give close
@@ -720,19 +767,22 @@ now available. Furthermore, by adding a small amount of white noise with
 variance \(\sigma_\epsilon\) to the \(\Tx\) and \(\Tn\) measurements, we
 ensure that the posterior doesn't go abruptly to zero when the
 conditions aren't met exactly. These modifications make HMC a viable
-algorithm to efficiently draw samples from the posterior. Setting \(k\)
-and \(\sigma_\epsilon\) is a compromise between exactness and
-efficiency; we found \(k=10\) and \(\sigma_\epsilon=0.1\) to perform
-well. The full model we implemented is below, and is an approximation of
-our ideal model above.
+algorithm to efficiently draw samples from the constrained posterior.
+Setting \(k\) and \(\sigma_\epsilon\) is a compromise between exactness
+and efficiency; we found \(k=10\) and \(\sigma_\epsilon=0.1\) to perform
+well. The modified model is given below, and approximates our ideal
+model \eqref{eq:idealmodel}.
 
-\begin{align}
+\begin{equation}
+\label{eq:smoothed_model}
+\begin{split}
     \mu_\miss &\sim \normal\del{0,100} \\
     f_\miss &\sim \normal\del{\mu_{\miss \mid \obs}, \Sigma_{\miss \mid \obs}} \\
-    T_\miss &\sim \mu_\miss + f_\miss \\
-    \Tx\sbr{d} &\sim \normal\del{\softmax\cbr{ T_{\miss,i}: t_{miss,i} \in d; k=10}, 0.1} \\
-    \Tn\sbr{d} &\sim \normal\del{\softmax\cbr{ T_{\miss,i}: t_{miss,i} \in d; k=10}, 0.1} \\
-\end{align}
+    T_\miss &= \mu_\miss + f_\miss \\
+    \Tx\sbr{\iday} &\sim \normal\del{\softmax_{i \in \dayset{\iday}} \cbr{ T_{\miss,i}; k=10}, 0.1^2} \\
+    \Tn\sbr{\iday} &\sim \normal\del{\softmin_{i \in \dayset{\iday}} \cbr{ T_{\miss,i}; k=10}, 0.1^2}
+\end{split}
+\end{equation}
 
 Example imputations from this procedure are shown in Figure X. From May
 25, 2015 to June 3, 2015, hourly temperatures are imputed at Waterloo
@@ -751,7 +801,7 @@ measurement window, but more likely at its very end.
     
 
 
-    	\section{Model diagnostic}\label{model-diagnostic}
+    	\section{Model diagnostics}\label{model-diagnostics}
 
 \subsection{Variogram}\label{variogram}
 
@@ -766,14 +816,15 @@ the temporal lag \(r\)
 
 For a Gaussian Process model, with a stationary kernel
 \(k(\hvec,r)=k(\xvec,\xvec+\hvec,t,t+r)\) this can be expressed in terms
-of the observation noise \(\sigman\) and \(k(\cdot,\cdot)\), as
+of the observation noise \(\sigman\) and kernel function
+\(k(\cdot,\cdot)\), as
 
 \begin{equation}
     \label{eq:gp_variogram}
     \gamma\del{\hvec,r} = \sigman^2 + k\del{0,0} - k(\hvec,r)\,.
 \end{equation}
 
-Furthermore, the semi-variogram can be estimated empirically, be
+From the data, the semi-variogram can also be estimated empirically, be
 averaging the square differences of any two observations that are
 separated by \(\hvec\) in space, and \(r\) in time (or, in practice,
 within half a bin width of \(\hvec\) and \(r\)). By comparing the
@@ -795,13 +846,19 @@ the model's semi-variogram obtained through equation
     
 
 
+    	We notice that the variogram of the simple \texttt{SExSE} model tracks
+the empirical variogram well at short lags, but fails to capture the
+diurnal cycle, and the fit degrades at long lag. We attempt to improve
+the model in section \ref{sec:improving_model}.
+    
+
+
     	\subsection{Error and expected error}\label{error-and-expected-error}
 
-In the previous section, we laid out our imputation strategy, and we
-visually checked that the imputations appear reasonable.
-
-To quantify the predictive accuracy, we compare the posterior mean
-temperature to the truth, and obtain the empirical mean squared error as
+The variogram gives us a visual diagnostic of the overall model fit. To
+quantify the model's predictive ability in the Iowa example, we compare
+the posterior mean temperature to the withheld truth, and obtain the
+empirical mean squared error as
 
 \begin{equation}
     \label{eq:mse}
@@ -810,10 +867,10 @@ temperature to the truth, and obtain the empirical mean squared error as
 
 This equation is for the final predictions obtained using nearby hourly
 temperatures and local daily maxima and minima. A similar diagnostic can
-be computed for the intermediary predictions, excluding the local
-\(\Tx\) and \(\Tn\). At that stage, we are not concerned with any
-overall bias in the predicted temperatures, so we instead obtain on the
-sample variance of the errors as
+be computed for the intermediary predictions, which exclude the local
+\(\Tx\) and \(\Tn\) information. At that stage, we are not concerned
+with any overall bias in the predicted temperatures, so we instead
+compute the sample variance of the errors as
 
 \begin{equation}
     \label{eq:varerr}
@@ -826,31 +883,36 @@ Model & Log Likelihood & Var(err) & \(\E\)(Var(err)) & MSE(err) &
 \(\E\)(MSE(err))\tabularnewline
 \midrule
 \endhead
-SE x SE & -55,614 & 1.589 & 0.682 & 1.129 & 0.437\tabularnewline
-SExSE + diurnal & -54,472 & 1.633 & 0.782 & 1.151 & 0.521\tabularnewline
-Sum of products, fixed variance & -48,589 & 4.991 & 8.808 & 2.983 &
-2.423\tabularnewline
-SoP, fixed temporal, free var & -47,082 & 1.314 & 2.281 & 1.141 &
-0.855\tabularnewline
-SoP, completely free & -46,184 & 1.423 & 1.729 & 1.122 &
-0.908\tabularnewline
+SE x SE & -55,614 & 1.589 & 0.875 & 1.104 & 0.614\tabularnewline
+SExSE + diurnal & -54,472 & 1.633 & 0.974 & 1.137 & 0.697\tabularnewline
+Sum of products, fixed variance & -48,589 & 4.991 & 8.791 &
+&\tabularnewline
+SoP, fixed temporal, free var & -47,082 & 1.314 & 2.321 & 1.150 &
+0.897\tabularnewline
+SoP, completely free & -46,184 & 1.423 & 1.765 & 1.152 &
+0.950\tabularnewline
+SoP, simpler & -45,945 & 1.319 & 1.190 & 1.069 & 0.823\tabularnewline
 \bottomrule
 \end{longtable}
 
 For our purposes, it isn't sufficient for the spatio-temporal model to
 yield good predictions; we also require a good estimate of its own
-accuracy. We estimate the expected MSE and predictive variance sampling
-\(K\) random draws \(\T^k_\miss\) from the posterior distribution, again
-conditioned on \(\T_\obs\) after fitting the spatio-temporal Gaussian
-process model, and on \(\T_\obs\), \(\Tx\) and \(\Tn\) after
-incorporating the local data using Stan. The draws are from a
+accuracy. We estimate the expected MSE and predictive variance by
+sampling \(K\) random draws \(\T^k_\miss\) from the posterior
+distribution, again conditioned firstly on just \(\T_\obs\) after
+fitting the spatio-temporal Gaussian process model, and then
+additionally on \(\T_\obs\), \(\Tx\) and \(\Tn\) after incorporating the
+local data using Stan. The draws are obtained from the posterior
 multivariate normal distribution in the first case, and the MCMC samples
 obtained through Stan in the second case. We then evaluate the variance
-between the samples and the posterior mean as
+or MSE between the samples and the posterior mean as
 
-\begin{align}
-    \E \del{\var\del{\error \mid \cdot}} &= \frac{1}{K} \sum_{k=1}^K \var_i \cbr{\T^{(k)}_{\miss,i} - \E\del{\T_{\miss,i} \mid \cdot}}
-\end{align}
+\begin{equation}
+\begin{split}
+    \E \del{\var\del{\error \mid \T_\obs}} &\approx \frac{1}{K} \sum_{k=1}^K \var_i \cbr{\T^{(k)}_{\miss,i} - \E\del{\T_{\miss,i} \mid \T_\obs}} \\
+    \E \del{\mse\del{\error \mid \T_\obs,\Tx,\Tn}} &\approx \frac{1}{K} \sum_{k=1}^K \mse_i \cbr{\T^{(k)}_{\miss,i} - \E\del{\T_{\miss,i} \mid \T_\obs,\Tx,\Tn}} \\
+\end{split}
+\end{equation}
 
 When evaluating models, we want the errors to be small, and so the
 empirical error variance and MSE to be low. A well-calibrated model
@@ -860,10 +922,12 @@ values.
 
 These diagnostics for our first spatio-temporal model, the product of
 squared exponentials, are found in the first row of Table X. The
-empirical error variance using only nearby measurements is already low,
-with typical errors of order \(\sqrt{1.565}=1.25\,\degreeC\).
-Incorporating the local measurements reduces it further to
-\(\sqrt{1.435}=1.20\,\degreeC\)
+empirical error variance using only nearby measurements is already
+fairly low, with typical errors of order
+\(\sqrt{1.589}=1.26\,\degreeC\). Incorporating the local measurements
+reduces it further to \(\sqrt{1.104}=1.05\,\degreeC\). However, the
+model is overly optimistic, and the expected errors underestimate the
+true errors.
     
 
 
@@ -871,8 +935,8 @@ Incorporating the local measurements reduces it further to
 
 In this section, we develop more sophisticated Gaussian process models
 than the simple product of squared exponential kernels. We then assess
-whether these models improve the diagnostic measures that we developed
-in the previous section.
+whether these models improve the variogram and the predictive diagnostic
+measures that we developed in the previous sections.
 
 The most salient feature of the empirical variogram that isn't captured
 by the \texttt{SExSE} model is the oscillation with a 24-hour period. It
@@ -901,7 +965,7 @@ specification as \(k_{space}\) in \eqref{eq:kspace}).
     
 
 
-    	We also develop a more complex model, which breaks up \(k_time\) into
+    	We also develop a more complex model, which breaks up \(k_{time}\) into
 short-term, medium-term and long-term correlation components, each with
 their own spatial decay.
 
@@ -959,50 +1023,6 @@ incorrectness of our model.
     
 
 
-    	\begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
-\tightlist
-\item
-  focused on timeseries model
-
-  \begin{itemize}
-  \tightlist
-  \item
-    kernel components
-  \item
-    diurnal cycle
-  \item
-    show improved variograms
-  \end{itemize}
-\item
-  spatiotemporal model
-
-  \begin{itemize}
-  \tightlist
-  \item
-    variograms and cross-variograms
-  \item
-    trace evolution
-
-    \begin{itemize}
-    \tightlist
-    \item
-      product kernel
-    \item
-      sum of products with variance 1
-    \item
-      sum of products with free variance
-    \end{itemize}
-  \item
-    for each model, report marginal likelihood, and predictive
-    diagnostic in a table
-  \item
-    discuss importance of getting uncertainty right
-  \end{itemize}
-\end{enumerate}
-    
-
-
     	\section{Analysis}\label{analysis}
 
 \begin{itemize}
@@ -1018,13 +1038,14 @@ incorrectness of our model.
     
 
 
-    	\section{References}\label{references}
+    	\section{Inference on measurement
+hour}\label{inference-on-measurement-hour}
 
-Baker, Donald G. (June 1975). ``Effect of Observation Time on Mean
-Temperature Estimation''. Journal of Applied Meteorology. 14 (4):
-471--476.
-
--\textgreater{} follow up on citations to above
+\begin{figure}
+\centering
+\includegraphics{figures/hr_inference.png}
+\caption{measurement hour inference}
+\end{figure}
     
 
 
@@ -1032,5 +1053,8 @@ Temperature Estimation''. Journal of Applied Meteorology. 14 (4):
     % Add a bibliography block to the postdoc
     
     
+\bibliographystyle{ametsoc2014}
+\bibliography{ref}
+
     
     \end{document}
