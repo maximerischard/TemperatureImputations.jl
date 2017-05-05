@@ -15,6 +15,7 @@
 % Nicer default font than Computer Modern for most use cases
 \usepackage{palatino}
 \usepackage{eulervm}
+\usepackage[bb=boondox]{mathalfa}
 
 % Basic figure setup, for now with no caption control since it's done
 % automatically by Pandoc (which extracts ![](path) syntax from Markdown).
@@ -63,6 +64,8 @@
 \usepackage[normalem]{ulem} % ulem is needed to support strikethroughs (\sout)
                             % normalem makes italics be italics, not underlines
 \usepackage{newunicodechar}
+\usepackage{natbib}
+\usepackage{cancel}
 ((* endblock packages *))
 
 ((* block definitions *))
@@ -99,21 +102,26 @@
    \newcommand{\trans}{^{\intercal}}
    \newcommand{\sigmaf}{\sigma_{\mathrm{GP}}}
    \newcommand{\sigman}{\sigma_{\epsilon}}
-   \newcommand{\degreeC}{{}^\circ \mathrm{C}}
+   \newcommand{\degreeC}{{}^{\circ}~\mathrm{C}}
    \newcommand{\miss}{\mathrm{miss}}
-   \newcommand{\obs}{\mathrm{obs}}
-	\newcommand{\error}{\mathrm{err}}
-   \DeclareMathOperator{\softmax}{smoothmax}
-   \DeclareMathOperator{\softmin}{smoothmin}
+   \newcommand{\obs}{\mathrm{nearby}}
+   \newcommand{\error}{\mathrm{err}}
+   \newcommand{\hour}{\mathtt{hour}}
+   \DeclareMathOperator*{\softmax}{smoothmax}
+   \DeclareMathOperator*{\softmin}{smoothmin}
 
-	\DeclareMathOperator{\kSESE}{k_{\mathtt{SExSE}}}
+   \DeclareMathOperator{\kSESE}{k_{\mathtt{SExSE}}}
    \DeclareMathOperator{\kdiurn}{k_{\mathtt{SESE_24}}}
    \DeclareMathOperator{\ksumprod}{k_{\mathtt{sumprod}}}
+   \newcommand{\iday}{\mathtt{day}}
+   \newcommand{\dayset}[1]{\cbr{i}_{#1}}
+   \newcommand{\discrepancy}{\delta}
 
 	\providecommand{\tightlist}{%
   	  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
 
 	\newunicodechar{°}{\textdegree}
+	\renewcommand{\cite}[1]{\citep{#1}}
 ((* endblock definitions *))
 
 ((* block author *))\author{Maxime Rischard}((* endblock author *))
@@ -124,7 +132,7 @@
     ((*- if "DeclareMathOperator" in cell.source -*))
     ((*- elif "Table of Contents" in cell.source -*))
     ((* else *))
-    	((( cell.source | citation2latex | strip_files_prefix | markdown2latex )))
+        ((( cell.source | citation2latex | strip_files_prefix | markdown2latex(extra_args=['--wrap', 'preserve']) )))
     ((* endif *))
 
 ((* endblock markdowncell *))
@@ -168,3 +176,7 @@
 
 ((* block stream *))
 ((* endblock stream *))
+((* block bibliography *))
+\bibliographystyle{ametsoc2014}
+\bibliography{ref}
+((* endblock bibliography *))
