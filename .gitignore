@@ -6,3 +6,9 @@ TemperatureImputations_files/
 *.log
 *.out
 *.synctex.gz
+*.fdb_latexmk
+*.bbl
+*.blg
+*.flx
+*.toc
+*.fls
