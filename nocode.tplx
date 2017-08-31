@@ -116,6 +116,14 @@
    \newcommand{\iday}{\mathtt{day}}
    \newcommand{\dayset}[1]{\cbr{i}_{#1}}
    \newcommand{\discrepancy}{\delta}
+   \newcommand{\Xmax}{X_{\max}}
+   \newcommand{\Xmin}{X_{\min}}
+   \newcommand{\Fcond}{F_{X \mid \Xmax,\Xmin}}
+   \newcommand{\pxx}[2]{\Pr{}_{#1#2}}
+   \newcommand{\pij}{\pxx{i}{j}}
+   \newcommand{\pisum}{\pxx{i}{\bullet}}
+   \newcommand{\psumj}{\pxx{\bullet}{j}}
+   \newcommand{\eqlabel}[1]{\label{#1}}
 
 	\providecommand{\tightlist}{%
   	  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
