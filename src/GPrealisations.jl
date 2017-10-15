@@ -6,15 +6,15 @@ using Optim: minimizer
 import NLopt
 
 type GPRealisations
-    reals::Vector{GP}
+    reals::Vector{GPE}
     m::Mean
     k::Kernel
     logNoise::Float64
-    mLL::Float64
-    dmLL::Vector{Float64}
+    mll::Float64
+    dmll::Vector{Float64}
 end
 
-function GPRealisations(reals::Vector{GP})
+function GPRealisations(reals::Vector{GPE})
     first = reals[1]
     gpr = GPRealisations(reals, first.m, first.k, first.logNoise, NaN, [])
 end
@@ -49,26 +49,26 @@ function set_params!(gpr::GPRealisations, hyp::Vector{Float64}; noise::Bool=true
 end
 
 function update_mll!(gpr::GPRealisations)
-    mLL = 0.0
+    mll = 0.0
     for gp in gpr.reals
         update_mll!(gp)
-        mLL += gp.mLL
+        mll += gp.mll
     end
-    gpr.mLL = mLL
-    return mLL
+    gpr.mll = mll
+    return mll
 end
 function update_mll_and_dmll!(gpr::GPRealisations, Kgrads::Dict{Int,Matrix}, ααinvcKIs::Dict{Int,Matrix}; kwargs...)
-    mLL = 0.0
+    mll = 0.0
     for gp in gpr.reals
         update_mll_and_dmll!(gp, Kgrads[gp.nobsv], ααinvcKIs[gp.nobsv]; kwargs...)
-        mLL += gp.mLL
+        mll += gp.mll
     end
-    gpr.dmLL = gpr.reals[1].dmLL
+    gpr.dmll = gpr.reals[1].dmll
     for gp in gpr.reals[2:end]
-        gpr.dmLL .+= gp.dmLL
+        gpr.dmll .+= gp.dmll
     end
-    gpr.mLL = mLL
-    return gpr.dmLL
+    gpr.mll = mll
+    return gpr.dmll
 end
 function update_mll_and_dmll!(gpr::GPRealisations; kwargs...)
     Kgrads = Dict{Int,Matrix}()
@@ -77,8 +77,8 @@ function update_mll_and_dmll!(gpr::GPRealisations; kwargs...)
         if haskey(Kgrads, gp.nobsv)
             continue
         end
-        Kgrads[gp.nobsv] = Array(Float64, gp.nobsv, gp.nobsv)
-        ααinvcKIs[gp.nobsv] = Array(Float64, gp.nobsv, gp.nobsv)
+        Kgrads[gp.nobsv] = Array{Float64}(gp.nobsv, gp.nobsv)
+        ααinvcKIs[gp.nobsv] = Array{Float64}(gp.nobsv, gp.nobsv)
     end
     return update_mll_and_dmll!(gpr, Kgrads, ααinvcKIs; kwargs...)
 end
@@ -90,14 +90,17 @@ function get_optim_target(gpr::GPRealisations; noise::Bool=true, mean::Bool=true
         if haskey(Kgrads, gp.nobsv)
             continue
         end
-        Kgrads[gp.nobsv] = Array(Float64, gp.nobsv, gp.nobsv)
-        ααinvcKIs[gp.nobsv] = Array(Float64, gp.nobsv, gp.nobsv)
+        Kgrads[gp.nobsv] = Array{Float64}(gp.nobsv, gp.nobsv)
+        ααinvcKIs[gp.nobsv] = Array{Float64}(gp.nobsv, gp.nobsv)
     end
     function mll(hyp::Vector{Float64})
         try
             set_params!(gpr, hyp; noise=noise, mean=mean, kern=kern)
             update_mll!(gpr)
-            return -gpr.mLL
+            if !isfinite(gpr.mll)
+                return Inf
+            end
+            return -gpr.mll
         catch err
              if !all(isfinite(hyp))
                 println(err)
@@ -114,12 +117,15 @@ function get_optim_target(gpr::GPRealisations; noise::Bool=true, mean::Bool=true
         end        
     end
 
-    function mll_and_dmll!(hyp::Vector{Float64}, grad::Vector{Float64})
+    function mll_and_dmll!(grad::Vector{Float64}, hyp::Vector{Float64})
         try
             set_params!(gpr, hyp; noise=noise, mean=mean, kern=kern)
             update_mll_and_dmll!(gpr, Kgrads, ααinvcKIs; noise=noise, mean=mean, kern=kern)
-            grad[:] = -gpr.dmLL
-            return -gpr.mLL
+            grad[:] = -gpr.dmll
+            if !isfinite(gpr.mll)
+                return Inf
+            end
+            return -gpr.mll
         catch err
              if !all(isfinite(hyp))
                 println(err)
@@ -135,8 +141,8 @@ function get_optim_target(gpr::GPRealisations; noise::Bool=true, mean::Bool=true
             end
         end 
     end
-    function dmll!(hyp::Vector{Float64}, grad::Vector{Float64})
-        mll_and_dmll!(hyp::Vector{Float64}, grad::Vector{Float64})
+    function dmll!(grad::Vector{Float64}, hyp::Vector{Float64})
+        mll_and_dmll!(grad::Vector{Float64}, hyp::Vector{Float64})
     end
 
     func = OnceDifferentiable(mll, dmll!, mll_and_dmll!,
@@ -162,12 +168,12 @@ function optimize_NLopt(gpr::GPRealisations; noise::Bool=true, mean::Bool=true, 
     best_y = Inf
     function myfunc(x::Vector, grad::Vector)
         if length(grad) > 0
-            target.g!(x, grad)
+            target.g!(grad, x)
         end
 
         count += 1
         y = target.f(x)
-        if y < best_y
+        if isfinite(y) & (y < best_y)
             best_y = y
             best_x[:] = x
         end
@@ -177,8 +183,8 @@ function optimize_NLopt(gpr::GPRealisations; noise::Bool=true, mean::Bool=true, 
     nparams = length(init_x)
     opt = NLopt.Opt(method, nparams)
 
-    lower = Array(Float64, nparams)
-    upper = Array(Float64, nparams)
+    lower = Array{Float64}(nparams)
+    upper = Array{Float64}(nparams)
     lower = init_x - 3.0
     upper = init_x + 3.0
     NLopt.lower_bounds!(opt, lower)

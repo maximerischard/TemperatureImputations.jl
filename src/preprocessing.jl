@@ -7,8 +7,13 @@ function read_station(usaf::Int, wban::Int, id::Int; data_dir::String=".")
     station_data = CSV.read(join((data_dir, "/data2015/",fn)), DataTable,
                             datarow=1,
                             header=[:year, :month, :day, :hour, :min, :seconds, :temp])
-    station_data[:temp][isnan(station_data[:temp].values)].isnull[:] = true
-    station_data = station_data[!station_data[:temp].isnull & !isnan(station_data[:temp].values) ,:]    
+    station_data[:temp][isnan.(station_data[:temp].values)].isnull[:] = true
+    # remove missing data (null or nan)
+    station_data = station_data[( .!station_data[:temp].isnull # remove null
+                                  .& 
+                                  .!isnan.(station_data[:temp].values)
+                                ) # remove NaN
+                                , :]    
     station_ts = DateTime[DateTime(
         get(r[:year]),
         get(r[:month]),
@@ -16,7 +21,7 @@ function read_station(usaf::Int, wban::Int, id::Int; data_dir::String=".")
         get(r[:hour]),
         get(r[:min]),
         get(r[:seconds])
-        ) for r in eachrow(station_data)]
+        ) for r in DataTables.eachrow(station_data)]
     station_data[:ts] = station_ts
     station_data[:station] = id
     return station_data
@@ -41,7 +46,7 @@ function add_ts_hours!(df::DataTable)
     return df
 end
 function read_Stations(isdSubset; data_dir::String=".")
-    station_IDs = [(get(r[:USAF]), get(r[:WBAN])) for r in eachrow(isdSubset)]
+    station_IDs = [(get(r[:USAF]), get(r[:WBAN])) for r in DataTables.eachrow(isdSubset)]
     hourly_ls = [read_station(sid[1], sid[2], i; data_dir=data_dir) for (i,sid) in enumerate(station_IDs)]
     hourly_cat = vcat(hourly_ls)
     add_ts_hours!(hourly_cat)
