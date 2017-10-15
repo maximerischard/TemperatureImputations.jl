@@ -7,5 +7,6 @@ rsync --verbose --human-readable --progress --archive --compress --delete \
     ody:/n/regal/pillai_lab/mrischard/temperature_model/saved/stan_fit/ /Volumes/Samsung250GB/temperature_model/saved/stan_fit
 
 # render PDF
+source ~/bin/venv_nbconvert/bin/activate
 jupyter nbconvert --to latex --template nocode.tplx TemperatureImputations.ipynb
 latexmk -bibtex -pdf TemperatureImputations

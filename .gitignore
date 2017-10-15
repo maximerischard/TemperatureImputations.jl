@@ -12,3 +12,5 @@ TemperatureImputations_files/
 *.flx
 *.toc
 *.fls
+tmp
+*/tmp
