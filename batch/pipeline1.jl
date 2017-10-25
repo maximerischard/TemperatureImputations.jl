@@ -9,6 +9,7 @@ doc = """
 using DocOpt
 arguments = docopt(doc)
 GPmodel = arguments["<model>"]
+data_dir="../"
 module TempModel
     using TimeSeries
     using DataFrames
@@ -17,10 +18,10 @@ module TempModel
     using GaussianProcesses: set_params!
     using PDMats
     using GaussianProcesses
-    include("src/predict_from_nearby.jl")
-    include("src/preprocessing.jl")
-    include("src/variogram.jl")
-    include("src/fitted_kernel.jl")
+    include(data_dir*"/src/predict_from_nearby.jl")
+    include(data_dir*"/src/preprocessing.jl")
+    include(data_dir*"/src/variogram.jl")
+    include(data_dir*"/src/fitted_kernel.jl")
 end
 
 using JLD
@@ -43,11 +44,11 @@ else
     error(@sprintf("unknown model: %s", GPmodel))
 end
 
-isdList=TempModel.read_isdList()
+isdList=TempModel.read_isdList(; data_dir=data_dir)
 isdSubset=isdList[[(usaf in (725450,725460,725480,725485)) for usaf in isdList[:USAF].values],:]
 isdSubset
 
-hourly_cat=TempModel.read_Stations(isdSubset)
+hourly_cat=TempModel.read_Stations(isdSubset; data_dir=data_dir)
 itest=3
 
 test_usaf=get(isdSubset[itest,:USAF])
@@ -58,7 +59,7 @@ window=3*increm
 
 while true
     dt_end=dt_start+window
-    saved_dir = joinpath(pwd(), "saved/predictions_from_nearby", GPmodel)
+    saved_dir = joinpath(pwd(), data_dir*"/saved/predictions_from_nearby", GPmodel)
     if !isdir(saved_dir)
         mkdir(saved_dir)
     end
