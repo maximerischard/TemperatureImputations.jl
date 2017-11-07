@@ -17,7 +17,7 @@ function add_diag!(Σ::PDMats.PDMat, a::Float64)
     end
     copy!(Σ.chol.factors, mat)
     cholfact!(Σ.chol.factors, Symbol(Σ.chol.uplo))
-    @assert sumabs(mat .- full(Σ.chol)) < 1e-8
+    @assert maximum(abs, mat .- full(Σ.chol)) < 1e-10
     return Σ
 end
 
@@ -43,7 +43,7 @@ function predict_from_nearby(hourly_data::DataTable, stationDF::DataTable,
     test_X = [test_subset[:ts_hours].values test_X_PRJ test_Y_PRJ]
 
     train_GP = GP(train_X', train_Y, MeanZero(), k, logNoise);
-    test_pred=GaussianProcesses.predict(train_GP, test_X'; full_cov=true);
+    test_pred=GaussianProcesses.predict_f(train_GP, test_X'; full_cov=true);
     add_diag!(test_pred[2], exp(2*logNoise))
     return NearbyPrediction(test_subset[:ts].values, test_pred[1], test_pred[2])
 end
