@@ -1,12 +1,3 @@
-import PyPlot; plt=PyPlot
-using LaTeXStrings
-plt.rc("figure", dpi=300.0)
-plt.rc("figure", figsize=(12,8))
-plt.rc("savefig", dpi=300.0)
-plt.rc("text", usetex=false)
-plt.rc("font", family="serif")
-plt.rc("font", serif="Palatino")
-;
 function plot_imputations(ts, temp_impute)
     imputed_10, imputed_90 = get_temp_percentiles(temp_impute)
     μ = get_temp_mean(temp_impute)
@@ -21,12 +12,17 @@ function plot_truth(test::DataTable)
     ts = test[:ts].values
     plt.plot(ts, test[:temp].values, 
         color="black", "o-", label="true hourly")
-    plt.plot(ts, test_subsubset[:Tn].values, 
+    plt.step(ts, test_subsubset[:Tn].values, where="post",
         color="blue", linewidth=3, label=L"$T_n$")
-    plt.plot(ts, test_subsubset[:Tx].values, 
+    plt.step(ts, test_subsubset[:Tx].values, where="post",
         color="red", linewidth=3, label=L"$T_x$")
 end
-function plot_predictive(nearby_pred::TempModel.NearbyPrediction, xlim::Tuple{DateTime,DateTime})
+function plot_predictive(nearby_pred::TempModel.NearbyPrediction, xlim::Tuple{DateTime,DateTime};
+                         truth::Bool=true,
+                         neighbours::Bool=true,
+                         mean_impt::Bool=true,
+                         imputations::Bool=true)
+
     test_subset = subset(test_trimmed, xlim[1], xlim[2])
     train_subset = subset(hourly_train, xlim[1], xlim[2])
     μ = nearby_pred.μ
@@ -36,28 +32,43 @@ function plot_predictive(nearby_pred::TempModel.NearbyPrediction, xlim::Tuple{Da
     centering = eye(nobsv) .- (1.0/nobsv) .* ones(nobsv, nobsv)
     Σ_centered = centering * Σ.mat * centering
     distr = MultivariateNormal(μ, Σ)
-    for station in unique(train_subset[:station].values)
-        sdata = train_subset[train_subset[:station].values.==station,:]
-        ts=sdata[:ts].values
-        plt.plot(ts, sdata[:temp].values.-mean(sdata[:temp].values), color="#F8A21F", 
-            label="records at"get(isdSubset[station,:NAME]))
+    if neighbours
+        for station in unique(train_subset[:station].values)
+            sdata = train_subset[train_subset[:station].values.==station,:]
+            ts=sdata[:ts].values
+            plt.plot(ts, sdata[:temp].values.-mean(sdata[:temp].values), color="#F8A21F", 
+                label=get(isdSubset[station,:NAME]))
+        end
     end
-    _ylim = plt.ylim()
     ts=nearby_pred.ts
-    plt.plot(ts, μ, color="#009F77", linewidth=2, label="posterior mean")
-    for _ in 1:2
-        temp_sim = rand(distr)
-        plt.plot(ts, temp_sim.-mean(temp_sim), color="#009F77", linewidth=1)
+    in_window = (xlim[1] .<= ts) .& (ts .<= xlim[2])
+    mean_μ = mean(μ[in_window])
+    if mean_impt
+        plt.plot(ts, μ-mean_μ, color="#009F77", linewidth=2, label="posterior mean")
+        plt.fill_between(ts, 
+                         μ-mean_μ-2*sqrt.(diag(Σ_centered)),
+                         μ-mean_μ+2*sqrt.(diag(Σ_centered)),
+                         color="#009F77", alpha=0.3)
     end
-    plt.fill_between(ts, μ-2*√diag(Σ_centered),μ+2*√diag(Σ_centered), color="#009F77", alpha=0.3)
+    if imputations
+        for _ in 1:2
+            temp_sim = rand(distr)
+            mean_sim = mean(temp_sim[in_window])
+            plt.plot(ts, temp_sim.-mean_sim, color="#009F77", linewidth=1)
+        end
+    end
     ts = test_subset[:ts].values
     temp_true = test_subset[:temp].values
-    plt.plot(ts, temp_true.-mean(temp_true), 
-        color="black", "-", label="true hourly")
+    if truth
+        mean_true = mean(temp_true)
+        plt.plot(ts, temp_true.-mean_true, "o-",
+            color="black", label="true hourly")
+    end
     plt.legend(loc="best")
     plt.title("Predictive distribution based on nearby data alone")
+    plt.gca()[:xaxis][:set_major_formatter](plt.matplotlib[:dates][:DateFormatter]("%Y-%m-%d"))
+    plt.xticks(collect(plot_xlim[1]:Day(1):plot_xlim[2]))
     plt.xlim(xlim)
-    plt.ylim(_ylim)
 end
 function plot_residuals(nearby::TempModel.NearbyPrediction)
     ts = nearby.ts

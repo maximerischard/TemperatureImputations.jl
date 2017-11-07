@@ -14,8 +14,6 @@ using Distances
 using DataTables: by, head
 using Dates: tonext, Hour, Day
 
-include("TempModel.jl")
-
 function subset(df, from, to; closed_start=true, closed_end=true)
     ts = df[:ts].values
     return df[argsubset(ts,from,to;closed_start=closed_start,closed_end=closed_end),:]
@@ -31,7 +29,7 @@ function argsubset(ts, from, to; closed_start=true, closed_end=true)
     else
         before_to = ts .< to
     end
-    return after_from & before_to
+    return after_from .& before_to
 end
 
 function add_diag!(Σ::PDMats.PDMat, a::Float64)
