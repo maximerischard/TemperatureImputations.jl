@@ -7,12 +7,16 @@ doc = """
         pipeline1.jl <model>
 """
 using DocOpt
+using DataTables
+
 arguments = docopt(doc)
 GPmodel = arguments["<model>"]
 data_dir="../"
 module TempModel
+    data_dir="../"
     using TimeSeries
-    using DataFrames
+    using DataTables
+    using DataTables: by
     using GaussianProcesses
     using Proj4
     using GaussianProcesses: set_params!

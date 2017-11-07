@@ -1,6 +1,6 @@
 using Base.Dates: Day, Hour
 
-function prep_data(nearby_pred::NearbyPrediction, TnTx::DataFrame, 
+function prep_data(nearby_pred::NearbyPrediction, TnTx::DataTable, 
                 date_start::Date, hr_measure::Hour, impute_window::Day)
     #=window_start = DateTime(date_start) + hr_measure - Day(1)=#
     #=window_end = window_start + impute_window=#

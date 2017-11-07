@@ -40,8 +40,11 @@ function read_isdList(;data_dir::String=".")
 end
 function add_ts_hours!(df::DataTable)
     # timestamps in hours
-    ms_per_hour = 1e3*3600
-    ts_vec = convert(Vector{Float64}, df[:ts].values.-get(minimum(df[:ts]))) / ms_per_hour
+    ts_vals = df[:ts].values
+    min_dt = minimum(ts_vals)
+    ms_per_hour = convert(Millisecond, Hour(1))
+    g_hours_from_min = (dt) -> convert(Millisecond, dt - min_dt) / ms_per_hour
+    ts_vec = g_hours_from_min.(ts_vals)
     df[:ts_hours] = ts_vec
     return df
 end

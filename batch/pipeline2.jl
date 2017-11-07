@@ -5,11 +5,11 @@ start_date = Date(2015,1,1) + (parse(Int, njob_str)-1)*inc_days
 hr_measure = Hour(parse(Int, hr_str))
 
 using Stan
-using DataFrames
+using DataTables
 using GaussianProcesses
 using Proj4
 using PDMats: PDMat
-using DataFrames: head
+using DataTables: head
 using JLD
 using GaussianProcesses: SumKernel
 
@@ -28,11 +28,11 @@ TnTx = test_data(hourly_cat, itest, Hour(17))
 
 module pred
     using PDMats: PDMat
-    using DataFrames
+    using DataTables
     using GaussianProcesses: GP, Kernel, MeanZero, predict
     using Base.Dates: Day, Hour
     using Stan
-    using DataFrames: DataFrame, by
+    using DataTables: DataTable, by
 
     include("../src/utils.jl")
     include("../src/predict_from_nearby.jl")
