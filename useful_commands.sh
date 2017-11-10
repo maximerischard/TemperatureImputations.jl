@@ -13,6 +13,16 @@ latexmk -bibtex -pdf TemperatureImputations
 
 # pipeline1.jl
 srun -p interact --pty --mem 4000 -n 4 -N 1 -t 0-9:00 /bin/bash
-module load gcc/7.1.0-fasrc01 julia/0.6.0-fasrc01
+
+module load gcc/7.1.0-fasrc01 
+module load julia/0.6.0-fasrc01
+module load OpenBLAS/0.2.18-fasrc01
+module load git/2.1.0-fasrc01
+
 cd /n/regal/pillai_lab/mrischard/temperature_model/batch/
 julia pipeline1.jl simpler
+
+# pipeline2
+
+sbatch /n/regal/pillai_lab/mrischard/temperature_model/batch/pipeline2_simpler.slurm
+julia batch/pipeline2.jl /n/regal/pillai_lab/mrischard/temperature_model/saved ${SLURM_ARRAY_TASK_ID} simpler
