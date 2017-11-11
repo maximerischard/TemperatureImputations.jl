@@ -1,6 +1,6 @@
 using DataTables
 using CSV
-using Base.Dates: Hour, Day, Date
+using Base.Dates: Hour, Day, Millisecond, Date
 
 function read_station(usaf::Int, wban::Int, id::Int; data_dir::String=".")
     fn = @sprintf("%d.%d.processed.2015.2015.csv", usaf, wban)
@@ -28,7 +28,7 @@ function read_station(usaf::Int, wban::Int, id::Int; data_dir::String=".")
 end
 function read_isdList(;data_dir::String=".")
     # Read stations data
-    isdList = CSV.read(join((data_dir,"/isdList.csv")), DataTable)
+    isdList = CSV.read(joinpath(data_dir,"isdList.csv"), DataTable)
 
     # Project onto Euclidean plane
     epsg=Proj4.Projection(Proj4.epsg[2794])
@@ -63,7 +63,7 @@ function test_data(hourly::DataTable, istation::Int, hr_measure::Hour)
         Tx=maximum(df[:temp].values),
         Tn_time=df[:ts].values[indmin(df[:temp].values)],
         Tx_time=df[:ts].values[indmax(df[:temp].values)],
-        times_p_day=nrow(df),
+        times_p_day=DataTables.nrow(df),
     ))
     return TnTx
 end
