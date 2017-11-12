@@ -4,7 +4,7 @@ using Base.Dates: Hour, Day, Millisecond, Date
 
 function read_station(usaf::Int, wban::Int, id::Int; data_dir::String=".")
     fn = @sprintf("%d.%d.processed.2015.2015.csv", usaf, wban)
-    station_data = CSV.read(join((data_dir, "/data2015/",fn)), DataTable,
+    station_data = CSV.read(joinpath(data_dir, "data2015", fn), DataTable,
                             datarow=1,
                             header=[:year, :month, :day, :hour, :min, :seconds, :temp])
     station_data[:temp][isnan.(station_data[:temp].values)].isnull[:] = true

@@ -28,9 +28,9 @@ using GaussianProcesses: SumKernel
 stan_days = Day(9)
 stan_increment = Day(3)
 
-root_dir = "../"
-include(root_dir*"src/utils.jl")
-include(root_dir*"src/preprocessing.jl")
+root_dir = ".."
+include(joinpath(root_dir,"src/utils.jl"))
+include(joinpath(root_dir,"src/preprocessing.jl"))
 
 isdList=read_isdList(;data_dir=root_dir)
 isdSubset=isdList[[(usaf in (725450,725460,725480,725485)) for usaf in isdList[:USAF].values],:]
@@ -44,7 +44,7 @@ hr_measure = Hour(17)
 TnTx = test_data(hourly_cat, itest, hr_measure)
 
 module TempModel
-    root_dir = "../"
+    root_dir = ".."
     using PDMats
     using PDMats: PDMat
     using Mamba
@@ -56,9 +56,9 @@ module TempModel
     using DataTables: by
     using GaussianProcesses
 
-    include(root_dir*"src/utils.jl")
-    include(root_dir*"src/predict_from_nearby.jl")
-    include(root_dir*"src/stan_impute.jl")
+    include(joinpath(root_dir, "src/utils.jl"))
+    include(joinpath(root_dir, "src/predict_from_nearby.jl"))
+    include(joinpath(root_dir, "src/stan_impute.jl"))
 end
 
 type FittingWindow

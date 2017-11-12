@@ -7,9 +7,10 @@
 #SBATCH -N 1                 # All cores on one machine
 #SBATCH --mail-type=ALL      #Type of email notification- BEGIN,END,FAIL,ALL
 #SBATCH --mail-user=mrischard@g.harvard.edu
-#SBATCH --array 1-119
+#SBATCH --array 1-122
 
 source ~/julia_modules.sh
-cd /n/regal/pillai_lab/mrischard/temperature_model/
-julia batch/pipeline2.jl /n/regal/pillai_lab/mrischard/temperature_model/saved ${SLURM_ARRAY_TASK_ID} simpler
+# module load cmdstan/2.12.0-fasrc01
+cd /n/regal/pillai_lab/mrischard/temperature_model/batch
+julia pipeline2.jl /n/regal/pillai_lab/mrischard/temperature_model/saved ${SLURM_ARRAY_TASK_ID} simpler
 

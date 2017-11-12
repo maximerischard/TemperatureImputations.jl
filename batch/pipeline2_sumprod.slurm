@@ -10,6 +10,6 @@
 #SBATCH --array 1-122
 
 source ~/julia_modules.sh
-cd /n/regal/pillai_lab/mrischard/temperature_model/
+cd /n/regal/pillai_lab/mrischard/temperature_model/batch
 julia pipeline2.jl /n/regal/pillai_lab/mrischard/temperature_model/saved ${SLURM_ARRAY_TASK_ID} sumprod
 

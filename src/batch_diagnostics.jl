@@ -12,7 +12,7 @@ import Mamba
 using JLD
 using Distances
 using DataTables: by, head
-using Dates: tonext, Hour, Day
+using Base.Dates: tonext, Hour, Day
 
 function subset(df, from, to; closed_start=true, closed_end=true)
     ts = df[:ts].values
