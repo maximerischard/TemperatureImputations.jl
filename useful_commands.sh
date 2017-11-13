@@ -5,6 +5,11 @@ rsync --verbose --human-readable --progress --archive --compress --delete \
 # rsync just stan samples
 rsync --verbose --human-readable --progress --archive --compress --delete \
     ody:/n/regal/pillai_lab/mrischard/temperature_model/saved/stan_fit/ /Volumes/Samsung250GB/temperature_model/saved/stan_fit
+# or
+rsync --verbose --human-readable --progress --archive --compress \
+    ody:/n/regal/pillai_lab/mrischard/temperature_model/saved/stan_fit/ /Volumes/Samsung250GB/temperature_model/saved/stan_fit
+
+# note: --delete means “delete extraneous files from dest dirs”
 
 # render PDF
 source ~/bin/venv_nbconvert/bin/activate
@@ -34,3 +39,23 @@ sbatch /n/regal/pillai_lab/mrischard/temperature_model/batch/pipeline2_simpler.s
 # other than that, I'm using the downloaded binaries of stan 2.17.0 rather than the cmdstan module available on odyssey
 CC=g++
 CXX=g++
+
+# backup
+rsync -av /n/regal/pillai_lab/mrischard/julia_lib/ ~/julia_lib
+
+
+
+
+# pipeline_hr
+module load gcc/7.1.0-fasrc01 
+module load julia/0.6.0-fasrc01
+module load OpenBLAS/0.2.18-fasrc01
+
+cd /n/regal/pillai_lab/mrischard/temperature_model/batch/
+julia pipeline_hr.jl /n/regal/pillai_lab/mrischard/temperature_model/saved 42 simpler 17 5
+
+cd ~/logs/
+for hr in {0..23}
+do
+  sbatch /n/regal/pillai_lab/mrischard/temperature_model/batch/pipeline_hr.slurm simpler $hr
+done
