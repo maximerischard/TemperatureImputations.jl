@@ -18,11 +18,19 @@ module load gcc/7.1.0-fasrc01
 module load julia/0.6.0-fasrc01
 module load OpenBLAS/0.2.18-fasrc01
 module load git/2.1.0-fasrc01
+# module load cmdstan/2.12.0-fasrc01
 
 cd /n/regal/pillai_lab/mrischard/temperature_model/batch/
 julia pipeline1.jl simpler
 
 # pipeline2
-
+cd /n/regal/pillai_lab/mrischard/temperature_model/batch/
+julia pipeline2.jl /n/regal/pillai_lab/mrischard/temperature_model/saved ${SLURM_ARRAY_TASK_ID} simpler
+cd ~/logs/
 sbatch /n/regal/pillai_lab/mrischard/temperature_model/batch/pipeline2_simpler.slurm
-julia batch/pipeline2.jl /n/regal/pillai_lab/mrischard/temperature_model/saved ${SLURM_ARRAY_TASK_ID} simpler
+
+# Stan on Odyssey
+# had to edit make/local to prevent stan from trying to use clang++ (which isn't available on odyssey)
+# other than that, I'm using the downloaded binaries of stan 2.17.0 rather than the cmdstan module available on odyssey
+CC=g++
+CXX=g++
