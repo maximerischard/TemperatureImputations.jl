@@ -11,10 +11,10 @@ doc = """
 using DocOpt
 
 using Stan
-using DataFrames
+using DataTables
+using DataTables: head
 using GaussianProcesses
 using PDMats: PDMat
-using DataFrames: head
 using Base.Dates: Day, Hour
 using JLD
 using GaussianProcesses: SumKernel
@@ -28,24 +28,28 @@ GPmodel = arguments["<model>"]
 hr_measure_true = Hour(parse(Int, arguments["<hr_measure_true>"]))
 hr_measure_fals = Hour(parse(Int, arguments["<hr_measure_fals>"]))
 
+root_dir = ".."
 
 stan_days = Day(9)
 stan_increment = Day(3)
 
 module TempModel
-    using PDMats: PDMat
-    using DataFrames
+    root_dir = ".."
+    using PDMats
+    using DataTables
     using Mamba
-    using GaussianProcesses: GP, Kernel, MeanZero, predict
     using Base.Dates: Day, Hour
     using Stan
-    using DataFrames: DataFrame, by
     using Proj4
+    using DataTables: DataTable, by
+    using DataTables
+    using DataTables: by
+    using GaussianProcesses
 
-    include("src/utils.jl")
-    include("src/preprocessing.jl")
-    include("src/predict_from_nearby.jl")
-    include("src/stan_impute.jl")
+    include(joinpath(root_dir, "src/utils.jl"))
+    include(joinpath(root_dir, "src/preprocessing.jl"))
+    include(joinpath(root_dir, "src/predict_from_nearby.jl"))
+    include(joinpath(root_dir, "src/stan_impute.jl"))
 end
 
 type FittingWindow
@@ -58,10 +62,10 @@ function predictions_fname(usaf::Int, fw::FittingWindow)
                     usaf, fw.start_date, fw.end_date)
 end
 
-isdList=TempModel.read_isdList()
+isdList=TempModel.read_isdList(;data_dir=root_dir)
 isdSubset=isdList[[(usaf in (725450,725460,725480,725485)) for usaf in isdList[:USAF].values],:]
 
-hourly_cat=TempModel.read_Stations(isdSubset)
+hourly_cat=TempModel.read_Stations(isdSubset; data_dir=root_dir)
 itest=3
 test_usaf=get(isdSubset[itest,:USAF])
 
@@ -132,22 +136,29 @@ nearby_pred=load(joinpath(saved_dir,
                 ))["nearby_pred"];
 
 imputation_data, ts_window = TempModel.prep_data(nearby_pred, TnTx_fals, stan_window.start_date, hr_measure_fals, stan_days)
-imputation_model = TempModel.get_imputation_model();
 
 function stan_dirname(usaf::Int, fw::FittingWindow)
     return @sprintf("%d_%s_to_%s/", 
                     usaf, fw.start_date, fw.end_date)
 end
-
 stan_dir = joinpath(saved_dir,"hr_measure", GPmodel, string(Int(hr_measure_fals)), stan_dirname(test_usaf, stan_window))
 if !isdir(stan_dir)
     mkpath(stan_dir)
 end
 
-writecsv(joinpath(stan_dir,"timestamps.csv"), ts_window'')
+imputation_model = TempModel.get_imputation_model(; pdir=stan_dir)
+for fname in readdir(joinpath(stan_dir, "tmp"))
+    mv(joinpath(stan_dir, "tmp", fname), joinpath(stan_dir, fname); remove_destination=true)
+end
+rm(joinpath(stan_dir, "tmp"))
 
-for fname in ("imputation","imputation_build.log","imputation_run.log","imputation.hpp","imputation.stan")
-    file_path = joinpath(saved_dir,"../tmp/",fname)
+
+
+writecsv(joinpath(stan_dir,"timestamps.csv"), reshape(ts_window, length(ts_window), 1))
+
+for fname in ("imputation","imputation_build.log","imputation_run.log","imputation.hpp")
+    tmpdir = joinpath(saved_dir, "..", "tmp")
+    file_path = joinpath(tmpdir, fname)
     if isfile(file_path)
         cp(file_path, joinpath(stan_dir,fname), remove_destination=true)
     else
