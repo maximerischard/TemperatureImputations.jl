@@ -9,6 +9,10 @@ rsync --verbose --human-readable --progress --archive --compress --delete \
 rsync --verbose --human-readable --progress --archive --compress \
     ody:/n/regal/pillai_lab/mrischard/temperature_model/saved/stan_fit/ /Volumes/Samsung250GB/temperature_model/saved/stan_fit
 
+# rsync just stan samples for hour measurement
+rsync --verbose --human-readable --progress --archive --compress \
+    ody:/n/regal/pillai_lab/mrischard/temperature_model/saved/hr_measure/ /Volumes/Samsung250GB/temperature_model/saved/hr_measure
+
 # note: --delete means “delete extraneous files from dest dirs”
 
 # render PDF
@@ -17,7 +21,7 @@ jupyter nbconvert --to latex --template nocode.tplx TemperatureImputations.ipynb
 latexmk -bibtex -pdf TemperatureImputations
 
 # pipeline1.jl
-srun -p interact --pty --mem 4000 -n 4 -N 1 -t 0-9:00 /bin/bash
+srun -p test --pty --mem 4000 -n 4 -N 1 -t 0-9:00 /bin/bash
 
 module load gcc/7.1.0-fasrc01 
 module load julia/0.6.0-fasrc01
@@ -44,6 +48,10 @@ CXX=g++
 rsync -av /n/regal/pillai_lab/mrischard/julia_lib/ ~/julia_lib
 
 
+# LaTeX
+source ~/bin/venv_nbconvert/bin/activate
+jupyter nbconvert --to latex --template nocode.tplx TemperatureImputations.ipynb
+latexmk -bibtex -pdf TemperatureImputations
 
 
 # pipeline_hr
