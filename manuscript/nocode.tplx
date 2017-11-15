@@ -29,7 +29,7 @@
 \makeatother
 \let\Oldincludegraphics\includegraphics
 % Set max figure width to be 80% of text width, for now hardcoded.
-\renewcommand{\includegraphics}[1]{\Oldincludegraphics[width=.8\maxwidth]{#1}}
+\renewcommand{\includegraphics}[1]{\Oldincludegraphics[width=0.98\maxwidth]{#1}}
 % Ensure that by default, figures have no caption (until we provide a
 % proper Figure object with a Caption API and a way to capture that
 % in the conversion process - todo).
@@ -112,7 +112,7 @@
    \DeclareMathOperator*{\softmin}{smoothmin}
 
    \DeclareMathOperator{\kSESE}{k_{\mathtt{SExSE}}}
-   \DeclareMathOperator{\kdiurn}{k_{\mathtt{SESE_24}}}
+   \DeclareMathOperator{\kdiurn}{k_{\mathtt{SESE_{24}}}}
    \DeclareMathOperator{\ksumprod}{k_{\mathtt{sumprod}}}
    \newcommand{\iday}{\mathtt{day}}
    \newcommand{\dayset}[1]{\cbr{i}_{#1}}
