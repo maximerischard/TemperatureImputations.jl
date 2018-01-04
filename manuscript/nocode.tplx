@@ -67,6 +67,8 @@
 \usepackage{natbib}
 \usepackage{cancel}
 \usepackage{authblk}
+
+\usepackage[doublespacing]{setspace}
 ((* endblock packages *))
 
 ((* block definitions *))
