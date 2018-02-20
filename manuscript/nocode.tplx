@@ -148,28 +148,6 @@
 \affil[**]{National Center for Atmospheric Research}
 ((* endblock author *))
 ((* block abstract *))
-\begin{abstract}
-	Climatological summary statistics based on daily temperature minima and maxima 
-	suffer from bias due to the observation time \cite{baker1975effect}.
-	We develop a novel approach to correcting this bias, by imputing hourly temperatures
-	at the location of the measurements, which can then be used directly for summary purposes.
-	The imputation strategy combines information from the observed minima and maxima,
-	and from nearby meteorlogical stations that record hourly temperatures.
-	A spatio-temporal Gaussian process model allows these two sources of information to be combined.
-	Imputed samples are obtained using the Hamiltonian Monte Carlo algorithm
-	implemented by the Stan probabilistic programming language \cite{stancite}.
-	We develop approximations to the imputation model 
-	that enable the HMC sampler to efficiently draw samples
-	that match the observed minima and maxima,
-	and demonstrate the success of this approach in a simpler example
-	where the imputation distribution is analytically tractable.
-	We further validate our imputation pipeline using hourly temperature data 
-	from four meteorological stations in Iowa,
-	of which one is hidden and the data replaced with daily minima and maxima,
-	and show that the imputed temperatures closely match the hidden temperatures.
-	We also demonstrate that this model and data allow the 
-	time of the daily measurements itself to be inferred.
-\end{abstract}
 ((* endblock abstract *))
 
 % Render markdown
