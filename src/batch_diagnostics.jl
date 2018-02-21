@@ -1,6 +1,6 @@
 import Base.+
 using TimeSeries
-using DataTables
+using DataFrames
 using GaussianProcesses
 using GaussianProcesses: Mean, Kernel, evaluate, metric, IsotropicData, VecF64
 using GaussianProcesses: Stationary, KernelData, MatF64, predict
@@ -8,10 +8,11 @@ import GaussianProcesses: optimize!, get_optim_target, cov, grad_slice!
 import GaussianProcesses: num_params, set_params!, get_params, update_mll!, update_mll_and_dmll!
 import GaussianProcesses: get_param_names, cov!, addcov!, multcov!
 import Proj4
-import Mamba
+import PDMats
+# import Mamba
 using JLD
 using Distances
-using DataTables: by, head
+using DataFrames: by, head
 using Base.Dates: tonext, Hour, Day
 
 function subset(df, from, to; closed_start=true, closed_end=true)
@@ -88,12 +89,12 @@ function stan_dirname(usaf::Int, fw::FittingWindow)
                     usaf, fw.start_date, fw.end_date)
 end
 
-function get_test_fw(test::DataTable, fw::FittingWindow)
+function get_test_fw(test::DataFrame, fw::FittingWindow)
     ts = test[:ts].values
     in_window = [(fw.start_date <= TempModel.measurement_date(t, hr_measure) <= fw.end_date-Day(1)) for t in ts]
     return test[in_window,:]
 end
-function arg_test_fw(test::DataTable, fw::FittingWindow)
+function arg_test_fw(test::DataFrame, fw::FittingWindow)
     ts = test[:ts].values
     in_window = [(fw.start_date <= TempModel.measurement_date(t, hr_measure) <= fw.end_date-Day(1)) for t in ts]
     return in_window
@@ -125,7 +126,8 @@ function get_chains_and_ts(fw::FittingWindow, GPmodel::AbstractString)
     end
 
     samples = cat(3, all_samples...)
-    chains = Mamba.Chains(samples; start=1, thin=1, chains=[i for i in 1:4], names=vec(header))
+    # chains = Mamba.Chains(samples; start=1, thin=1, chains=[i for i in 1:4], names=vec(header))
+    chains = DataFrames(samples, names=vec(header))
     
     ts_string = readcsv(joinpath(stan_model_dir, stan_fw_dir, "timestamps.csv"), String; header=false)
     ts = [DateTime(s, "yyyy-mm-ddTHH:MM:SS") for s in vec(ts_string)]
@@ -134,9 +136,14 @@ end
 
 # convenience function to extract the imputed temperatures
 # from the Mamba Chains object
-function get_temperatures_reparam(chains::Mamba.Chains)
-    temp_varnames = [h for h in chains.names if startswith(h, "temp_impt.")]
-    temp_samples=getindex(chains, :, temp_varnames, :).value
+# function get_temperatures_reparam(chains::Mamba.Chains)
+    # temp_varnames = [h for h in chains.names if startswith(h, "temp_impt.")]
+    # temp_samples=getindex(chains, :, temp_varnames, :).value
+    # return temp_samples
+# end
+function get_temperatures_reparam(chains::DataFrame)
+    temp_varnames = [h for h in names(chains) if startswith(h, "temp_impt.")]
+    temp_samples=getindex(chains, :, temp_varnames, :)
     return temp_samples
 end
 
@@ -166,7 +173,7 @@ type ImputationDiagnostic
 end
 EVarError(diag::ImputationDiagnostic) = diag.sumEVarError / diag.n
 mse(diag::ImputationDiagnostic) = diag.sumSE / diag.n
-function ImputationDiagnostic(temp_impute::Array{Float64,3}, test_truth::DataTable)
+function ImputationDiagnostic(temp_impute::Array{Float64,3}, test_truth::DataFrame)
     stacked_impute=vcat((temp_impute[:,:,i] for i in 1:size(temp_impute,3))...)
     temp_true = test_truth[:temp].values
     ts = test_subsubset[:ts].values

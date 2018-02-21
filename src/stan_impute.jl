@@ -1,6 +1,6 @@
 using Base.Dates: Day, Hour
 
-function prep_data(nearby_pred::NearbyPrediction, TnTx::DataTable, 
+function prep_data(nearby_pred::NearbyPrediction, TnTx::DataFrame, 
                 date_start::Date, hr_measure::Hour, impute_window::Day)
     #=window_start = DateTime(date_start) + hr_measure - Day(1)=#
     #=window_end = window_start + impute_window=#
@@ -99,12 +99,17 @@ function get_imputation_model(; pdir=pwd())
     return stanmodel
 end
 
-"""
- convenience function to extract the imputed temperatures
- from the STAN model object
-"""
-function get_temperatures(sim::Mamba.Chains)
-    temp_varnames=[@sprintf("temp_impt.%d", i) for i in 1:imputation_data["Nimpt"]]
-    temp_samples=getindex(sim, :, temp_varnames, :).value
+# """
+ # convenience function to extract the imputed temperatures
+ # from the STAN model object
+# """
+# function get_temperatures(sim::Mamba.Chains)
+    # temp_varnames=[@sprintf("temp_impt.%d", i) for i in 1:imputation_data["Nimpt"]]
+    # temp_samples=getindex(sim, :, temp_varnames, :).value
+    # return temp_samples
+# end
+function get_temperatures_reparam(chains::DataFrame)
+    temp_varnames = [h for h in names(chains) if startswith(h, "temp_impt.")]
+    temp_samples=getindex(chains, :, temp_varnames, :)
     return temp_samples
 end

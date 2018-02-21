@@ -21,15 +21,15 @@ function add_diag!(Σ::PDMats.PDMat, a::Float64)
     return Σ
 end
 
-function predict_from_nearby(hourly_data::DataTable, stationDF::DataTable, 
+function predict_from_nearby(hourly_data::DataFrame, stationDF::DataFrame, 
         k::Kernel, logNoise::Float64, 
         target::Int, from::DateTime, to::DateTime)
     hourly_train = hourly_data[hourly_data[:station].values.!=target,:]
     hourly_test  = hourly_data[hourly_data[:station].values.==target,:]
 
     train_subset = subset(hourly_train,from,to)
-    avgtemp=DataTables.by(train_subset, :station, 
-               df->DataTable(avgtemp=mean(df[:temp].values)))
+    avgtemp=DataFrames.by(train_subset, :station, 
+               df->DataFrame(avgtemp=mean(df[:temp].values)))
     train_subset = join(train_subset, avgtemp, on=:station)
 
     train_X_PRJ = stationDF[:X_PRJ].values[train_subset[:station].values]

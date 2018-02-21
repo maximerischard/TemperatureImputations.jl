@@ -21,7 +21,7 @@ function plot_imputations(ts, temp_impute; impt_indices=[250])
     plt.plot(ts, μ, color=colour_pred_tntx, linewidth=3, 
              label=L"$\mathrm{T}_\mathrm{miss} \mid \mathrm{T}_\mathrm{nearby}, \mathrm{T}_{n}, \mathrm{T}_{x}$")
 end
-function plot_truth(test::DataTable, window::FittingWindow; tntx::Bool=false, markersize=5)
+function plot_truth(test::DataFrame, window::FittingWindow; tntx::Bool=false, markersize=5)
     test_window = get_test_fw(test, window)
     ts = test_window[:ts].values
     temp = test_window[:temp].values

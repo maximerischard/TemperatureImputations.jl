@@ -2,7 +2,7 @@ module TempModel
     using GaussianProcesses
     using PDMats
     using Optim
-    using Mamba
+    # using Mamba
     using Stan
     import Proj4
     include("GPrealisations.jl")
