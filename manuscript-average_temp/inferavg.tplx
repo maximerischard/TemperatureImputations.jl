@@ -150,7 +150,7 @@
 ((* block author *))
 \author[*]{Maxime Rischard}
 \affil[*]{Department of Statistics, Harvard University}
-\affil[**]{National Center for Atmospheric Research}
+% \affil[**]{National Center for Atmospheric Research}
 ((* endblock author *))
 ((* block abstract *))
 ((* endblock abstract *))
@@ -167,7 +167,6 @@
 ((* endblock markdowncell *))
 ((* block predoc *))
     ((( super() )))
-	\tableofcontents
 ((* endblock predoc *))
 ((*- block figure scoped -*))
 	\begin{figure}[tbh]
