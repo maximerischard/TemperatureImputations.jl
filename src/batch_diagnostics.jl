@@ -12,6 +12,7 @@ import PDMats
 # import Mamba
 using JLD
 using Distances
+using AxisArrays
 using DataFrames: by, head
 using Base.Dates: tonext, Hour, Day
 
@@ -54,9 +55,9 @@ function predictions_fname(usaf::Int, fw::FittingWindow)
                     usaf, fw.start_date, fw.end_date)
 end
 
-function get_nearby(fw::FittingWindow, GPmodel::AbstractString)
+function get_nearby(fw::FittingWindow, GPmodel::AbstractString, usaf::Int)
     saved_dir = joinpath(SAVED_DIR, "predictions_from_nearby", GPmodel)
-    pred_fname = predictions_fname(test_usaf, fw)
+    pred_fname = predictions_fname(usaf, fw)
     nearby_pred=load(joinpath(saved_dir, pred_fname))["nearby_pred"]
 end
 
@@ -110,8 +111,22 @@ function window_center(fw::FittingWindow, increment::Day)
     return FittingWindow(fw.start_date+increment,fw.end_date-increment)
 end
 
-function get_chains_and_ts(fw::FittingWindow, GPmodel::AbstractString)
-    stan_fw_dir = stan_dirname(test_usaf, fw)
+function Chains(samples::AbstractArray{Float64, 3}, names::AbstractVector{AbstractString})
+    nsamples, ncol, nchains = size(samples)
+    chains = AxisArray(samples, Axis{:sample}(1:nsamples), Axis{:param}(names), Axis{:chain}(1:nchains))
+    return chains
+end
+
+function read_ts(fw::FittingWindow, GPmodel::AbstractString, usaf::Int)
+    stan_fw_dir = stan_dirname(usaf, fw)
+    stan_model_dir = joinpath(SAVED_DIR, "stan_fit", GPmodel)
+    stan_window_files = readdir(joinpath(stan_model_dir, stan_fw_dir))
+    ts_string = readcsv(joinpath(stan_model_dir, stan_fw_dir, "timestamps.csv"), String; header=false)
+    ts = [DateTime(s, "yyyy-mm-ddTHH:MM:SS") for s in vec(ts_string)]
+    return ts
+end
+function get_chains_and_ts(fw::FittingWindow, GPmodel::AbstractString, usaf::Int)
+    stan_fw_dir = stan_dirname(usaf, fw)
     stan_model_dir = joinpath(SAVED_DIR, "stan_fit", GPmodel)
     stan_window_files = readdir(joinpath(stan_model_dir, stan_fw_dir))
     samplefiles = [joinpath(stan_model_dir, stan_fw_dir, f) for 
@@ -119,7 +134,7 @@ function get_chains_and_ts(fw::FittingWindow, GPmodel::AbstractString)
         (startswith(f,"imputation_samples") &
         endswith(f,".csv"))]
     header=String[]
-    all_samples=[]
+    all_samples=Matrix{Float64}[]
     for sf in samplefiles
         samples, header = readcsv(sf, Float64; header=true)
         push!(all_samples, samples)
@@ -127,10 +142,9 @@ function get_chains_and_ts(fw::FittingWindow, GPmodel::AbstractString)
 
     samples = cat(3, all_samples...)
     # chains = Mamba.Chains(samples; start=1, thin=1, chains=[i for i in 1:4], names=vec(header))
-    chains = DataFrames(samples, names=vec(header))
+    chains = Chains(samples, vec(header))
     
-    ts_string = readcsv(joinpath(stan_model_dir, stan_fw_dir, "timestamps.csv"), String; header=false)
-    ts = [DateTime(s, "yyyy-mm-ddTHH:MM:SS") for s in vec(ts_string)]
+    ts = read_ts(fw, GPmodel, usaf)
     return chains, ts
 end
 
@@ -144,6 +158,21 @@ end
 function get_temperatures_reparam(chains::DataFrame)
     temp_varnames = [h for h in names(chains) if startswith(h, "temp_impt.")]
     temp_samples=getindex(chains, :, temp_varnames, :)
+    return temp_samples
+end
+function get_param_names(chains::AxisArray)
+    # there should be a more elegant way to obtain the names of an axis
+    PARAM = Axis{:param}
+    jparam = axisdim(chains, PARAM)
+    param_axis = axes(chains)[jparam]
+    param_names = axisvalues(param_axis)[1]
+    return param_names
+end
+function get_temperatures_reparam(chains::AxisArray)
+    # next 4 lines: tedious way to get names of parameters
+    param_names = get_param_names(chains)
+    temp_varnames = [h for h in param_names if startswith(h, "temp_impt.")]
+    temp_samples = view(chains, :, Axis{:param}(temp_varnames), :)
     return temp_samples
 end
 
