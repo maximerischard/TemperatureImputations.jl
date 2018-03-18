@@ -133,7 +133,7 @@
    \newcommand{\window}{\mathtt{win}}
    \DeclareMathOperator{\buffer}{\mathtt{buff}}
    \newcommand{\best}{\mathtt{best}}
-   \DeclareMathOperator{\timespan}{\Delta}
+   \DeclareMathOperator{\timespan}{\mathnormal{\Delta}}
 
 	\providecommand{\tightlist}{%
   	  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
@@ -144,7 +144,7 @@
 
 ((* block title *))
 	\title{
-		Bias correction in daily maximum and minimum temperature measurements through Gaussian process modeling
+		Imputing average temperatur
 		}
 ((* endblock title *))
 ((* block author *))
