@@ -360,28 +360,16 @@
     \begin{document}
     
     
-    
-    \maketitle
-    
+   \maketitle
+   % \tableofcontents
 
-    
-	\tableofcontents
-
-
-    
-
-
-
-
-
-
-        \begin{abstract}
-
-It is long known that climatological summary statistics based on daily temperature minima and maxima suffer from bias due to the observation time.
-We develop a novel approach to addressing this problem, by imputing hourly temperatures
-at the location of the measurements, which can then be used directly for summary purposes.
-We develop a spatio-temporal Gaussian process model to combine information from the observed minima and maxima, and from nearby stations that record hourly temperatures.
-To efficiently impute the hourly temperatures from our model, we develop a novel MCMC algorithm.
+ \begin{abstract}
+The Global Historical Climatology Network-Daily database contains, among other variables, daily maximum and minimum temperatures from weather stations around the globe.
+It is long known that climatological summary statistics based on daily temperature minima and maxima will not be accurate, if the bias due to the time at which the observations were collected is not accounted for. Despite a lot of work, to our knowledge, there does not exist a satisfactory solution to this important problem.
+In this paper, we carefully detail the problem and develop a novel approach to address it. Our idea is to impute the hourly temperatures
+at the location of the measurements by borrowing information from the nearby stations that record hourly temperatures, which then can be used to create accurate summaries of temperature extremes.
+The key difficulty is that these imputations of the temperature curves must satisfy the constraint of falling between the observed daily minima and maxima, and attaining those values at least once in a twenty-four hour period.
+In this paper, we develop a spatio-temporal Gaussian process model to for imputing the hourly measurements from the nearby stations, and then develop an novel, easy to implement, MCMC algorithm to sample from the posterior distribution satisfying the above constraints. 
 We validate our imputation model using hourly temperature data 
 from four meteorological stations in Iowa,
 of which one is hidden and the data replaced with daily minima and maxima,
@@ -434,7 +422,7 @@ The measured \(\Tx\) therefore overestimates the diurnal cycle's peak by 8.9°C.
 
         \begin{figure}
 \centering
-\includegraphics{../figures/waterloo_triangles.png}
+%\includegraphics{../figures/waterloo_triangles.png}
 \caption{\label{fig:waterloo_triangles}
 An extract of the temperature measurements made at the Waterloo Municipal Airport.
 The blue and red triangles respectively indicate the coldest and warmest temperature of each diurnal cycle.
@@ -450,7 +438,7 @@ Conversely, the average \(\Tn\) is colder by over 1°C if \(\Tn\) is measured at
 
 \begin{figure}
 \centering
-\includegraphics{../figures/waterloo_avgTnTx.png}
+%\includegraphics{../figures/waterloo_avgTnTx.png}
 \caption{\label{fig:waterloo_avgTnTx}
 Mean daily maximum temperature (left)
 and mean daily minimum temperature (right)
@@ -470,7 +458,7 @@ We can see this in Figure \ref{fig:waterloo_meanabsdiff}, where the respective v
 
 \begin{figure}
 \centering
-\includegraphics{../figures/waterloo_meanabsdiff.png}
+%\includegraphics{../figures/waterloo_meanabsdiff.png}
 \caption{\label{fig:waterloo_meanabsdiff}
 Mean absolute daily change in maximum temperature (left)
 and mean absolute daily change in minimum temperature (right)
@@ -478,7 +466,7 @@ extracted from hourly measurements at four Iowa weather stations in 2015
 under varying measurement times (UTC)}
 \end{figure}
     
-
+\end{document}
 
         \subsection{Our approach and proposed solution}\label{our-approach-and-proposed-solution}
     
@@ -1350,8 +1338,10 @@ Roughly speaking, we see that the prior distribution \(F_X\) is stretched to fit
     % Add a bibliography block to the postdoc
     
     
-\bibliographystyle{ametsoc2014}
-\bibliography{temperature_imputations}
+
+%\bibliographystyle{ametsoc2014}
+\bibliographystyle{plain}
+\bibliography{temper}
 
     
     \end{document}
