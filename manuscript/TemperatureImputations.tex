@@ -146,7 +146,7 @@
     \newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.49,0.56,0.16}{{#1}}}
     \newcommand{\InformationTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textbf{\textit{{#1}}}}}
     \newcommand{\WarningTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textbf{\textit{{#1}}}}}
-    
+    \newcommand \tcr[1]{\textcolor{red}{(#1)}}
     
     % Define a nice break command that doesn't care if a line doesn't already
     % exist.
@@ -365,16 +365,16 @@
 
  \begin{abstract}
 The Global Historical Climatology Network-Daily database contains, among other variables, daily maximum and minimum temperatures from weather stations around the globe.
-It is long known that climatological summary statistics based on daily temperature minima and maxima will not be accurate, if the bias due to the time at which the observations were collected is not accounted for. Despite a lot of work, to our knowledge, there does not exist a satisfactory solution to this important problem.
+It is long known that climatological summary statistics based on daily temperature minima and maxima will not be accurate, if the bias due to the time at which the observations were collected is not accounted for. Despite some previous work, to our knowledge, there does not exist a satisfactory solution to this important problem.
 In this paper, we carefully detail the problem and develop a novel approach to address it. Our idea is to impute the hourly temperatures
 at the location of the measurements by borrowing information from the nearby stations that record hourly temperatures, which then can be used to create accurate summaries of temperature extremes.
 The key difficulty is that these imputations of the temperature curves must satisfy the constraint of falling between the observed daily minima and maxima, and attaining those values at least once in a twenty-four hour period.
-In this paper, we develop a spatio-temporal Gaussian process model to for imputing the hourly measurements from the nearby stations, and then develop an novel, easy to implement, MCMC algorithm to sample from the posterior distribution satisfying the above constraints. 
+We develop a spatiotemporal Gaussian process model for imputing the hourly measurements from the nearby stations, and then develop a novel, easy to implement, MCMC technique to sample from the posterior distribution satisfying the above constraints. 
 We validate our imputation model using hourly temperature data 
 from four meteorological stations in Iowa,
 of which one is hidden and the data replaced with daily minima and maxima,
 and show that the imputed temperatures closely match the hidden temperatures.
-We also demonstrate that our model can exploit information contained in the data to infer the time of daily measurements.
+We also demonstrate that our model can exploit information contained in the data to infer the time of daily measurements. 
 
 \end{abstract}
     
@@ -383,7 +383,7 @@ We also demonstrate that our model can exploit information contained in the data
         \section{Introduction}\label{introduction}
     
 
-Long, high-quality records of temperature provide an important basis for our understanding of climate variability and change. Historically, there has been a focus on monthly-average temperature records, which are sufficient for certain analyses, such as quantifying long-term changes in temperature. As our knowledge of climate change expands, however, there is increasing interest in understanding changes in temperature on shorter timescales, with a particular focus on extreme events. To do so, it is necessary to utilize higher-resolution temperature data. 
+Long, high-quality records of temperature provide an important basis for our understanding of climate variability and change. Historically, there has been a focus on monthly-average temperature records that are sufficient for certain analyses, such as quantifying long-term changes in temperature. As our knowledge of climate change expands, however, there is increasing interest in understanding changes in temperature on shorter timescales, with a particular focus on extreme events. To do so, it is necessary to utilize higher-resolution temperature data. 
 
 Recent work has led to the development of the Global Historical Climatology Network-Daily (GHCND) database \citep{menne2012overview}, which contains, among other variables, daily maximum and minimum temperatures from weather stations around the globe. The database draws from a range of different sources, and the data within it undergoes basic quality control to remove erroneous values. 
 
@@ -394,22 +394,17 @@ Homogenization typically proceeds through identifying non-climatic `breakpoints'
 Once a breakpoint is identified, the measurements recorded after the breakpoint are adjusted in some way to reduce or remove the inhomogeneity.
 Most applications of these methods, however, focus on adjusting the mean state of the data rather than the shape of the distribution \citep[see][and references therein]{della2006method}.
 While this may be sufficient for monthly data, it is known that certain changes in measurement practices affect different percentiles of daily temperature in different ways.
-To address this issue, some homogenization methods have also employed percentile matching techniques, wherein the adjustment to a timeseries after a breakpoint is a function of percentile \citep{della2006method, trewin2013daily}. 
+To address this issue, some homogenization methods have also employed percentile matching techniques, wherein the adjustment to a timeseries after a breakpoint is a function of percentile \tcr{percentile of what?} \citep{della2006method, trewin2013daily}. 
 
-In this paper, we focus on addressing the time of observation bias, as well as its time trend, because of its known impact on the distribution of daily maximum and minimum temperature ($\Tx$ and $\Tn$ respectively) measurements.
-The bias exists because $\Tx$ and $\Tn$ are often recorded by an observer who visits a weather station every 24 hours, and notes the maximum and minimum temperatures measured by the thermometer over the previous 24 hours.
-Ideally, the observer would visit the station at midnight, and the highest and lowest temperatures over the past 24 hours would typically be representative of the high and low during the prior day.
-For convenience, however, most observers record data at a daytime hour instead.
-As can be seen in Fig.~\ref{fig:waterloo_triangles}, measurements recorded in the early morning may not properly register the low of the night before if it was unusually warm. Similarly, measurements recorded in the late afternoon may not properly register the high of the prior day if it was usually cool. In both cases, this will lead to a reduction in the variance of $\Tx$ and $\Tn$ distributions, but the effect will be greater at low (high) percentiles for $\Tx$ ($\Tn$). 
-
-If the time of observation remained constant over time, the bias would still exist, but it would not be linked to spurious trends in the data. However, there have been known (and likely unknown) changes in the time of observation.
-In the United States, for example, observers were instructed to switch from recording data in the afternoon to recording data in the morning beginning in the 1950s.
-This change has led to an apparent decrease in both $\Tx$ and $\Tn$ over time \citep{menne2009us}. 
-        \subsection{Illustration of bias induces by measurement hour}\label{illustration-of-bias-induces-by-measurement-hour}
-    
-
+\subsection{The problem} 
 \label{sec:illustrate_bias}
-        We illustrate the measurement bias in daily maxima and minima with ten days of hourly temperature measurements from the Waterloo Municipal Airport station in Iowa.
+%\label{illustration-of-bias-induces-by-measurement-hour}
+Climatologists are interested in studying the variations of the temperature patterns during a 24 hour period, called the diurnal cycle. In this section we illustrate the bias in the measurements of maximum and minimum temperatures ($\Tx$ and $\Tn$ respectively) during a diurnal cycle due to the time at which an observation is recorded during a day.  This bias exists because $\Tx$ and $\Tn$ are often recorded by an observer who visits a weather station every 24 hours, and notes the maximum and minimum temperatures measured by the thermometer over the previous 24 hours.
+Ideally, the observer would visit the station at midnight, and the recorded highest and lowest temperatures over the past 24 hours would typically be representative of the maximum and minimum of the diurnal cycle of the previous day.
+For convenience, however, most observers record data at a daytime hour instead.
+Consequently, the measurements recorded in the early morning may not properly register the low of the night before if it was unusually warm. Similarly, measurements recorded in the late afternoon may not properly register the high of the prior day if it was usually cool. In both cases, this will lead to a reduction in the variance of $\Tx$ and $\Tn$ distributions, but the effect will be greater at low (high) percentiles for $\Tx$ ($\Tn$). 
+
+       Figure \ref{fig:waterloo_triangles} illustrates this bias in daily maxima and minima with ten days of hourly temperature measurements from the Waterloo Municipal Airport station in Iowa.
 Ideally, \(\Tx\) measurements should capture the peak of each diurnal cycle, and \(\Tn\) its trough.
 The actual measurements are obtained by dividing the data into 24 hour measurement windows, and extracting the minimum and maximum.
 On most days, the measurements capture the peak and trough of the diurnal cycle: the triangles and lines coincide.
@@ -417,28 +412,25 @@ But there are also several discrepancies, typically in \(\Tx\) when the measurem
 The most blatant example occurs on April 3rd,
 where the peak of the diurnal cycle is 7.2°C and occurs at 21:00 (all times are in Coordinated Universal Time (UTC), and tick marks are at midnight at the start of each day), but the day's \(\Tx\) record of 16.1°C is reached immediately after the previous day's measurement.
 The measured \(\Tx\) therefore overestimates the diurnal cycle's peak by 8.9°C.
-    
-
-
-        \begin{figure}
+  
+ \begin{figure}[!h]
 \centering
-%\includegraphics{../figures/waterloo_triangles.png}
+\includegraphics{../figures/waterloo_triangles.pdf}
 \caption{\label{fig:waterloo_triangles}
+As can be seen in Fig.~\ref{fig:waterloo_triangles}, measurements recorded in the early morning may not properly register the low of the night before if it was unusually warm. Similarly, measurements recorded in the late afternoon may not properly register the high of the prior day if it was usually cool. In both cases, this will lead to a reduction in the variance of $\Tx$ and $\Tn$ distributions, but the effect will be greater at low (high) percentiles for $\Tx$ ($\Tn$). 
 An extract of the temperature measurements made at the Waterloo Municipal Airport.
 The blue and red triangles respectively indicate the coldest and warmest temperature of each diurnal cycle.
 The blue and red lines respectively denote the observed maximum and temperature recorded each day at 23:00 UTC (top) or 11:00~UTC (bottom) for the 24-hour period preceding the measurement.
 The occasional discrepancies between the 24-hour extrema, and the peaks and troughs of the diurnal cycle, are indicated with dotted lines.}
 \end{figure}
-    
 
-
-        This bias in the daily records can in turn induce bias in the long-term summary statistics that are of climatological interest.
+ This bias in the daily records can in turn induce bias in the long-term summary statistics that are of climatological interest.
 A measure as simple as the average daily maximum temperature for an entire year (2015) increases by over 1°C if the measurements are made at the warmest time of day 21:00 UTC rather than 14:00 UTC (see Figure~\ref{fig:waterloo_avgTnTx}).
 Conversely, the average \(\Tn\) is colder by over 1°C if \(\Tn\) is measured at 10:00 UTC (the coldest time of day on average) rather than 17:00 UTC.
 
 \begin{figure}
 \centering
-%\includegraphics{../figures/waterloo_avgTnTx.png}
+\includegraphics{../figures/waterloo_avgTnTx.pdf}
 \caption{\label{fig:waterloo_avgTnTx}
 Mean daily maximum temperature (left)
 and mean daily minimum temperature (right)
@@ -449,6 +441,13 @@ under varying measurement times (UTC)
     
 
 
+
+If the time of observation remained constant over time, this systematic bias would still exist, but it would not be linked to spurious trends in the data. However, there have been known (and likely unknown) changes in the time of observation.
+In the United States, for example, observers were instructed to switch from recording data in the afternoon to recording data in the morning beginning in the 1950s.
+This change has led to an apparent decrease in both $\Tx$ and $\Tn$ over time \citep{menne2009us}. 
+      %  \subsubsection{Illustration of bias induces by measurement hour}\label
+    
+
         A climatologist studying weather variability might be interested in summary statistics such as the average absolute change in the daily temperature maxima and minima from one day to the next.
 The answer to this question also depends on the time of day at which the temperatures are recorded.
 Collecting the measurements at the hottest time of day means that the peaks on a warm day gets recorded twice,
@@ -458,7 +457,7 @@ We can see this in Figure \ref{fig:waterloo_meanabsdiff}, where the respective v
 
 \begin{figure}
 \centering
-%\includegraphics{../figures/waterloo_meanabsdiff.png}
+\includegraphics{../figures/waterloo_meanabsdiff.pdf}
 \caption{\label{fig:waterloo_meanabsdiff}
 Mean absolute daily change in maximum temperature (left)
 and mean absolute daily change in minimum temperature (right)
@@ -466,7 +465,7 @@ extracted from hourly measurements at four Iowa weather stations in 2015
 under varying measurement times (UTC)}
 \end{figure}
     
-\end{document}
+
 
         \subsection{Our approach and proposed solution}\label{our-approach-and-proposed-solution}
     
@@ -474,22 +473,16 @@ under varying measurement times (UTC)}
 
         The goal of our approach is to infer the true \(\Tx\) and \(\Tn\) values throughout the data records, thereby correcting both the variance biases and the spurious trends.
 This stands in constrast to previous work, which has focused primarily on addressing spurious trends.
-We approach the problem as a missing data problem, wherein we are trying to recover the values of \(\Tx\) and \(\Tn\) that may have been overwritten due to measurement practices. Furthermore, by employing a Gaussian process framework and nearby stations with hourly data, we are able to simulate multiple realizations of temperature timeseries at each station, thereby providing estimates of uncertainty.
-    
-
-
-        Taking the missing data perspective, we seek to impute the hourly temperatures that have been replaced by a maximum and minimum over a 24 hour period.
-To do so, we combine information from two sources: the recorded daily temperature extremes at the station of interest, and also hourly temperatures recorded at nearby meteorological stations.
-These hourly measurements are considered less reliable by climatologists, as they are not as carefully documented, calibrated, and situated.
-The meterological stations are often in locations (like airports) where human activity will affect daily temperatures.
+We approach the problem as a missing data problem, wherein we seek to recover the values of \(\Tx\) and \(\Tn\) that may have been overwritten due to measurement practices. Our idea is to impute the hourly temperatures
+at the location of the measurements by borrowing information from the nearby stations that record hourly temperatures, which then can be used to create accurate summaries of temperature extremes.
+These hourly measurements at neighboring weather stations are considered less reliable by climatologists, as they are not as carefully documented, calibrated, and situated. For instance, weather stations at locations experiencing huge human activity like airports will record higher daily temperatures on average.
 Therefore, summary statistics extracted directly from those measurements would not be directly usable for climatology, as they could suffer from systematic bias.
-However, even if miscalibrated, the meterological data do contain valuable information about the hourly changes in temperatures on any given day.
-We therefore use them to inform the shape of the imputed temperature time-series at our location of interest,
-while we use the recorded temperature extrema to calibrate and constrain them.
-    
+However, even if mis-calibrated, the meteorological data from these nearby stations do contain valuable information about the hourly changes in temperatures on any given day.
 
+In this paper, we develop a spatiotemporal Gaussian process model using the information from nearby stations with hourly data and simulate multiple realizations of hourly temperature time series at each station of interest. The key technical difficulty is that these imputations of the temperature curves must satisfy the constraint of falling between the observed daily minima and maxima, and attaining those values at least once in a twenty-four hour period.
+We develop a novel, easy to implement, MCMC algorithm to sample from the posterior distribution satisfying the above constraints. Our constrained imputations are implemented in the Stan programming language \cite{stancite}; our code is publicly available.\tcr{Maxime: please make sure this is right...}
 
-        \section{A Spatiotemporal Model}\label{a-spatiotemporal-model}
+\section{A Spatiotemporal Model}\label{a-spatiotemporal-model}
 
 To model measured temperatures at various locations and times, we develop a spatio-temporal Gaussian process model.
 In its simplest form, we posit that temperatures from stations that are near each other are more correlated than distant stations, and that those correlations should also decay in time.
@@ -542,7 +535,6 @@ We put weak normal priors on \(\mu_{\station{i}}\) with large standard deviation
 0 &\text{otherwise}\,.
 \end{cases}
 \end{equation}
-
 added to the covariance function.
 The spatio-temporal covariance function becomes
 
@@ -556,18 +548,15 @@ Our model thus has 4 parameters, \(\sigmaf\), \(\ell_t\), \(\ell_x\) and \(\sigm
 \label{eq:optimization}
 \widehat\sigmaf,\widehat\ell_t,\widehat\ell_x,\widehat\sigman = \argmax_{\sigmaf,\ell_t,\ell_x,\sigman} \cbr{ \Pr\del{ Y \mid {\sigmaf,\ell_t,\ell_x,\sigman} } }\,.
 \end{equation}
-
 We obtained \(\widehat\sigmaf=3.73\,\degreeC\), \(\widehat\ell_t=2.7\,\mathrm{hours}\), \(\widehat\ell_x=176.4\,\mathrm{km}\) and \(\widehat\sigman=0.44\,\degreeC\).
     
-
-
-        \section{Predictions using nearby data}\label{predictions-using-nearby-data}
+\section{Predictions using nearby data}\label{predictions-using-nearby-data}
     
 
 \label{sec:predict_nearby}
         \begin{figure}
 \centering
-\includegraphics{../figures/imputations_2x2.png}
+\includegraphics{../figures/imputations_2x2.pdf}
 \caption{\label{fig:imputations_2x2}Imputations of the temperature time series at Waterloo Municipal Airport between May 28, 2015 and June 1, 2015 (a) using only nearby data and the product of squared exponentials model; (b) using only nearby data and the sum of products model; (c) incorporating \(\Tn\) and \(\Tx\) measurements under the product of squared exponentials model; and (d) incorporating \(\Tn\) and \(\Tx\) measurements under the sum of products model. The mean is subtracted from each time series in (a) and (b) as the models leave the average temperature at the imputation site as a free parameter. For each imputation distribution, the mean is shown as a thick line, surrounded by an 80\% credible envelope in lighter color, and example imputations as thinner lines.}
 \end{figure}
     
@@ -638,15 +627,14 @@ This ``softens'' the conditional distribution,
 \end{split}
 \eqlabel{eq:normal_lik}
 \end{equation}
-
 where \(\normal\del{x \mid \mu, \sigma^2}\) denotes the density of a normal distribution with mean \(\mu\) and variance \(\sigma^2\) evaluated at \(x\).
-For small \(\epsilon\), this is a very tolerable approximation which enables the use of MCMC techniques.
+For small \(\epsilon\), this seems to be a reasonable approximation enabling the use of MCMC techniques.
     
 
 
         \begin{figure}
 \centering
-\includegraphics{../figures/constraints3d.png}
+\includegraphics{../figures/constraints3d.pdf}
 \caption{\label{fig:constraints3d}
 With three variables \(X_1\), and \(X_2\) and \(X_3\), \(\Fcond\) resides in the one-dimensional six-sided loop shown with thicker green lines. This is a 1D manifold embedded in 3D space, and possessing sharp corners, making it difficult for most MCMC algorithms to explore.}
 \end{figure}
@@ -698,7 +686,7 @@ When \(\softmax\) replaces \(\max\) and \(\softmin\) replaces \(\min\), there is
 
 These modifications make HMC a viable algorithm to efficiently draw samples from the constrained posterior.
 Setting \(k\) and \(\epsilon\) is a compromise between exactness and efficiency;
-we found \(k=10\) and \(\epsilon=0.1\,\degreeC\) to perform well for this paper's application.
+we found \(k=10\) and \(\epsilon=0.1\,\degreeC\) to perform well for our application.
 
 Henceforth, we will refer to this use of HMC and a smoothmax approximation to the target distribution as SmoothHMC.
 SmoothHMC provides a generally applicable algorithm to draw from a multivariate distribution conditionally on the observed minimum and maximum of its components.
@@ -736,7 +724,7 @@ The marginal quantiles of the analytical posterior are shown in Figure \ref{fig:
 
         \begin{figure}
 \centering
-\includegraphics{../figures/toy_quantiles.png}
+\includegraphics{../figures/toy_quantiles.pdf}
 \caption{\label{fig:toy_quantiles}(a) Prior distribution of \(X_i\) displayed as mean function with 2~SD envelope; (b) Quantiles of the analytically derived posterior \(\Fcond\) conditioned on \(\Xmin\) and \(\Xmax\), with prior \(\mu_i\) shown in blue; (c) Quantiles of the samples drawn from \(\Fcond\) using Stan without the \(\softmax\) approximation, with prior \(\mu_i\) shown in blue; (d) Quantiles of the samples drawn from \(\Fcond\) using Stan with the \(\softmax\) approximation, with prior \(\mu_i\) shown in blue.}
 \end{figure}
     
@@ -767,7 +755,7 @@ this sampling algorithm delivers a close approximation of the marginal distribut
 
         \begin{figure}
 \centering
-\includegraphics{../figures/toy_joint.png}
+\includegraphics{../figures/toy_joint.pdf}
 \caption{\label{fig:toy_joint}
 Comparison of the joint distribution of \(X_{23}\) and \(X_{52}\)
 obtained analytically and from Stan samples.}
@@ -849,7 +837,6 @@ where \(\dayset{\iday}\) is the set of indices \(i\) such that the time \(t_{\mi
 
 
         To sample from this model, we modify it with the \(\softmax\) approximation to the maximum, and a normal likelihood:
-
 \begin{equation}
 \begin{split}
     \Tx\sbr{\iday} &\sim \normal\del{\softmax_{i \in \dayset{\iday}} \cbr{ T_{\miss,i}; k=10}, 0.1^2}\,, \\
@@ -863,7 +850,7 @@ where \(\dayset{\iday}\) is the set of indices \(i\) such that the time \(t_{\mi
         A few samples from this imputation procedure are shown in Figure~\ref{fig:imputations_2x2}(c).
 From May 28, 2015 to June 1, 2015, hourly temperatures are imputed at Waterloo Airport, using the hourly temperature measurements from nearby stations to inform the course of the temperatures, and using the daily minima and maxima ``measurements'' to constrain the imputed temperatures.
 One can verify visually that the imputations respect the \(\Tn\) and \(\Tx\) constraints, reaching but not exceeding each extreme on each day.
-Because we actually have hourly data for Waterloo, yet only fed our algorithm a reduction of this data to daily extremes, we can also plot the hidden temperatures (in black), and see how faithfully the imputations reproduce them.
+Since we actually have hourly data for Waterloo, but yet fed our algorithm only the daily extremes, we can also plot the hidden temperatures (in black), and see how faithfully the imputations reproduce them.
 We see that the imputations indeed track the true measurements very closely.
 On May 31st, we can see that the imputations capture two possibilities: the \(\Tx\) record \emph{could} have been set early in the 24-hr period, or at its end.
 This success demonstrates that SmoothHMC is capable of imputing temperature time series from the constrained posterior distribution \(\T_\miss \mid \T_\obs, \Tn, \Tx\).
@@ -874,7 +861,7 @@ This success demonstrates that SmoothHMC is capable of imputing temperature time
 
 \subsection{Variogram}\label{variogram}
 
-We can visually inspect our model by plotting temporal and spatial semi-variograms. The semi-variogram of a stationary spatio-temporal function \(Y(\xvec,t)\) is a function of the spatial lag \(\hvec\) and the temporal lag \(r\)
+We can visually inspect our model by plotting temporal and spatial semi-variograms. The semi-variogram \tcr{Maxime:Give reference} of a stationary spatio-temporal function \(Y(\xvec,t)\) is a function of the spatial lag \(\hvec\) and the temporal lag \(r\)
 
 \begin{equation}
     \gamma\del{\hvec,r} = \frac{1}{2} \E\sbr{\del{Y\del{\xvec,t}-Y\del{\xvec+\hvec,t+r}}^2} = \var\del{ Y\del{\xvec,t}} - \cov\del{ \del{Y\del{\xvec,t}} , Y\del{\xvec+\hvec,t+r}}\,.
@@ -1027,7 +1014,7 @@ This insensitivity can be seen as reassuring, as it shows robustness against mod
 
 
         Figure~\ref{fig:imputations_2x2}(d) shows the imputations produced under the \(\ksumprod\) kernel \eqref{eq:sumprod_kernel}.
-This is the primary output of our imputation method, and it shows promising behavior.
+This is the primary output of our imputation method, and the results are promising.
 Firstly, just like in the toy example presented in \ref{sec:toy_example}, the individual imputations meet the three constraints imposed by the measured minimum and maximum.
 Each day, the imputations stay between \(\Tn\) and \(\Tx\),
 and the temperatures always drop to \(\Tn\) and rise to \(\Tx\) at some time of the day.
@@ -1040,7 +1027,7 @@ We view as a particular strength of our approach that the imputations are able t
 
         \begin{figure}
 \centering
-\includegraphics{../figures/imputed_summary_stats.png}
+\includegraphics{../figures/imputed_summary_stats.pdf}
 \caption{\label{fig:imputed_summary_stats}Average maximum daily temperature summary statistic obtained under varying hour of measurement from withheld Waterloo Airport data (shown in blue), and from imputations of the withheld data (shown in orange with 2~SD envelope).}
 \end{figure}
     
@@ -1094,7 +1081,7 @@ and we may be able to infer the true \(\hour\) by maximizing \(\discrepancy_\hou
 
         \begin{figure}
 \centering
-\includegraphics{../figures/measure_hour_example.png}
+\includegraphics{../figures/measure_hour_example.pdf}
 \caption{\label{fig:measure_hour_example} A sample window showing constrained and unconstrained imputations assuming (top) the correct measurement hour (17 UTC), and (bottom) the wrong measurement hour (5 UTC). Assuming the wrong measurement time drives the constrained mean imputation away from the unconstrained mean imputation.}
 \end{figure}
     
@@ -1102,7 +1089,7 @@ and we may be able to infer the true \(\hour\) by maximizing \(\discrepancy_\hou
 
         \begin{figure}
 \centering
-\includegraphics{../figures/hr_inference.png}
+\includegraphics{../figures/hr_inference.pdf}
 \caption{\label{fig:hr_inference} Discrepancy measure for imputations of temperatures at Waterloo Municipal Airport assuming measurement hours \(\hour=1,2,\ldots,24\). The true hour of measurement is 17, and obtains the highest \(\delta_\hour\).}
 \end{figure}
     
@@ -1116,7 +1103,7 @@ and we may be able to infer the true \(\hour\) by maximizing \(\discrepancy_\hou
 For this reason, the bias induced by the measurement time
 that we demonstrate in Section~\ref{sec:illustrate_bias}
 could lead to wrong estimates and conclusions regarding long-term trends in temperature records.
-We reframed the source of this bias as a missing data problem, and imputed the missing hourly temperatures at the weather station using posterior samples from a spatio-temporal Gaussian process model.
+We reformulated the source of this bias as a missing data problem, and imputed the missing hourly temperatures at the weather station using posterior samples from a spatiotemporal Gaussian process model.
 The model allows the combination of information from the measured daily minimum (\(\Tn\)) and maximum (\(\Tx\)) temperatures, and from measurements of hourly temperatures at nearby meteorological stations.
 While ours is not a realistic physical model, it is very flexible, and it performs well for the task of interpolating temperatures between nearby locations and times.
 Indeed, more complex covariance functions (with a diurnal component and a sum of short-range and long-range components) showed only modest improvements in the mean squared error of the imputations compared to a withheld hourly temperature record.
@@ -1136,7 +1123,7 @@ It showed an excellent ability to sample from the conditional distribution in an
 SmoothHMC is the main technical contribution of this paper, and we believe the method could find applications beyond the present setting.
 
 We used this method to obtained imputations of the temperature time series that satisfied the constraints imposed by the measured \(\Tn\) and \(\Tx\).
-The imputation of withheld temperatures at Waterloo Municipal Airport tracked the true temperatures closely, within a root mean square error of \(1.04\,\degreeC\).
+The imputation of withheld temperatures at Waterloo Municipal Airport tracked the true temperatures closely, within a root mean square error of \(1.04\,\degreeC\).\tcr{This is a lot!?}
 We view as particularly encouraging that the imputations successfully capture bimodalities of the possible time of the maximum or minimum temperature on days where this time is difficult to infer from the available information.
 
 Future improvements to the imputation strategy would include the inclusion of rounding effects in the measurement model, explicit treatment of non-stationarity due to coastlines or other geographical features, and of altitude differences.
@@ -1152,144 +1139,142 @@ We plan to use this method to compare the average temperature to the average of 
     
 
 \appendix
-        \section{Stan programs}\label{stan-programs}
+%        \section{Stan programs}\label{stan-programs}
+%
+%\subsection{Smoothmax toy example}\label{smoothmax-toy-example}
+%    
+%
+%\label{sec:stan_illustration}
+%        \subsubsection{\texorpdfstring{Without \texttt{smoothmax} Approximation}{Without smoothmax Approximation}}\label{without-smoothmax-approximation}
+%    
+%
+%
+%        \begin{verbatim}
+%data {
+%    int<lower=0> N; // number of observations
+%    real Xmax;
+%    real Xmin;
+%    vector[N] mu_i;
+%    real<lower=0> sigma_i[N];
+%}
+%parameters {
+%    vector[N] X_i; // latent variables
+%}
+%model {
+%    X_i ~ normal(mu_i, sigma_i);
+%    Xmax ~ normal(max(X_i), 0.01);
+%    Xmin ~ normal(min(X_i), 0.01);
+%}
+%\end{verbatim}
+%    
+%
+%
+%        \subsubsection{\texorpdfstring{With \texttt{smoothmax} Approximation}{With smoothmax Approximation}}\label{with-smoothmax-approximation}
+%    
+%
+%
+%        \begin{verbatim}
+%functions {
+%    real smoothmax(vector x, real k, real maxkx){
+%        return (maxkx+log(sum(exp(k*x - maxkx))))/k;
+%    }
+%    real smoothmin(vector x, real k, real minkx){
+%        return -smoothmax(-x, k, -minkx);
+%    }
+%}
+%data {
+%    int<lower=0> N; // number of observations
+%    real Xmax;
+%    real Xmin;
+%    real mu_i[N];
+%    real<lower=0> sigma_i[N];
+%    real<lower=0> k;
+%}
+%parameters {
+%    vector[N] X_i; // latent variables
+%}
+%transformed parameters {
+%    real Xsmoothmax;
+%    real Xsmoothmin;
+%    Xsmoothmax = smoothmax(X_i, k, k*Xmax);
+%    Xsmoothmin = smoothmin(X_i, k, k*Xmin);
+%}
+%model {
+%    X_i ~ normal(mu_i, sigma_i);
+%    Xmax ~ normal(Xsmoothmax, 0.01);
+%    Xmin ~ normal(Xsmoothmin, 0.01);
+%}
+%\end{verbatim}
+%    
 
-\subsection{Smoothmax toy example}\label{smoothmax-toy-example}
+%
+%        \subsection{Temperature imputations}\label{temperature-imputations}
+%    
+%
+%\label{sec:appendix_stan}
+%        \begin{verbatim}
+%functions {
+%    real smoothmax(vector x, real k, real maxkx){
+%        return (maxkx+log(sum(exp(k*x - maxkx))))/k;
+%    }
+%    real smoothmin(vector x, real k, real minkx){
+%        return -smoothmax(-x, k, -minkx);
+%    }
+%}
+%data {
+%    // Tn Tx data
+%    int<lower=1> N_TxTn; //
+%    vector[N_TxTn] Tx;
+%    vector[N_TxTn] Tn;
+%
+%    // imputation points (for which we have )
+%    int<lower=1> Nimpt;
+%    int<lower=1,upper=N_TxTn> day_impute[Nimpt];
+%    // number of hours recorded within each day
+%    int<lower=1> impt_times_p_day[N_TxTn];
+%
+%    // prior 
+%    vector[Nimpt] predicted_mean;
+%    matrix[Nimpt,Nimpt] predicted_cov;
+%    matrix[Nimpt,Nimpt] predicted_cov_chol;
+%
+%    // control soft max hardness
+%    real<lower=0> k_smoothmax;
+%}
+%parameters {
+%    vector[Nimpt] w_uncorr;
+%    real mu;
+%}
+%transformed parameters {
+%    vector[Nimpt] temp_impt;
+%    real Tsmoothmax[N_TxTn];
+%    real Tsmoothmin[N_TxTn];  
+%    temp_impt = mu + predicted_mean + predicted_cov_chol*w_uncorr;
+%    {
+%        int istart;
+%        istart = 1;
+%        for (i in 1:N_TxTn){
+%            int ntimes;
+%            ntimes = impt_times_p_day[i];
+%            Tsoftmin[i] = smoothmin(segment(temp_impt,istart,ntimes), 
+%                                    k_smoothmax, 
+%                                    k_smoothmax*Tn[i]);
+%            Tsoftmax[i] = smoothmax(segment(temp_impt,istart,ntimes), 
+%                                    k_smoothmax,
+%                                    k_smoothmax*Tx[i]);
+%            istart = istart + ntimes;
+%        }
+%    }
+%}
+%model {
+%    w_uncorr ~ normal(0,1);
+%    mu ~ normal(0, 100.0);
+%    Tn ~ normal(Tsmoothmin, 0.1);
+%    Tx ~ normal(Tsmoothmax, 0.1);
+%}
+%\end{verbatim}
     
-
-\label{sec:stan_illustration}
-        \subsubsection{\texorpdfstring{Without \texttt{smoothmax} Approximation}{Without smoothmax Approximation}}\label{without-smoothmax-approximation}
-    
-
-
-        \begin{verbatim}
-data {
-    int<lower=0> N; // number of observations
-    real Xmax;
-    real Xmin;
-    vector[N] mu_i;
-    real<lower=0> sigma_i[N];
-}
-parameters {
-    vector[N] X_i; // latent variables
-}
-model {
-    X_i ~ normal(mu_i, sigma_i);
-    Xmax ~ normal(max(X_i), 0.01);
-    Xmin ~ normal(min(X_i), 0.01);
-}
-\end{verbatim}
-    
-
-
-        \subsubsection{\texorpdfstring{With \texttt{smoothmax} Approximation}{With smoothmax Approximation}}\label{with-smoothmax-approximation}
-    
-
-
-        \begin{verbatim}
-functions {
-    real smoothmax(vector x, real k, real maxkx){
-        return (maxkx+log(sum(exp(k*x - maxkx))))/k;
-    }
-    real smoothmin(vector x, real k, real minkx){
-        return -smoothmax(-x, k, -minkx);
-    }
-}
-data {
-    int<lower=0> N; // number of observations
-    real Xmax;
-    real Xmin;
-    real mu_i[N];
-    real<lower=0> sigma_i[N];
-    real<lower=0> k;
-}
-parameters {
-    vector[N] X_i; // latent variables
-}
-transformed parameters {
-    real Xsmoothmax;
-    real Xsmoothmin;
-    Xsmoothmax = smoothmax(X_i, k, k*Xmax);
-    Xsmoothmin = smoothmin(X_i, k, k*Xmin);
-}
-model {
-    X_i ~ normal(mu_i, sigma_i);
-    Xmax ~ normal(Xsmoothmax, 0.01);
-    Xmin ~ normal(Xsmoothmin, 0.01);
-}
-\end{verbatim}
-    
-
-
-        \subsection{Temperature imputations}\label{temperature-imputations}
-    
-
-\label{sec:appendix_stan}
-        \begin{verbatim}
-functions {
-    real smoothmax(vector x, real k, real maxkx){
-        return (maxkx+log(sum(exp(k*x - maxkx))))/k;
-    }
-    real smoothmin(vector x, real k, real minkx){
-        return -smoothmax(-x, k, -minkx);
-    }
-}
-data {
-    // Tn Tx data
-    int<lower=1> N_TxTn; //
-    vector[N_TxTn] Tx;
-    vector[N_TxTn] Tn;
-
-    // imputation points (for which we have )
-    int<lower=1> Nimpt;
-    int<lower=1,upper=N_TxTn> day_impute[Nimpt];
-    // number of hours recorded within each day
-    int<lower=1> impt_times_p_day[N_TxTn];
-
-    // prior 
-    vector[Nimpt] predicted_mean;
-    matrix[Nimpt,Nimpt] predicted_cov;
-    matrix[Nimpt,Nimpt] predicted_cov_chol;
-
-    // control soft max hardness
-    real<lower=0> k_smoothmax;
-}
-parameters {
-    vector[Nimpt] w_uncorr;
-    real mu;
-}
-transformed parameters {
-    vector[Nimpt] temp_impt;
-    real Tsmoothmax[N_TxTn];
-    real Tsmoothmin[N_TxTn];  
-    temp_impt = mu + predicted_mean + predicted_cov_chol*w_uncorr;
-    {
-        int istart;
-        istart = 1;
-        for (i in 1:N_TxTn){
-            int ntimes;
-            ntimes = impt_times_p_day[i];
-            Tsoftmin[i] = smoothmin(segment(temp_impt,istart,ntimes), 
-                                    k_smoothmax, 
-                                    k_smoothmax*Tn[i]);
-            Tsoftmax[i] = smoothmax(segment(temp_impt,istart,ntimes), 
-                                    k_smoothmax,
-                                    k_smoothmax*Tx[i]);
-            istart = istart + ntimes;
-        }
-    }
-}
-model {
-    w_uncorr ~ normal(0,1);
-    mu ~ normal(0, 100.0);
-    Tn ~ normal(Tsmoothmin, 0.1);
-    Tx ~ normal(Tsmoothmax, 0.1);
-}
-\end{verbatim}
-    
-
-
-        \section{Derivation of the analytic posterior for toy example}\label{derivation-of-the-analytic-posterior-for-toy-example}
+\section*{Appendix: Derivation of the analytic posterior for toy example}\label{derivation-of-the-analytic-posterior-for-toy-example}
     
 
 \label{sec:analytical_posterior}
@@ -1322,13 +1307,11 @@ Meanwhile, \(\pij\) is proportional to
     \prod_{k \neq i,j}^{100}
     \del{F_k(\Xmax) - F_k(\Xmin)} \,,
 \end{equation}
-
 which we compute for all \(i,j\) and renormalize
 to obtain the \(100 \times 100\) matrix of probabilities.
 We sum over its rows and columns to obtain \(\psumj\) and \(\pisum\).
 While this algorithm has cubic complexity in the dimensionality \(p\) of \(X\),
-for \(p=100\)
-computers only take seconds to compute the entries of \(\Pr\) and evaluate \(\Pr\del{X_i \leq x \mid \Xmax, \Xmin}\) over a range of \(x\).
+for \(p=100\), it only take seconds to compute the entries of \(\Pr\) and evaluate \(\Pr\del{X_i \leq x \mid \Xmax, \Xmin}\) over a range of \(x\).
 Figure \ref{fig:toy_quantiles}(b) shows the analytical quantiles of \(\Fcond\).
 Roughly speaking, we see that the prior distribution \(F_X\) is stretched to fit between \(\Xmin\) and \(\Xmax\).
     
