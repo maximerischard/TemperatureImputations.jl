@@ -16,8 +16,12 @@ using AxisArrays
 using DataFrames: by, head
 using Base.Dates: tonext, Hour, Day
 
+const janfirst = Date(2015, 1, 1)
+const stan_increment = Day(3)
+const stan_days = Day(9)
+
 function subset(df, from, to; closed_start=true, closed_end=true)
-    ts = df[:ts].values
+    ts = df[:ts]
     return df[argsubset(ts,from,to;closed_start=closed_start,closed_end=closed_end),:]
 end
 function argsubset(ts, from, to; closed_start=true, closed_end=true)
@@ -61,12 +65,13 @@ function get_nearby(fw::FittingWindow, GPmodel::AbstractString, usaf::Int)
     nearby_pred=load(joinpath(saved_dir, pred_fname))["nearby_pred"]
 end
 
-function print_diagnostics(nearby::TempModel.NearbyPrediction; ndraws=10000)
+function print_diagnostics(nearby::TempModel.NearbyPrediction,
+        test_data, train_data; ndraws=10000)
     ts = nearby.ts
     ts_start = minimum(ts)
     ts_end = maximum(ts)
-    test_subset = subset(test_trimmed, ts_start, ts_end)
-    train_subset = subset(hourly_train, ts_start, ts_end)
+    test_subset = subset(test_data, ts_start, ts_end)
+    train_subset = subset(train_data, ts_start, ts_end)
 
     μ = nearby.μ
     Σ = nearby.Σ
@@ -78,11 +83,11 @@ function print_diagnostics(nearby::TempModel.NearbyPrediction; ndraws=10000)
 #     println("sum(Σ_centered)=", sum(Σ_centered*Σ_centered))
     for _ in 1:5
         temp_sim = rand(distr)
-        println("var(predicted mean - simulated prediction)=", var(μ .- temp_sim))
+        @printf("var(predicted mean - simulated prediction)= %.3f\n", var(μ .- temp_sim))
     end
-    temp_true = test_subset[:temp].values
-    println("E(var(predicted mean - predictive draw))=", mean(var(μ .- rand(distr)) for _ in 1:ndraws))
-    println("var(truth - predicted mean)=", var(μ .- temp_true))
+    temp_true = test_subset[:temp]
+    @printf("E(var(predicted mean - predictive draw))= %.3f\n", mean(var(μ .- rand(distr)) for _ in 1:ndraws))
+    @printf("var(truth - predicted mean)= %.3f\n", var(μ .- temp_true))
 end
 
 function stan_dirname(usaf::Int, fw::FittingWindow)
@@ -90,13 +95,13 @@ function stan_dirname(usaf::Int, fw::FittingWindow)
                     usaf, fw.start_date, fw.end_date)
 end
 
-function get_test_fw(test::DataFrame, fw::FittingWindow)
-    ts = test[:ts].values
+function get_test_fw(test::DataFrame, fw::FittingWindow, hr_measure::Hour)
+    ts = test[:ts]
     in_window = [(fw.start_date <= TempModel.measurement_date(t, hr_measure) <= fw.end_date-Day(1)) for t in ts]
     return test[in_window,:]
 end
-function arg_test_fw(test::DataFrame, fw::FittingWindow)
-    ts = test[:ts].values
+function arg_test_fw(test::DataFrame, fw::FittingWindow, hr_measure::Hour)
+    ts = test[:ts]
     in_window = [(fw.start_date <= TempModel.measurement_date(t, hr_measure) <= fw.end_date-Day(1)) for t in ts]
     return in_window
 end
@@ -202,10 +207,9 @@ type ImputationDiagnostic
 end
 EVarError(diag::ImputationDiagnostic) = diag.sumEVarError / diag.n
 mse(diag::ImputationDiagnostic) = diag.sumSE / diag.n
-function ImputationDiagnostic(temp_impute::Array{Float64,3}, test_truth::DataFrame)
+function ImputationDiagnostic{A<:AbstractArray{Float64, 3}}(temp_impute::A, test_truth::DataFrame)
     stacked_impute=vcat((temp_impute[:,:,i] for i in 1:size(temp_impute,3))...)
-    temp_true = test_truth[:temp].values
-    ts = test_subsubset[:ts].values
+    temp_true = test_truth[:temp]
     μ = vec(mean(stacked_impute, 1))
     evar_err = mean(mse(μ, stacked_impute[i,:]) for i in 1:size(stacked_impute,1))
     MSE = mse(μ, temp_true)
@@ -249,10 +253,13 @@ function find_best_window(t::DateTime, cands::Vector{FittingWindow})
     return best_window
 end
 
-function get_diagnostics(nearby::TempModel.NearbyPrediction, ts_start::DateTime, ts_end::DateTime; 
-                            ndraws=10000)
+function get_diagnostics(
+        nearby::TempModel.NearbyPrediction, 
+        test_data, 
+        ts_start::DateTime, ts_end::DateTime; 
+        ndraws=10000)
 
-    test_subset = subset(test_trimmed, ts_start, ts_end, closed_start=true, closed_end=true)
+    test_subset = subset(test_data, ts_start, ts_end, closed_start=true, closed_end=true)
     
     ts = nearby.ts
     iinside = argsubset(ts, ts_start, ts_end)
@@ -264,7 +271,7 @@ function get_diagnostics(nearby::TempModel.NearbyPrediction, ts_start::DateTime,
     centering = eye(nobsv) .- (1.0/nobsv) .* ones(nobsv, nobsv)
     Σ_centered = centering * Σ * centering
     distr = MultivariateNormal(μ, Σ)
-    temp_true = test_subset[:temp].values
+    temp_true = test_subset[:temp]
     n = length(ts)
     return NearbyPredDiagnostic(
         mean(var(μ .- rand(distr)) for _ in 1:ndraws)*n,

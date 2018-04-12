@@ -13,18 +13,18 @@ function prep_data(nearby_pred::NearbyPrediction, TnTx::DataFrame,
     # for each 
     ts_window_day = [measurement_date(dt, hr_measure) for dt in ts_window]
     window_days = collect(date_start:Day(1):date_end)
-    window_TnTx=TnTx[[d ∈ window_days for d in TnTx[:ts_day].values],:]
+    window_TnTx=TnTx[[d ∈ window_days for d in TnTx[:ts_day]],:]
 
     day_impute = Dates.Day.(ts_window_day .- minimum(ts_window_day))
     day_impute_numeric = Dates.value.(day_impute) .+ 1
     # day_impute = convert(Vector{Int}, Dates.value(ts_window_day .- minimum(ts_window_day))+1
     imputation_data = Dict(
         "N_TxTn" => nrow(window_TnTx),
-        "Tn" => window_TnTx[:Tn].values,
-        "Tx" => window_TnTx[:Tx].values,
+        "Tn" => window_TnTx[:Tn],
+        "Tx" => window_TnTx[:Tx],
         "Nimpt" => sum(in_window),
         "day_impute" => day_impute_numeric,
-        "impt_times_p_day" => window_TnTx[:times_p_day].values,
+        "impt_times_p_day" => window_TnTx[:times_p_day],
         "predicted_mean" => μ_window,
         "predicted_cov" => Σ_window.mat,
         "predicted_cov_chol" => full(Σ_window.chol[:L]),
