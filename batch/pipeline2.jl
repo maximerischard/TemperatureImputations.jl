@@ -33,12 +33,12 @@ include(joinpath(root_dir,"src/utils.jl"))
 include(joinpath(root_dir,"src/preprocessing.jl"))
 
 isdList=read_isdList(;data_dir=root_dir)
-isdSubset=isdList[[(usaf in (725450,725460,725480,725485)) for usaf in isdList[:USAF].values],:]
+isdSubset=isdList[[(usaf in (725450,725460,725480,725485)) for usaf in isdList[:USAF]],:]
 isdSubset
 
 hourly_cat=read_Stations(isdSubset; data_dir=root_dir)
 itest=3
-test_usaf=get(isdSubset[itest,:USAF])
+test_usaf=isdSubset[itest,:USAF]
 hr_measure = Hour(17)
 
 TnTx = test_data(hourly_cat, itest, hr_measure)
@@ -51,9 +51,8 @@ module TempModel
     using GaussianProcesses: GP, Kernel, MeanZero, predict
     using Base.Dates: Day, Hour
     using Stan
-    using DataTables: DataTable, by
-    using DataTables
-    using DataTables: by
+    using DataFrames
+    using DataFrames: by
     using GaussianProcesses
 
     include(joinpath(root_dir, "src/utils.jl"))
@@ -74,7 +73,7 @@ end
 # copy-pasted from pipeline1.jl
 nearby_windows = FittingWindow[]
 dt_start=DateTime(2015,1,1,0,0,0)
-increm=get(maximum(hourly_cat[:ts])-minimum(hourly_cat[:ts])) / 15
+increm=(maximum(hourly_cat[:ts])-minimum(hourly_cat[:ts])) / 15
 window=3*increm
 while true
     dt_end=dt_start+window
@@ -82,7 +81,7 @@ while true
     edate = Date(dt_end)
     fwindow = FittingWindow(sdate,edate)
     push!(nearby_windows, fwindow)
-    if dt_end >= get(maximum(hourly_cat[:ts]))
+    if dt_end >= (maximum(hourly_cat[:ts]))
         break
     end
     dt_start+=increm

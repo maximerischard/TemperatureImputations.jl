@@ -7,7 +7,7 @@ doc = """
         pipeline1.jl <model>
 """
 using DocOpt
-using DataTables
+using DataFrames
 
 arguments = docopt(doc)
 GPmodel = arguments["<model>"]
@@ -15,8 +15,8 @@ data_dir="../"
 module TempModel
     data_dir="../"
     using TimeSeries
-    using DataTables
-    using DataTables: by
+    using DataFrames
+    using DataFrames: by
     using GaussianProcesses
     using Proj4
     using GaussianProcesses: set_params!
@@ -49,16 +49,16 @@ else
 end
 
 isdList=TempModel.read_isdList(; data_dir=data_dir)
-isdSubset=isdList[[(usaf in (725450,725460,725480,725485)) for usaf in isdList[:USAF].values],:]
+isdSubset=isdList[[(usaf in (725450,725460,725480,725485)) for usaf in isdList[:USAF]],:]
 isdSubset
 
 hourly_cat=TempModel.read_Stations(isdSubset; data_dir=data_dir)
 itest=3
 
-test_usaf=get(isdSubset[itest,:USAF])
+test_usaf=isdSubset[itest,:USAF]
 
 dt_start=DateTime(2015,1,1,0,0,0)
-increm=get(maximum(hourly_cat[:ts])-minimum(hourly_cat[:ts])) / 15
+increm=(maximum(hourly_cat[:ts])-minimum(hourly_cat[:ts])) / 15
 window=3*increm
 
 while true
@@ -77,7 +77,7 @@ while true
                     Date(dt_end))), 
         "nearby_pred", 
         nearby_pred)
-    if dt_end >= get(maximum(hourly_cat[:ts]))
+    if dt_end >= maximum(hourly_cat[:ts])
         break
     end
     dt_start+=increm
