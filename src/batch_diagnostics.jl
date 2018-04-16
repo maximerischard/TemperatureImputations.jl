@@ -53,6 +53,10 @@ type FittingWindow
     start_date::Date
     end_date::Date
 end
+type WindowTime
+    start_time::DateTime
+    end_time::DateTime
+end
 
 function predictions_fname(usaf::Int, fw::FittingWindow)
     return @sprintf("%d_%s_to_%s.jld", 
@@ -95,15 +99,23 @@ function stan_dirname(usaf::Int, fw::FittingWindow)
                     usaf, fw.start_date, fw.end_date)
 end
 
-function get_test_fw(test::DataFrame, fw::FittingWindow, hr_measure::Hour)
-    ts = test[:ts]
-    in_window = [(fw.start_date <= TempModel.measurement_date(t, hr_measure) <= fw.end_date-Day(1)) for t in ts]
-    return test[in_window,:]
+function t_inside_wt(t::DateTime, wt::WindowTime)
+    return wt.start_time <= t <= wt.end_time
 end
+function t_inside_fw(t::DateTime, fw::FittingWindow, hr_measure::Hour)
+    measure_day = TempModel.measurement_date(t, hr_measure)
+    in_window = fw.start_date <= measure_day <= fw.end_date-Day(1)
+    return in_window
+end
+
 function arg_test_fw(test::DataFrame, fw::FittingWindow, hr_measure::Hour)
     ts = test[:ts]
-    in_window = [(fw.start_date <= TempModel.measurement_date(t, hr_measure) <= fw.end_date-Day(1)) for t in ts]
+    in_window = t_inside_fw.(ts, fw, hr_measure)
     return in_window
+end
+function get_test_fw(test::DataFrame, fw::FittingWindow, hr_measure::Hour)
+    in_window = arg_test_fw(test, fw, hr_measure)
+    return test[in_window,:]
 end
 function get_window(windownum::Int)
     stan_start = janfirst + (windownum-1)*stan_increment
@@ -225,34 +237,42 @@ function +(diag1::ImputationDiagnostic,diag2::ImputationDiagnostic)
         )
 end
 
-""" 
-    Is window A inside of window B?
-"""
-function a_isinside_b(t::DateTime, b::FittingWindow)
-    start_after = t >= b.start_date
-    end_before = t <= b.end_date+Day(1)
-    return start_after & end_before
-end
 """
     How much buffer time is there on either side of the window?
 """
-function buffer(t::DateTime, b::FittingWindow)
-    start_diff = abs(t - b.start_date)
-    end_diff = abs(t - (b.end_date+Day(1)))
+function buffer(t::DateTime, wt::WindowTime)
+    start_diff = t - wt.start_time
+    end_diff = wt.end_time - t
     return min(start_diff, end_diff)
 end
 """ 
     Amongst a list of candidate windows `cand`, find the window that includes `wind`
     with the largest buffer on either sides.
 """
-function find_best_window(t::DateTime, cands::Vector{FittingWindow})
-    incl_wdows = [fw for fw in cands if a_isinside_b(t, fw)]
-    buffers = [buffer(t, fw) for fw in incl_wdows]
+function find_best_window(t::DateTime, cands::Vector{WindowTime})
+    inside_windows = t_inside_wt.(t, cands)
+    incl_wdows = cands[inside_windows]
+    buffers = [buffer(t, wt) for wt in incl_wdows]
     imax = indmax(buffers)
-    best_window = incl_wdows[imax]
-    return best_window
+    return find(inside_windows)[imax]
 end
 
+#######################################
+###### Nearby-only predictions ########
+#######################################
+
+type NearbyPredDiagnostic
+    sumEVarError::Float64
+    sumVarError::Float64
+    n::Int
+end
+function +(diag1::NearbyPredDiagnostic,diag2::NearbyPredDiagnostic)
+    return NearbyPredDiagnostic(
+        diag1.sumEVarError + diag2.sumEVarError,
+        diag1.sumVarError + diag2.sumVarError,
+        diag1.n + diag2.n
+        )
+end
 function get_diagnostics(
         nearby::TempModel.NearbyPrediction, 
         test_data, 
