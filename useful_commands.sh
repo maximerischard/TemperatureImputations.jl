@@ -21,16 +21,12 @@ jupyter nbconvert --to latex --template nocode.tplx TemperatureImputations.ipynb
 latexmk -bibtex -pdf TemperatureImputations
 
 # pipeline1.jl
-srun -p test --pty --mem 4000 -n 4 -N 1 -t 0-9:00 /bin/bash
+srun -p shared --pty --mem 8000 -n 4 -N 1 -t 0-9:00 /bin/bash
 
-module load gcc/7.1.0-fasrc01 
-module load julia/0.6.0-fasrc01
-module load OpenBLAS/0.2.18-fasrc01
-module load git/2.1.0-fasrc01
-# module load cmdstan/2.12.0-fasrc01
+source ~/julia_modules.sh
 
 cd /n/regal/pillai_lab/mrischard/temperature_model/batch/
-julia pipeline1.jl simpler
+julia pipeline1.jl diurnal
 
 # pipeline2
 cd /n/regal/pillai_lab/mrischard/temperature_model/batch/
