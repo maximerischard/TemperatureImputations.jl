@@ -47,7 +47,6 @@ module TempModel
     root_dir = ".."
     using PDMats
     using PDMats: PDMat
-    using Mamba
     using GaussianProcesses: GP, Kernel, MeanZero, predict
     using Base.Dates: Day, Hour
     using Stan

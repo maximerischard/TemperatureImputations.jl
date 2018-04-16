@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH -J stan_pipeline2_simpler     # name for job array
-#SBATCH -p general    #Partition
+#SBATCH -p shared    #Partition
 #SBATCH -t 0-12:00:00         #Running time of 1 day
 #SBATCH --mem-per-cpu 2000   # request 4GB memory
 #SBATCH -n 1                 # 2 cores
@@ -10,7 +10,6 @@
 #SBATCH --array 1-122
 
 source ~/julia_modules.sh
-# module load cmdstan/2.12.0-fasrc01
 cd /n/regal/pillai_lab/mrischard/temperature_model/batch
 julia pipeline2.jl /n/regal/pillai_lab/mrischard/temperature_model/saved ${SLURM_ARRAY_TASK_ID} simpler
 

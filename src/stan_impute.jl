@@ -95,7 +95,11 @@ function get_imputation_model(; pdir=pwd())
             Tx ~ normal(Tsmoothmax, 0.1);
         }
     """
-    stanmodel = Stanmodel(name="imputation", model=imputation_model, pdir=pdir)
+    stanmodel = Stanmodel(
+        name="imputation", 
+        model=imputation_model, 
+        pdir=pdir, 
+        useMamba=false)
     return stanmodel
 end
 
