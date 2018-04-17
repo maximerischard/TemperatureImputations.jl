@@ -163,10 +163,10 @@
     
     
 \author[*]{Maxime Rischard}
-\author[**]{Karen McKinnon}
+\author[**]{Karen A. McKinnon}
 \author[*]{Natesh Pillai}
 \affil[*]{Department of Statistics, Harvard University}
-\affil[**]{National Center for Atmospheric Research}
+\affil[**]{National Center for Atmospheric Research; Descartes Labs}
 
     
 
@@ -383,7 +383,7 @@ We also demonstrate that our model can exploit information contained in the data
         \section{Introduction}\label{introduction}
     
 
-Long, high-quality records of temperature provide an important basis for our understanding of climate variability and change. Historically, there has been a focus on monthly-average temperature records that are sufficient for certain analyses, such as quantifying long-term changes in temperature. As our knowledge of climate change expands, however, there is increasing interest in understanding changes in temperature on shorter timescales, with a particular focus on extreme events. To do so, it is necessary to utilize higher-resolution temperature data. 
+Long, high-quality records of temperature provide an important basis for our understanding of climate variability and change. Historically, there has been a focus on monthly-average temperature records that are sufficient for certain analyses, such as quantifying long-term changes in temperature. As our knowledge of climate change expands, however, there is increasing interest in understanding changes in temperature on shorter timescales, with a particular focus on extreme events. To do so, it is necessary to utilize temperature data with higher temporal resolution. 
 
 Recent work has led to the development of the Global Historical Climatology Network-Daily (GHCND) database \citep{menne2012overview}, which contains, among other variables, daily maximum and minimum temperatures from weather stations around the globe. The database draws from a range of different sources, and the data within it undergoes basic quality control to remove erroneous values. 
 
@@ -393,40 +393,47 @@ There is a large body of work focused on homogenizing monthly-average temperatur
 Homogenization typically proceeds through identifying non-climatic `breakpoints' in a given time series through comparison with neighboring stations.
 Once a breakpoint is identified, the measurements recorded after the breakpoint are adjusted in some way to reduce or remove the inhomogeneity.
 Most applications of these methods, however, focus on adjusting the mean state of the data rather than the shape of the distribution \citep[see][and references therein]{della2006method}.
-While this may be sufficient for monthly data, it is known that certain changes in measurement practices affect different percentiles of daily temperature in different ways.
-To address this issue, some homogenization methods have also employed percentile matching techniques, wherein the adjustment to a timeseries after a breakpoint is a function of percentile \tcr{percentile of what?} \citep{della2006method, trewin2013daily}. 
+While this may be sufficient for monthly data, it is known that changes in measurement practices may affect different quantiles of the daily temperature distribution unequally.
+To address this issue, some homogenization methods have also employed frequency distribution matching techniques, so that each temperature recorded after a breakpoint is adjusted according to its percentile within the time series \tcr{percentile of what?} \citep{della2006method, trewin2013daily}. 
 
 \subsection{The problem} 
 \label{sec:illustrate_bias}
 %\label{illustration-of-bias-induces-by-measurement-hour}
-Climatologists are interested in studying the variations of the temperature patterns during a 24 hour period, called the diurnal cycle. In this section we illustrate the bias in the measurements of maximum and minimum temperatures ($\Tx$ and $\Tn$ respectively) during a diurnal cycle due to the time at which an observation is recorded during a day.  This bias exists because $\Tx$ and $\Tn$ are often recorded by an observer who visits a weather station every 24 hours, and notes the maximum and minimum temperatures measured by the thermometer over the previous 24 hours.
-Ideally, the observer would visit the station at midnight, and the recorded highest and lowest temperatures over the past 24 hours would typically be representative of the maximum and minimum of the diurnal cycle of the previous day.
-For convenience, however, most observers record data at a daytime hour instead.
-Consequently, the measurements recorded in the early morning may not properly register the low of the night before if it was unusually warm. Similarly, measurements recorded in the late afternoon may not properly register the high of the prior day if it was usually cool. In both cases, this will lead to a reduction in the variance of $\Tx$ and $\Tn$ distributions, but the effect will be greater at low (high) percentiles for $\Tx$ ($\Tn$). 
+Many historical measurements of daily temperatures are provided as daily maxima and minima, which should bracket the diurnal cycle for each day. In this section we illustrate the bias in the measurements of maximum and minimum temperatures ($\Tx$ and $\Tn$ respectively) for a given cycle due to the time of day at which observations are recorded.  This bias exists because $\Tx$ and $\Tn$ are often recorded by an observer who visits a weather station every 24 hours, and notes the maximum and minimum temperatures measured by the thermometer over the previous 24 hours.
 
-       Figure \ref{fig:waterloo_triangles} illustrates this bias in daily maxima and minima with ten days of hourly temperature measurements from the Waterloo Municipal Airport station in Iowa.
+Ideally, the observer would visit the station at midnight, and the recorded highest and lowest temperatures over the past 24 hours would be representative of the maximum and minimum of the diurnal cycle of the previous day.
+
+Figure \ref{fig:waterloo_triangles} illustrates this bias in daily maxima and minima with ten days of hourly temperature measurements from the Waterloo Municipal Airport station in Iowa.
 Ideally, \(\Tx\) measurements should capture the peak of each diurnal cycle, and \(\Tn\) its trough.
-The actual measurements are obtained by dividing the data into 24 hour measurement windows, and extracting the minimum and maximum.
+We emulate daily $\Tx$/$\Tn$ measurements by dividing the data into 24 hour measurement windows, and reporting the minimum and maximum temperature that was recorded in this window.
 On most days, the measurements capture the peak and trough of the diurnal cycle: the triangles and lines coincide.
 But there are also several discrepancies, typically in \(\Tx\) when the measurements are made near the warmest hour of the day, and in \(\Tn\) when the measurements are made near the coldest hour.
 The most blatant example occurs on April 3rd,
-where the peak of the diurnal cycle is 7.2°C and occurs at 21:00 (all times are in Coordinated Universal Time (UTC), and tick marks are at midnight at the start of each day), but the day's \(\Tx\) record of 16.1°C is reached immediately after the previous day's measurement.
+where the peak of the diurnal cycle is 7.2°C and occurs at 21:00 (all times are in the UTC-6 time zone, and tick marks are at midnight at the start of each day), but the day's \(\Tx\) record of 16.1°C is reached immediately after the previous day's measurement.
 The measured \(\Tx\) therefore overestimates the diurnal cycle's peak by 8.9°C.
-  
+Ideally, measurements of the diurnal cycle peak and trough would be obtained by recording $\Tx$ and $\Tn$ at the coldest and warmest time of day respectively.
+This choice minimizes the possibility of the previous or next diurnal cycle affecting the measurement.
+For convenience, however, most observers record data at a single daytime hour instead.
+Consequently, measurements recorded in the early morning may not properly register the low of the previous night if it was unusually warm. 
+Similarly, measurements recorded in the afternoon may not properly register the afternoon's peak temperature if it was usually cool. 
+Our goal is to address the bias that results from this measurement practice.
+
  \begin{figure}[!h]
 \centering
 \includegraphics{../figures/waterloo_triangles.pdf}
-\caption{\label{fig:waterloo_triangles}
+\caption{
+\label{fig:waterloo_triangles}
 As can be seen in Fig.~\ref{fig:waterloo_triangles}, measurements recorded in the early morning may not properly register the low of the night before if it was unusually warm. Similarly, measurements recorded in the late afternoon may not properly register the high of the prior day if it was usually cool. In both cases, this will lead to a reduction in the variance of $\Tx$ and $\Tn$ distributions, but the effect will be greater at low (high) percentiles for $\Tx$ ($\Tn$). 
 An extract of the temperature measurements made at the Waterloo Municipal Airport.
 The blue and red triangles respectively indicate the coldest and warmest temperature of each diurnal cycle.
-The blue and red lines respectively denote the observed maximum and temperature recorded each day at 23:00 UTC (top) or 11:00~UTC (bottom) for the 24-hour period preceding the measurement.
-The occasional discrepancies between the 24-hour extrema, and the peaks and troughs of the diurnal cycle, are indicated with dotted lines.}
+The blue and red lines respectively denote the observed maximum and temperature recorded each day at 17:00 (top) or 5:00 (bottom) for the 24-hour period preceding the measurement.
+The occasional discrepancies between the 24-hour extrema, and the peaks and troughs of the diurnal cycle, are indicated with dotted lines.
+}
 \end{figure}
 
- This bias in the daily records can in turn induce bias in the long-term summary statistics that are of climatological interest.
-A measure as simple as the average daily maximum temperature for an entire year (2015) increases by over 1°C if the measurements are made at the warmest time of day 21:00 UTC rather than 14:00 UTC (see Figure~\ref{fig:waterloo_avgTnTx}).
-Conversely, the average \(\Tn\) is colder by over 1°C if \(\Tn\) is measured at 10:00 UTC (the coldest time of day on average) rather than 17:00 UTC.
+The bias in the daily records can in turn induce bias in the long-term summary statistics that are of climatological interest.
+A measure as simple as the average daily maximum temperature for an entire year (2015) increases by over 1°C if the measurements are made at 15:00 compared to 9:00 (see Figure~\ref{fig:waterloo_avgTnTx}).
+Conversely, the average \(\Tn\) is colder by over 1°C if \(\Tn\) is measured at 5:00 (the coldest time of day on average) rather than 15:00.
 
 \begin{figure}
 \centering
@@ -435,7 +442,7 @@ Conversely, the average \(\Tn\) is colder by over 1°C if \(\Tn\) is measured at
 Mean daily maximum temperature (left)
 and mean daily minimum temperature (right)
 extracted from hourly measurements at four Iowa weather stations in 2015
-under varying measurement times (UTC)
+under varying measurement times (UTC-6)
 .}
 \end{figure}
     
@@ -462,16 +469,15 @@ We can see this in Figure \ref{fig:waterloo_meanabsdiff}, where the respective v
 Mean absolute daily change in maximum temperature (left)
 and mean absolute daily change in minimum temperature (right)
 extracted from hourly measurements at four Iowa weather stations in 2015
-under varying measurement times (UTC)}
+under varying measurement times (UTC-6).}
 \end{figure}
     
 
 
-        \subsection{Our approach and proposed solution}\label{our-approach-and-proposed-solution}
+\subsection{Our approach and proposed solution}\label{our-approach-and-proposed-solution}
     
-
-
-        The goal of our approach is to infer the true \(\Tx\) and \(\Tn\) values throughout the data records, thereby correcting both the variance biases and the spurious trends.
+% Note: I'm not sure I agree with the next sentence [Maxime 2018-04-16]
+The goal of our approach is to infer the true \(\Tx\) and \(\Tn\) values throughout the data records, thereby correcting both the variance biases and the spurious trends.
 This stands in constrast to previous work, which has focused primarily on addressing spurious trends.
 We approach the problem as a missing data problem, wherein we seek to recover the values of \(\Tx\) and \(\Tn\) that may have been overwritten due to measurement practices. Our idea is to impute the hourly temperatures
 at the location of the measurements by borrowing information from the nearby stations that record hourly temperatures, which then can be used to create accurate summaries of temperature extremes.
@@ -480,36 +486,34 @@ Therefore, summary statistics extracted directly from those measurements would n
 However, even if mis-calibrated, the meteorological data from these nearby stations do contain valuable information about the hourly changes in temperatures on any given day.
 
 In this paper, we develop a spatiotemporal Gaussian process model using the information from nearby stations with hourly data and simulate multiple realizations of hourly temperature time series at each station of interest. The key technical difficulty is that these imputations of the temperature curves must satisfy the constraint of falling between the observed daily minima and maxima, and attaining those values at least once in a twenty-four hour period.
-We develop a novel, easy to implement, MCMC algorithm to sample from the posterior distribution satisfying the above constraints. Our constrained imputations are implemented in the Stan programming language \cite{stancite}; our code is publicly available.\tcr{Maxime: please make sure this is right...}
+We develop a novel, easy to implement, MCMC algorithm to sample from the posterior distribution satisfying the above constraints. Our constrained imputations are implemented in the Stan programming language \cite{stancite}; our code is publicly available on the first author's GitHub account.
 
-\section{A Spatiotemporal Model}\label{a-spatiotemporal-model}
+\section{A First Spatiotemporal Model}\label{a-spatiotemporal-model}
 
 To model measured temperatures at various locations and times, we develop a spatio-temporal Gaussian process model.
 In its simplest form, we posit that temperatures from stations that are near each other are more correlated than distant stations, and that those correlations should also decay in time.
 Squared exponential covariance functions can be used to model correlation decaying as a function of distance.
 We model the simultaneous temperatures throughout a region as a Gaussian process, with covariance between two locations \(\xvec\) and \(\xvec'\) given by the squared exponential kernel with characteristic lengthscale \(\ell_x\) and variance \(\sigmaf^2\):
-
 \begin{equation}
     \cov\del{T(\xvec), T(\xvec') \mid t} = k_{space}(\xvec, \xvec') =  \sigma_{space}^2 \exp\del{-\frac{\del{\xvec-\xvec'}\trans\del{\xvec-\xvec'}}{2\ell_x^2}}\,.
     \label{eq:kspace}
 \end{equation}
-
 Similarly, the time series of temperatures at a single location can be modeled as a Gaussian process with characteristic timescale \(\ell_t\):
-
 \begin{equation}
 \cov\del{T(t), T(t') \mid \xvec} = k_{time}(t, t') = \sigma_{time}^2 \exp\del{-\frac{\del{t-t'}^2}{2\ell_t^2}}\,.
 \end{equation}
-
 We then combine the spatial and temporal model by multiplying the correlation functions:
-
 \begin{equation}
 k_{st}(\xvec,\xvec',t,t') = k_{time}(t,t') \cdot k_{space}(\xvec, \xvec')\,.
 \end{equation}
-
 This yields the covariance of the Gaussian process underlying the spatio-temporal model of temperatures.
 The variances \(\sigma_{space}^2\) and \(\sigma_{time}^2\) are not separately identifiable, so we arbitrarily fix \(\sigma_{space}^2=1\).
-To complete the model specification, we add a mean temperature for each station \(\mu_{\station{i}}\), and iid normal measurement noise \(\epsilon_i\) with variance \(\sigman^2\):
+To allow for systematic differences between stations, we add a mean temperature parameter \(\mu_{\station{i}}\) for each station, where $\station{i}$ is the index of the station at which observation $i$ was recorded.
+This parameter captures both systematic differences in temperature between locations, for example due to differences in altitude, vegetation, or built environment around the station, and also calibration errors in the measurement apparatus.
 
+The observation model is twofold.
+At stations that provide a full temperature time series, we model each measurement as 
+To complete the model specification, we add a mean temperature for each station , and iid normal measurement noise \(\epsilon_i\) with variance \(\sigman^2\):
 \begin{equation}
 \begin{split}
     \T_i &= \mu_{\station{i}} + f(\xvec_i, t_i) + \epsilon_i\,,\\
@@ -518,10 +522,9 @@ To complete the model specification, we add a mean temperature for each station 
 \end{split}
 \eqlabel{eq:gpmodel}
 \end{equation}
-    
 
 
-        \subsection{Fitting the spatiotemporal model}\label{fitting-the-spatiotemporal-model}
+\subsection{Fitting the spatiotemporal model}\label{fitting-the-spatiotemporal-model}
 
 Software is readily available in many programming languages for fitting Gaussian process models, including inference on the covariance parameters. We chose to use the julia \texttt{GaussianProcesses.jl} package to fit the above spatiotemporal model to the hourly temperatures at four Iowa weather stations.
 The Iowa data set includes 47,864 measurements, which is computationally challenging to fit directly with a single Gaussian process.
@@ -537,13 +540,10 @@ We put weak normal priors on \(\mu_{\station{i}}\) with large standard deviation
 \end{equation}
 added to the covariance function.
 The spatio-temporal covariance function becomes
-
 \begin{equation}
     k_{st}(\xvec,\xvec',t,t') = k_{time}(t,t') \cdot k_{space}(\xvec, \xvec') + k_\mu(\xvec, \xvec') \,.
 \end{equation}
-
 Our model thus has 4 parameters, \(\sigmaf\), \(\ell_t\), \(\ell_x\) and \(\sigman\), which we fit by maximizing the marginal likelihood of the Iowa data
-
 \begin{equation}
 \label{eq:optimization}
 \widehat\sigmaf,\widehat\ell_t,\widehat\ell_x,\widehat\sigman = \argmax_{\sigmaf,\ell_t,\ell_x,\sigman} \cbr{ \Pr\del{ Y \mid {\sigmaf,\ell_t,\ell_x,\sigman} } }\,.
@@ -880,7 +880,7 @@ In our Iowa example, there are only four possible locations. For each location, 
 
 \begin{figure}
 \centering
-\includegraphics{../figures/spatial_variogram.png}
+\includegraphics{../figures/spatial_variogram.pdf}
 \caption{\label{fig:spatial_variogram} Semi-variogram}
 \end{figure}
     
@@ -920,9 +920,9 @@ Model & Log Likelihood & Var(err) & \(\E\)(Var(err)) & MSE(err) & \(\E\)(MSE(err
 Model & Log Likelihood & Var(err) & \(\E\)(Var(err)) & MSE(err) & \(\E\)(MSE(err))\tabularnewline
 \midrule
 \endhead
-\(\kSESE\) & -55,614 & 1.59 & 0.88 & 1.10 & 0.61\tabularnewline
-\(\kdiurn\) & -54,472 & 1.63 & 0.97 & 1.15 & 0.95\tabularnewline
-\(\ksumprod\) & -45,944 & 1.32 & 1.19 & 1.07 & 0.82\tabularnewline
+\(\kSESE\) & -55,614 & 1.59 & 0.88 & 1.12 & 0.44\tabularnewline
+\(\kdiurn\) & -54,472 & 1.63 & 0.97 & 1.12 & 0.69\tabularnewline
+\(\ksumprod\) & -45,944 & 1.32 & 1.19 & 1.04 & 0.81\tabularnewline
 \bottomrule
 \end{longtable}
     
@@ -942,7 +942,7 @@ We then evaluate the variance or MSE between the samples and the posterior mean 
 
 When evaluating models, we want the errors to be small, and so the empirical error variance and MSE to be low. A well-calibrated model should also have the expected error variances \(\E \del{\var\del{\error \mid \cdot}}\) close to their empirical values.
 
-These diagnostics for our first spatio-temporal model, the product of squared exponentials, are found in the first row of Table~\ref{table:diagnostics}. The empirical error variance using only nearby measurements is already fairly low, with typical errors of order \(\sqrt{1.59}=1.26\,\degreeC\). Incorporating the local measurements reduces it further to \(\sqrt{1.10}=1.05\,\degreeC\). However, the model is overly optimistic, and the expected errors underestimate the true errors.
+These diagnostics for our first spatio-temporal model, the product of squared exponentials, are found in the first row of Table~\ref{table:diagnostics}. The empirical error variance using only nearby measurements is already fairly low, with typical errors of order \(\sqrt{1.59}=1.26\,\degreeC\). Incorporating the local measurements reduces it further to \(\sqrt{1.12}=1.06\,\degreeC\). However, the model is overly optimistic, and the expected errors underestimate the true errors.
     
 
 
@@ -1000,14 +1000,14 @@ We now have three competing Gaussian process models, with covariance functions \
 Firstly, the marginal log-likelihood is the quantity maximized by the parameter fitting procedure in \eqref{eq:optimization}.
 The maximized log-likelihood can be found in the second column of Table~ \ref{table:diagnostics}, and we see that the more complex models indeed yield a much higher log-likelihood, promising a better model fit which should yield better predictions.
 Secondly, we compare the variance of the error in the predicted temperatures specified in \eqref{eq:varerr} when withholding all the data from a test station. Averaged over all of 2015, this is given in the third column, and shows more mixed results.
-The diurnal model \(\kdiurn\) performs worse than the simple \(\kSESE\) model, and \(\ksumprod\) only yields a small improvement.
+The diurnal model \(\kdiurn\) performs slightly worse than the simple \(\kSESE\) model, and \(\ksumprod\) only yields a small improvement.
 Thirdly, we can reintroduce the daily minima and maxima from the withheld station, and compare the mean squared error specified in \eqref{eq:mse} for predictions at the test station. Results in the fifth column show even more modest improvements for the more complex models.
+However, the more complex model give better estimates of their own inaccuracy: the expected errors reported by the model are closer to the empirical errors for predicting the witheld time series.
 
-We interpret these results as a reminder that predictions using Gaussian process are sensitive to model specification when extrapolating, but fairly insensitive to the model when interpolating \cite{stein2012interpolation}.
+
+We interpret these results as a reminder that prediction accuracy using Gaussian process is sensitive to model specification when extrapolating, but fairly insensitive to the model when interpolating \cite{stein2012interpolation}.
 Our imputations interpolate the temperatures from nearby stations, further aided by the constraints imposed by the daily \(\Tn\) and \(\Tx\) measurements, which could explain why the choice of model does not seem to have a large impact on the performance of our imputation procedure.
 This insensitivity can be seen as reassuring, as it shows robustness against model misspecification.
-    
-
 
         \section{Imputed summary statistics}\label{imputed-summary-statistics}
     
@@ -1060,7 +1060,7 @@ We therefore do not consider the introduction of a uniform prior on \(\hour\) in
 If we do so for \(\hour=1,2,\ldots,24\), is there information available in these samples to infer \(\hour\)?
 We will examine sample imputations to answer this question.
 Figure~\ref{fig:measure_hour_example} shows mean imputation for temperatures over nine days starting on February~27, 2015. The orange line is the mean using only nearby temperatures (shifted by a constant to match the true temperatures), while the green line is additionally conditional on \(\Tn\) and \(\Tx\); the true temperatures are shown in grey.
-The top plot shows the imputation under the correct daily measurement time (17 UTC), while the bottom plot is under an incorrect measurement time (5 UTC).
+The top plot shows the imputation under the correct daily measurement time (11:00 UTC-6), while the bottom plot is under an incorrect measurement time (23:00 UTC-6).
 The first unsurprising observation is that assuming an incorrect measurement time can lead to wildly inaccurate imputations.
 But we then also notice that assuming the wrong time also causes the mean constrained imputation to depart further from the unconstrained imputation
 (that is, the green and orange lines are further apart).
@@ -1082,7 +1082,7 @@ and we may be able to infer the true \(\hour\) by maximizing \(\discrepancy_\hou
         \begin{figure}
 \centering
 \includegraphics{../figures/measure_hour_example.pdf}
-\caption{\label{fig:measure_hour_example} A sample window showing constrained and unconstrained imputations assuming (top) the correct measurement hour (17 UTC), and (bottom) the wrong measurement hour (5 UTC). Assuming the wrong measurement time drives the constrained mean imputation away from the unconstrained mean imputation.}
+\caption{\label{fig:measure_hour_example} A sample window showing constrained and unconstrained imputations assuming (top) the correct measurement hour (11:00 UTC-6), and (bottom) the wrong measurement hour (23:00 UTC-6). Assuming the wrong measurement time drives the constrained mean imputation away from the unconstrained mean imputation.}
 \end{figure}
     
 
@@ -1105,7 +1105,7 @@ that we demonstrate in Section~\ref{sec:illustrate_bias}
 could lead to wrong estimates and conclusions regarding long-term trends in temperature records.
 We reformulated the source of this bias as a missing data problem, and imputed the missing hourly temperatures at the weather station using posterior samples from a spatiotemporal Gaussian process model.
 The model allows the combination of information from the measured daily minimum (\(\Tn\)) and maximum (\(\Tx\)) temperatures, and from measurements of hourly temperatures at nearby meteorological stations.
-While ours is not a realistic physical model, it is very flexible, and it performs well for the task of interpolating temperatures between nearby locations and times.
+While ours is not a physical model, it is very flexible, and it performs well for the task of interpolating temperatures between nearby locations and times.
 Indeed, more complex covariance functions (with a diurnal component and a sum of short-range and long-range components) showed only modest improvements in the mean squared error of the imputations compared to a withheld hourly temperature record.
     
 
@@ -1118,7 +1118,7 @@ Our model could be improved in the future with a more complete characterization 
     
 
 
-        In order to condition the imputations on the taily \(\Tx\) and \(\Tn\), we developed SmoothHMC, a general algorithm based on Hamiltonian Monte Carlo with a smoothed approximation of the target distribution that can sample from a multivariate distribution conditionally on its observed minimum and maximum.
+        In order to condition the imputations on the daily \(\Tx\) and \(\Tn\), we developed SmoothHMC, a general algorithm based on Hamiltonian Monte Carlo with a smoothed approximation of the target distribution that can sample from a multivariate distribution conditionally on its observed minimum and maximum.
 It showed an excellent ability to sample from the conditional distribution in an example where the distribution function can also be obtained analytically.
 SmoothHMC is the main technical contribution of this paper, and we believe the method could find applications beyond the present setting.
 
