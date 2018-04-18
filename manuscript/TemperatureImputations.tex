@@ -400,11 +400,12 @@ To address this issue, some homogenization methods have also employed frequency 
 \subsection{The problem} 
 \label{sec:illustrate_bias}
 %\label{illustration-of-bias-induces-by-measurement-hour}
-Many historical measurements of daily temperatures are provided as daily maxima and minima, which should bracket the diurnal cycle for each day. In this section we illustrate the bias in the measurements of maximum and minimum temperatures ($\Tx$ and $\Tn$ respectively) for a given cycle due to the time of day at which observations are recorded.  This bias exists because $\Tx$ and $\Tn$ are often recorded by an observer who visits a weather station every 24 hours, and notes the maximum and minimum temperatures measured by the thermometer over the previous 24 hours.
-
-Ideally, the observer would visit the station at midnight, and the recorded highest and lowest temperatures over the past 24 hours would be representative of the maximum and minimum of the diurnal cycle of the previous day.
-
+Many historical measurements of daily temperatures are provided as daily maxima and minima, which should bracket the diurnal cycle for each day. In this section we illustrate the bias, 
+ in the measurements of maximum and minimum temperatures ($\Tx$ and $\Tn$ respectively) for a given cycle due to the time of day at which observations are recorded.
+This bias has long been recognized in the scientific literature, see for example \citep{baker1975effect} and references therein.
 Figure \ref{fig:waterloo_triangles} illustrates this bias in daily maxima and minima with ten days of hourly temperature measurements from the Waterloo Municipal Airport station in Iowa.
+
+The bias exists because $\Tx$ and $\Tn$ are often recorded by an observer who visits a weather station every 24 hours, and notes the maximum and minimum temperatures measured by the thermometer over the previous 24 hours.
 Ideally, \(\Tx\) measurements should capture the peak of each diurnal cycle, and \(\Tn\) its trough.
 We emulate daily $\Tx$/$\Tn$ measurements by dividing the data into 24 hour measurement windows, and reporting the minimum and maximum temperature that was recorded in this window.
 On most days, the measurements capture the peak and trough of the diurnal cycle: the triangles and lines coincide.
