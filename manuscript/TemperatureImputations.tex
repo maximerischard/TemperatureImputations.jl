@@ -321,8 +321,9 @@
    \DeclareMathOperator{\kSESE}{k_{\mathtt{SExSE}}}
    \DeclareMathOperator{\kdiurn}{k_{\mathtt{SESE_{24}}}}
    \DeclareMathOperator{\ksumprod}{k_{\mathtt{sumprod}}}
-   \newcommand{\iday}{\mathtt{day}}
-   \newcommand{\dayset}[1]{\cbr{i}_{#1}}
+   \newcommand{\iday}{d}
+   \newcommand{\tmeas}{t^{\mathrm{meas}}}
+   \newcommand{\dayset}[1]{(\tmeas_{#1-1},\,\tmeas_{#1}]}
    \newcommand{\discrepancy}{\delta}
    \newcommand{\Xmax}{X_{\max}}
    \newcommand{\Xmin}{X_{\min}}
@@ -418,12 +419,11 @@ Consequently, measurements recorded in the early morning may not properly regist
 Similarly, measurements recorded in the afternoon may not properly register the afternoon's peak temperature if it was usually cool. 
 Our goal is to address the bias that results from this measurement practice.
 
- \begin{figure}[!h]
+ \begin{figure}[!ht]
 \centering
 \includegraphics{../figures/waterloo_triangles.pdf}
 \caption{
 \label{fig:waterloo_triangles}
-As can be seen in Fig.~\ref{fig:waterloo_triangles}, measurements recorded in the early morning may not properly register the low of the night before if it was unusually warm. Similarly, measurements recorded in the late afternoon may not properly register the high of the prior day if it was usually cool. In both cases, this will lead to a reduction in the variance of $\Tx$ and $\Tn$ distributions, but the effect will be greater at low (high) percentiles for $\Tx$ ($\Tn$). 
 An extract of the temperature measurements made at the Waterloo Municipal Airport.
 The blue and red triangles respectively indicate the coldest and warmest temperature of each diurnal cycle.
 The blue and red lines respectively denote the observed maximum and temperature recorded each day at 17:00 (top) or 5:00 (bottom) for the 24-hour period preceding the measurement.
@@ -481,7 +481,7 @@ The goal of our approach is to infer the true \(\Tx\) and \(\Tn\) values through
 This stands in constrast to previous work, which has focused primarily on addressing spurious trends.
 We approach the problem as a missing data problem, wherein we seek to recover the values of \(\Tx\) and \(\Tn\) that may have been overwritten due to measurement practices. Our idea is to impute the hourly temperatures
 at the location of the measurements by borrowing information from the nearby stations that record hourly temperatures, which then can be used to create accurate summaries of temperature extremes.
-These hourly measurements at neighboring weather stations are considered less reliable by climatologists, as they are not as carefully documented, calibrated, and situated. For instance, weather stations at locations experiencing huge human activity like airports will record higher daily temperatures on average.
+These hourly measurements at neighboring weather stations are considered less reliable by climatologists, as they are not as carefully documented, calibrated, and situated. For instance, weather stations at locations experiencing a lot of human activity, like airports, may record higher daily temperatures on average.
 Therefore, summary statistics extracted directly from those measurements would not be directly usable for climatology, as they could suffer from systematic bias.
 However, even if mis-calibrated, the meteorological data from these nearby stations do contain valuable information about the hourly changes in temperatures on any given day.
 
@@ -511,18 +511,28 @@ The variances \(\sigma_{space}^2\) and \(\sigma_{time}^2\) are not separately id
 To allow for systematic differences between stations, we add a mean temperature parameter \(\mu_{\station{i}}\) for each station, where $\station{i}$ is the index of the station at which observation $i$ was recorded.
 This parameter captures both systematic differences in temperature between locations, for example due to differences in altitude, vegetation, or built environment around the station, and also calibration errors in the measurement apparatus.
 
-The observation model is twofold.
-At stations that provide a full temperature time series, we model each measurement as 
-To complete the model specification, we add a mean temperature for each station , and iid normal measurement noise \(\epsilon_i\) with variance \(\sigman^2\):
+The observation model depends on the type of measurement obtained at a given location.
+At stations $j$ that provide a full temperature time series, we model the $i^{\mathrm{th}}$ temperature record as a noisy measurement from the true time series, with iid normal noise:
 \begin{equation}
 \begin{split}
-    \T_i &= \mu_{\station{i}} + f(\xvec_i, t_i) + \epsilon_i\,,\\
-    f(\xvec_i, t_i) &\sim \GP\del{0, k_{st}(\xvec,\xvec',t,t')}\,,\\
-    \epsilon_i &\overset{\iid}{\sim} \normal\del{0,\sigman^2}\,.\\
+    \T_{ij} &= \mu_{j} + f(\xvec_j, t_{ij}) + \epsilon_{ij}\,,\\
+    f(\xvec_j, t_{ij}) &\sim \GP\del{0, k_{st}(\xvec,\xvec',t,t')}\,,\\
+    \epsilon_{ij} &\overset{\iid}{\sim} \normal\del{0,\sigman^2}\,.\\
 \end{split}
 \eqlabel{eq:gpmodel}
 \end{equation}
-
+The noise term captures measurement error, including rounding errors, and temperature fluctuations occuring on a very short time scale.
+At stations that only provide daily $\Tx$ and $\Tn$ records, 
+we denote the time of the $\iday^{\mathrm{th}}$ daily measurement by $\tmeas_{\iday}$, 
+and approximate the $\Tx$ and $\Tn$ observation respectively as the maximum or minimum temperatures at a discretized set of times inside of $\dayset{\iday}$:
+\begin{equation}
+\begin{split}
+    \del{\Tx}_{\iday j} &= \max\cbr{\T_{ij}\text{, for all $i$ such that } t_{ij} \in \dayset{\iday}} \,,\\
+    \del{\Tn}_{\iday j} &= \min\cbr{\T_{ij}\text{, for all $i$ such that } t_{ij} \in \dayset{\iday}} \,,
+\end{split}
+\eqlabel{eq:obs_Tn_Tx}
+\end{equation}
+with $\T_{ij}$ modeled as in \eqref{eq:gpmodel}.
 
 \subsection{Fitting the spatiotemporal model}\label{fitting-the-spatiotemporal-model}
 
@@ -531,7 +541,6 @@ The Iowa data set includes 47,864 measurements, which is computationally challen
 There are many methods to handle large data sets with Gaussian processes: for example \cite{quinonero2007approximation} review sparse approximations to Gaussian processes from a machine learning perspective, while \cite{banerjee2008gaussian} develop a method specifically for large spatial data sets.
 For simplicity, we chose instead to divide the data into 10-day chunks, modeled as independent Gaussian processes with shared hyperparameters.
 We put weak normal priors on \(\mu_{\station{i}}\) with large standard deviation \(\sigma_{\mu}=10\,\degreeC\), which can be incorporated into the Gaussian process with an additional term
-
 \begin{equation}
     k_{\mu}(\xvec, \xvec') = \begin{cases}
 \sigma_\mu^2 &\text{if } \xvec = \xvec'\,, \\
@@ -546,7 +555,7 @@ The spatio-temporal covariance function becomes
 Our model thus has 4 parameters, \(\sigmaf\), \(\ell_t\), \(\ell_x\) and \(\sigman\), which we fit by maximizing the marginal likelihood of the Iowa data
 \begin{equation}
 \label{eq:optimization}
-\widehat\sigmaf,\widehat\ell_t,\widehat\ell_x,\widehat\sigman = \argmax_{\sigmaf,\ell_t,\ell_x,\sigman} \cbr{ \Pr\del{ Y \mid {\sigmaf,\ell_t,\ell_x,\sigman} } }\,.
+\widehat\sigmaf,\widehat\ell_t,\widehat\ell_x,\widehat\sigman = \argmax_{\sigmaf,\ell_t,\ell_x,\sigman} \cbr{ \Pr\del{ \T \mid {\sigmaf,\ell_t,\ell_x,\sigman} } }\,.
 \end{equation}
 We obtained \(\widehat\sigmaf=3.73\,\degreeC\), \(\widehat\ell_t=2.7\,\mathrm{hours}\), \(\widehat\ell_x=176.4\,\mathrm{km}\) and \(\widehat\sigman=0.44\,\degreeC\).
     
@@ -735,7 +744,7 @@ In Stan, the user specifies a probabilistic data-generating process for the obse
 Stan then compiles this model into a custom \texttt{C++} program that implements
 posterior sampling using HMC.
 We implement two Stan models to draw from \(\Fcond\).
-The Stan model code for both are available in appendix \ref{sec:stan_illustration}.
+The Stan model code for both are available from the GitHub account of the first author.
 The first model implements \eqref{eq:normal_lik},
 with the narrow normal likelihood term around the maximum and minimum,
 while the second model includes the \(\softmax\) and \(\softmin\) approximations \eqref{eq:softmax} to the maximum and minimum functions.
@@ -820,38 +829,30 @@ Thirdly, we allow for the mean temperature to be different at different location
 and so the imputed temperatures are shifted by an additional parameter \(\mu_{\miss}\),
 to which we attach a vague prior.
 To summarize, the probabilistic model that we wish to draw posterior imputations of \(\T_\miss\) from is given by:
-
 \begin{equation}
 \begin{aligned}
     \mu_{\miss} &\sim \normal\del{0,10^2} & \text{ (vague prior on mean temperature)} \\
     \T_{\miss \mid \obs} &\equiv \T_{\miss} \mid \T_\obs \sim \normal\del{\mu_{\miss \mid \obs}, \Sigma_{\miss \mid \obs}} & \text{ (posterior from $\T_\obs$ becomes prior)} \\
     \T_\miss &= \mu_\miss + \T_{\miss \mid \obs} \\
-    \Tx\sbr{\iday} &= \max_{i \in \dayset{\iday}}\cbr{ \T_{\miss,i}} & \text{ (observe maximum in 24hr window)}\\
-    \Tn\sbr{\iday} &= \min_{i \in \dayset{\iday}}\cbr{ \T_{\miss,i}} & \text{ (observe minimum in 24hr window)}
+    \del{\Tx}_{\iday} &= \max\cbr{\T_{\miss,\,i}\text{, for all $i$ such that } t_{\miss\,,i} \in \dayset{\iday}} \,,\\
+    \del{\Tn}_{\iday} &= \min\cbr{\T_{\miss,\,i}\text{, for all $i$ such that } t_{\miss\,,i} \in \dayset{\iday}} \,.
 \end{aligned}
 \eqlabel{eq:idealmodel}
 \end{equation}
-
-where \(\dayset{\iday}\) is the set of indices \(i\) such that the time \(t_{\miss,i}\) is in the measurement window of day \(\iday\).
-    
-
-
-        To sample from this model, we modify it with the \(\softmax\) approximation to the maximum, and a normal likelihood:
+To sample from this model, we modify it with the \(\softmax\) approximation to the maximum, and a normal likelihood:
 \begin{equation}
 \begin{split}
-    \Tx\sbr{\iday} &\sim \normal\del{\softmax_{i \in \dayset{\iday}} \cbr{ T_{\miss,i}; k=10}, 0.1^2}\,, \\
-    \Tn\sbr{\iday} &\sim \normal\del{\softmin_{i \in \dayset{\iday}} \cbr{ T_{\miss,i}; k=10}, 0.1^2}\,.
+    \del{\Tx}_{\iday} &\sim \normal\del{\softmax_{i \in \dayset{\iday}} \cbr{ T_{\miss,i}; k=10}, 0.1^2}\,, \\
+    \del{\Tn}_{\iday} &\sim \normal\del{\softmin_{i \in \dayset{\iday}} \cbr{ T_{\miss,i}; k=10}, 0.1^2}\,.
 \end{split}
 \eqlabel{eq:smoothed_model}
 \end{equation}
-    
-
 
         A few samples from this imputation procedure are shown in Figure~\ref{fig:imputations_2x2}(c).
-From May 28, 2015 to June 1, 2015, hourly temperatures are imputed at Waterloo Airport, using the hourly temperature measurements from nearby stations to inform the course of the temperatures, and using the daily minima and maxima ``measurements'' to constrain the imputed temperatures.
+From May 28, 2015 to June 1, 2015, hourly temperatures are imputed at Waterloo Airport, using the hourly temperature measurements from nearby stations to inform the course of the temperatures, and using the daily minima and maxima extracted from the hourly measurements to constrain the imputed temperatures.
 One can verify visually that the imputations respect the \(\Tn\) and \(\Tx\) constraints, reaching but not exceeding each extreme on each day.
-Since we actually have hourly data for Waterloo, but yet fed our algorithm only the daily extremes, we can also plot the hidden temperatures (in black), and see how faithfully the imputations reproduce them.
-We see that the imputations indeed track the true measurements very closely.
+Since we actually have hourly data for Waterloo, yet fed our algorithm only the daily extremes, we can also plot the hidden temperatures (in black), and see how faithfully the imputations reproduce them.
+We see that the imputations indeed track the true measurements closely.
 On May 31st, we can see that the imputations capture two possibilities: the \(\Tx\) record \emph{could} have been set early in the 24-hr period, or at its end.
 This success demonstrates that SmoothHMC is capable of imputing temperature time series from the constrained posterior distribution \(\T_\miss \mid \T_\obs, \Tn, \Tx\).
     
@@ -861,8 +862,7 @@ This success demonstrates that SmoothHMC is capable of imputing temperature time
 
 \subsection{Variogram}\label{variogram}
 
-We can visually inspect our model by plotting temporal and spatial semi-variograms. The semi-variogram \tcr{Maxime:Give reference} of a stationary spatio-temporal function \(Y(\xvec,t)\) is a function of the spatial lag \(\hvec\) and the temporal lag \(r\)
-
+We can visually inspect our model by plotting temporal and spatial semi-variograms. The semi-variogram  of a stationary spatio-temporal function \(Y(\xvec,t)\) is a function of the spatial lag \(\hvec\) and the temporal lag \(r\)\citep[see for example][chapter 6]{sherman2011spatial}:
 \begin{equation}
     \gamma\del{\hvec,r} = \frac{1}{2} \E\sbr{\del{Y\del{\xvec,t}-Y\del{\xvec+\hvec,t+r}}^2} = \var\del{ Y\del{\xvec,t}} - \cov\del{ \del{Y\del{\xvec,t}} , Y\del{\xvec+\hvec,t+r}}\,.
 \end{equation}
@@ -1123,12 +1123,11 @@ It showed an excellent ability to sample from the conditional distribution in an
 SmoothHMC is the main technical contribution of this paper, and we believe the method could find applications beyond the present setting.
 
 We used this method to obtained imputations of the temperature time series that satisfied the constraints imposed by the measured \(\Tn\) and \(\Tx\).
-The imputation of withheld temperatures at Waterloo Municipal Airport tracked the true temperatures closely, within a root mean square error of \(1.04\,\degreeC\).\tcr{This is a lot!?}
+The imputation of withheld temperatures at Waterloo Municipal Airport track the true temperatures, within a root mean square error of \(1.02\,\degreeC\).
 We view as particularly encouraging that the imputations successfully capture bimodalities of the possible time of the maximum or minimum temperature on days where this time is difficult to infer from the available information.
 
 Future improvements to the imputation strategy would include the inclusion of rounding effects in the measurement model, explicit treatment of non-stationarity due to coastlines or other geographical features, and of altitude differences.
 Gaussian process modeling allows for much flexibility in the choice of covariance kernels, and improved modeling should lead to more accurate imputations.
-    
 
 
         The imputed time series are the primary output of this work, but they are intended as a starting point for further analyses motivated by different scientific goals.
