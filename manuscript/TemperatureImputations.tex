@@ -395,7 +395,7 @@ Homogenization typically proceeds through identifying non-climatic `breakpoints'
 Once a breakpoint is identified, the measurements recorded after the breakpoint are adjusted in some way to reduce or remove the inhomogeneity.
 Most applications of these methods, however, focus on adjusting the mean state of the data rather than the shape of the distribution \citep[see][and references therein]{della2006method}.
 While this may be sufficient for monthly data, it is known that changes in measurement practices may affect different quantiles of the daily temperature distribution unequally.
-To address this issue, some homogenization methods have also employed frequency distribution matching techniques, so that each temperature recorded after a breakpoint is adjusted according to its percentile within the time series \tcr{percentile of what?} \citep{della2006method, trewin2013daily}. 
+To address this issue, some homogenization methods have also employed frequency distribution matching techniques, so that each temperature recorded after a breakpoint is adjusted according to its percentile within the time series \citep{della2006method, trewin2013daily}. 
 
 \subsection{The problem} 
 \label{sec:illustrate_bias}
@@ -868,27 +868,27 @@ We can visually inspect our model by plotting temporal and spatial semi-variogra
 \end{equation}
 
 For a Gaussian Process model, with a stationary kernel \(k(\hvec,r)=k(\xvec,\xvec+\hvec,t,t+r)\) this can be expressed in terms of the observation noise \(\sigman\) and kernel function \(k(\cdot,\cdot)\), as
-
 \begin{equation}
     \label{eq:gp_variogram}
     \gamma\del{\hvec,r} = \sigman^2 + k\del{0,0} - k(\hvec,r)\,.
 \end{equation}
+From the data, the variogram can also be estimated empirically, be averaging the square differences of any two observations that are separated by \(\hvec\) in space, and \(r\) in time (or, in practice, within half a bin width of \(r\)).
+By comparing the empirical variogram to the variogram of our fitted \(\GP\) model, we obtain a visual diagnosis of the model.
 
-From the data, the semi-variogram can also be estimated empirically, be averaging the square differences of any two observations that are separated by \(\hvec\) in space, and \(r\) in time (or, in practice, within half a bin width of \(\hvec\) and \(r\)). By comparing the empirical variogram to the variogram of our fitted \(\GP\) model, we obtain a visual diagnosis of the model.
-
-In our Iowa example, there are only four possible locations. For each location, we plot the empirical temporal variogram \(\widehat\gamma\del{0,r}\). For any pair of stations separated by \(\hvec\) (fixed), we can also plot \(\widehat\gamma\del{\hvec,r}\). We then overlay the model's semi-variogram obtained through equation \eqref{eq:gp_variogram}, resulting in Figure~\ref{fig:spatial_variogram}.
+In our Iowa example, there are only four possible locations. For each location, we plot the empirical temporal variogram \(\widehat\gamma\del{0,r}\). For any pair of stations separated by \(\hvec\) (fixed), we can also plot the estimate \(\widehat\gamma\del{\hvec,r}\). We then overlay the model's semi-variogram obtained through equation \eqref{eq:gp_variogram}, resulting in Figure~\ref{fig:spatial_variogram}.
 
 \begin{figure}
 \centering
 \includegraphics{../figures/spatial_variogram.pdf}
-\caption{\label{fig:spatial_variogram} Semi-variogram}
+\caption{\label{fig:spatial_variogram}
+Semi-variograms of the Iowa temperature temperature time series.
+Each station is labeled by its ICAO airport code.
+The empirical semi-variograms are shown in black, and the variograms for the three covariance models proposed in this paper are shown using parameters fitted by maximizing the marginal likelihood.
+The temporal semi-variograms for each station are shown on the diagonal, while the off-diagonal plots show the pairwise semi-variograms between stations, evaluated for a fixed spatial lag \(\hvec\) equal to the distance between the two stations.
+}
 \end{figure}
     
-
-
-        We notice that the variogram of the simple \texttt{SExSE} model tracks the empirical variogram well at short lags, but fails to capture the diurnal cycle, and the fit degrades at long lag. We attempt to improve the model in Section~\ref{sec:improving_model}.
-    
-
+        We notice that the variogram of the model with product kernel (labeled \(\kSESE\)) tracks the empirical variogram well at short lags, but fails to capture the diurnal cycle, and the fit degrades at long lag. We improve the model in Section~\ref{sec:improving_model}.
 
         \subsection{Error and expected error}\label{error-and-expected-error}
 
@@ -1028,20 +1028,16 @@ We view as a particular strength of our approach that the imputations are able t
         \begin{figure}
 \centering
 \includegraphics{../figures/imputed_summary_stats.pdf}
-\caption{\label{fig:imputed_summary_stats}Average maximum daily temperature summary statistic obtained under varying hour of measurement from withheld Waterloo Airport data (shown in blue), and from imputations of the withheld data (shown in orange with 2~SD envelope).}
+\caption{\label{fig:imputed_summary_stats}Average minimum (left) and maximum (right) daily temperature summary statistic obtained under varying hour of measurement from withheld Waterloo Airport data (shown in blue), and from imputations of the withheld data (shown in orange with 2~SD envelope) obtained under the $\kSESE$ covariance function (top) and the \(\ksumprod\) (bottom) covariance function.}
 \end{figure}
     
-
-
         These imputations however are not the final aim of our analysis.
 Rather, our stated goal is to undo, or at least account for, the sensitivity of summary statistics to measurement time, for example the average \(\Tx\) in Figure~\ref{fig:waterloo_avgTnTx}.
 Equipped with these imputations, is it possible to infer what the value of the summary statistic would have been for different measurement hours?
-This seems to be possible as demonstrated in Figure~\ref{fig:imputed_summary_stats},
+This possibility is demonstrated in Figure~\ref{fig:imputed_summary_stats},
 which shows the same summary statistic as in Figure~\ref{fig:waterloo_avgTnTx} applied to the imputations as well as the (witheld) hourly data at Waterloo Airport.
-It can be seen that the imputed summary statistics track within about 0.1~\(\degreeC\) of the true values,
-while the posterior standard deviation gives a fair estimate of the imputation error.
-    
-
+It can be seen that the imputed summary statistics track within about 0.1~\(\degreeC\) of the true values.
+The product kernel \(\kSESE\) and the sum of products kernel \(\ksumprod\) seem to perform equally well imputing the summary statistics for different times, but the \(\ksumprod\) gives more honest, wider credible intervals.
 
         \section{Inference on measurement hour}\label{inference-on-measurement-hour}
 
