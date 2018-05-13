@@ -1,11 +1,11 @@
 #!/bin/bash
-#SBATCH -J stan_pipeline_hr     # name for job array
-#SBATCH -p general    #Partition
-#SBATCH -t 0-12:00:00         #Running time of 1 day
-#SBATCH --mem-per-cpu 2000   # request 4GB memory
-#SBATCH -n 1                 # 2 cores
+#SBATCH -J stan_pipeline_hr  # name for job array
+#SBATCH -p shared            # Partition
+#SBATCH -t 0-12:00:00        # Running time of 12 hours
+#SBATCH --mem-per-cpu 2000   # request 2GB memory
+#SBATCH -n 1                 # 1 core
 #SBATCH -N 1                 # All cores on one machine
-#SBATCH --mail-type=ALL      #Type of email notification- BEGIN,END,FAIL,ALL
+#SBATCH --mail-type=ALL      # Type of email notification- BEGIN,END,FAIL,ALL
 #SBATCH --mail-user=mrischard@g.harvard.edu
 #SBATCH --array 1-119
 

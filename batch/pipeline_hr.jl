@@ -11,13 +11,10 @@ doc = """
 using DocOpt
 
 using Stan
-using DataTables
-using DataTables: head
 using GaussianProcesses
 using PDMats: PDMat
 using Base.Dates: Day, Hour
 using JLD
-using GaussianProcesses: SumKernel
 
 arguments = docopt(doc)
 saved_dir = arguments["<saved_dir>"]
@@ -36,15 +33,14 @@ stan_increment = Day(3)
 module TempModel
     root_dir = ".."
     using PDMats
-    using DataTables
-    using Mamba
+    using PDMats: PDMat
+    using GaussianProcesses: GP, Kernel, MeanZero, predict
     using Base.Dates: Day, Hour
     using Stan
-    using Proj4
-    using DataTables: DataTable, by
-    using DataTables
-    using DataTables: by
+    using DataFrames
+    using DataFrames: by
     using GaussianProcesses
+    using Proj4
 
     include(joinpath(root_dir, "src/utils.jl"))
     include(joinpath(root_dir, "src/preprocessing.jl"))
@@ -63,11 +59,11 @@ function predictions_fname(usaf::Int, fw::FittingWindow)
 end
 
 isdList=TempModel.read_isdList(;data_dir=root_dir)
-isdSubset=isdList[[(usaf in (725450,725460,725480,725485)) for usaf in isdList[:USAF].values],:]
+isdSubset=isdList[[(usaf in (725450,725460,725480,725485)) for usaf in isdList[:USAF]],:]
 
 hourly_cat=TempModel.read_Stations(isdSubset; data_dir=root_dir)
 itest=3
-test_usaf=get(isdSubset[itest,:USAF])
+test_usaf=isdSubset[itest,:USAF]
 
 TnTx_true = TempModel.test_data(hourly_cat, itest, hr_measure_true)
 TnTx_fals = TempModel.test_data(hourly_cat, itest, hr_measure_fals)
@@ -78,7 +74,7 @@ TnTx_fals[:Tx] = TnTx_true[:Tx]
 # copy-pasted from pipeline1.jl
 nearby_windows = FittingWindow[]
 dt_start=DateTime(2015,1,1,0,0,0)
-increm=get(maximum(hourly_cat[:ts])-minimum(hourly_cat[:ts])) / 15
+increm=(maximum(hourly_cat[:ts])-minimum(hourly_cat[:ts])) / 15
 window=3*increm
 while true
     dt_end=dt_start+window
@@ -86,7 +82,7 @@ while true
     edate = Date(dt_end)
     fwindow = FittingWindow(sdate,edate)
     push!(nearby_windows, fwindow)
-    if dt_end >= get(maximum(hourly_cat[:ts]))
+    if dt_end >= (maximum(hourly_cat[:ts]))
         break
     end
     dt_start+=increm
@@ -151,8 +147,6 @@ for fname in readdir(joinpath(stan_dir, "tmp"))
     mv(joinpath(stan_dir, "tmp", fname), joinpath(stan_dir, fname); remove_destination=true)
 end
 rm(joinpath(stan_dir, "tmp"))
-
-
 
 writecsv(joinpath(stan_dir,"timestamps.csv"), reshape(ts_window, length(ts_window), 1))
 
