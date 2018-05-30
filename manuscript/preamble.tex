@@ -1,0 +1,150 @@
+% Nicer default font (+ math font) than Computer Modern for most use cases
+\usepackage{mathrsfs}
+\usepackage{graphicx}
+\usepackage{xr-hyper} % cross-references (between documents)
+\usepackage{xcolor} % Allow colors to be defined
+\usepackage{geometry} % Used to adjust the document margins
+\usepackage{amsmath} % Equations
+\usepackage{amssymb} % Equations
+% Colors for the hyperref package
+% The hyperref package gives us a pdf with properly built
+% internal navigation ('pdf bookmarks' for the table of contents,
+% internal cross-reference links, web links for URLs, etc.)
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    pdfborder=0 0 1,
+    pdftitle=\temptitle{},
+    allcolors=[rgb]{0.00,0.38,0.59},
+    allbordercolors=[rgb]{0.60,0.76,0.86}
+}
+\usepackage[title,toc]{appendix}
+\usepackage{natbib}
+\usepackage{bm}
+\usepackage{mathtools}
+\usepackage{pdflscape}
+\usepackage[doublespacing,nodisplayskipstretch]{setspace}
+% only use if doublespacing:
+\renewcommand*{\arraystretch}{0.6} % https://tex.stackexchange.com/questions/183562/how-to-reduce-vertical-space-in-matrix
+\makeatletter
+\renewcommand*\env@cases[1][0.6]{%
+  \let\@ifnextchar\new@ifnextchar
+  \left\lbrace
+  \def\arraystretch{#1}%
+  \array{@{}l@{\quad}l@{}}%
+}
+\makeatother
+% \def\SmallColSep{\setlength{\arraycolsep}{3pt}}
+% \usepackage{authblk}
+
+\usepackage{enumitem}
+\newlist{flatlist}{enumerate*}{1}
+\setlist[flatlist]{label=(\arabic*)}
+
+\geometry{tmargin=1in,bmargin=1in,lmargin=1in,rmargin=1in}
+\def\sectionautorefname{Section}
+\def\Appendixautorefname{Appendix}
+\def\subsectionautorefname{Section}
+\def\figureautorefname{Figure}
+\def\tableautorefname{Table}
+\def\equationautorefname~#1\null{(#1)\null}
+
+\newcommand{\keywords}{Gaussian processes; kriging; Climate; Bayesian computation; }
+\hypersetup{pdfkeywords=\keywords{}}
+\hypersetup{pdfauthor=Maxime Rischard}
+\newcommand{\tempauthors}{
+    Maxime Rischard
+    \thanks{We thank Peter Huybers, Debdeep Pati and Martin Lysy for their ideas, questions and suggestions.}
+    \vspace{-0.2em}
+    \\
+    Department of Statistics, Harvard University \\
+
+    Natesh Pillai \vspace{-0.2em} \\
+    Department of Statistics, Harvard University \\
+
+    Karen A. McKinnon \vspace{-0.2em} \\
+    National Center for Atmospheric Research; Descartes Labs
+}
+
+% Authors using authblk package
+% \author[*]{Maxime Rischard}
+% \author[**]{Karen A. McKinnon}
+% \author[*]{Natesh Pillai}
+% \affil[*]{Department of Statistics, Harvard University}
+% \affil[**]{National Center for Atmospheric Research; Descartes Labs}
+
+% Macros %
+\newcommand{\mathbold}[1]{\bm{#1}} % if not using mathpazo
+\DeclarePairedDelimiter{\parenthesis}{\lparen}{\rparen}
+\DeclarePairedDelimiter{\squarebracket}{\lbrack}{\rbrack}
+\DeclarePairedDelimiter{\curlybracket}{\lbrace}{\rbrace}
+\DeclarePairedDelimiter{\absolutevalue}{\lvert}{\rvert}
+\newcommand{\del}[1]{\parenthesis*{#1}}
+\newcommand{\sbr}[1]{\squarebracket*{#1}}
+\newcommand{\cbr}[1]{\curlybracket*{#1}}
+\newcommand{\abs}[1]{\absolutevalue*{#1}}
+% \DeclareMathOperator{\dif}{d}
+\newcommand*{\diffdchar}{d}
+\newcommand*{\dif}[1]{\mathop{\diffdchar #1}}
+\DeclareMathOperator*{\argmin}{arg\,min}
+\DeclareMathOperator*{\argmax}{arg\,max}
+
+\let\Pr\relax
+\DeclareMathOperator{\Pr}{\mathbb{P}}
+\DeclareMathOperator{\E}{\mathbb{E}}
+\DeclareMathOperator{\V}{\mathbb{V}}
+\DeclareMathOperator{\cov}{{cov}}
+\DeclareMathOperator{\var}{{var}}
+\DeclareMathOperator{\mse}{{MSE}}
+\DeclareMathOperator{\Ind}{\mathbb{I}}
+\DeclareMathOperator*{\sgn}{{sgn}}
+\DeclareMathOperator{\normal}{\mathcal{N}}
+\DeclareMathOperator{\unif}{Uniform}
+\DeclareMathOperator{\GP}{\mathcal{GP}}
+\newcommand{\T}{\mathrm{T}}
+\newcommand{\Tn}{\T_{n}}
+\newcommand{\Tx}{\T_{x}}
+\newcommand{\station}[1]{\mathrm{station}\sbr{#1}}
+\newcommand{\xvec}{\mathbold{x}}
+\newcommand{\hvec}{\mathbold{h}}
+\newcommand{\indep}{\perp}
+\newcommand{\iid}{iid}
+\newcommand{\trans}{^{\intercal}}
+\newcommand{\sigmaf}{\sigma_{\mathrm{GP}}}
+\newcommand{\sigman}{\sigma_{\epsilon}}
+\newcommand{\degreeC}{{}^{\circ}\mathrm{C}}
+\newcommand{\miss}{\mathrm{miss}}
+\newcommand{\obs}{\mathrm{nearby}}
+\newcommand{\error}{\mathrm{err}}
+\newcommand{\hour}{\mathtt{hr}}
+\DeclareMathOperator*{\softmax}{smoothmax}
+\DeclareMathOperator*{\softmin}{smoothmin}
+\newcommand*\rotcolhead{\rotatebox{90}}
+
+\DeclareMathOperator{\kSESE}{k_{\mathtt{SExSE}}}
+\DeclareMathOperator{\kdiurn}{k_{\mathtt{SESE_{24}}}}
+\DeclareMathOperator{\ksumprod}{k_{\mathtt{sumprod}}}
+\newcommand{\iday}{d}
+\newcommand{\tmeas}{t^{\mathrm{meas}}}
+\newcommand{\dayset}[1]{(\tmeas_{#1-1},\,\tmeas_{#1}]}
+\newcommand{\concordance}{\delta}
+\newcommand{\Xmax}{X_{\max}}
+\newcommand{\Xmin}{X_{\min}}
+\newcommand{\Fcond}{F_{X \mid \Xmax,\Xmin}}
+\newcommand{\pxx}[2]{\Pr{}_{#1#2}}
+\newcommand{\pij}{\pxx{i}{j}}
+\newcommand{\pisum}{\pxx{i}{\bullet}}
+\newcommand{\psumj}{\pxx{\bullet}{j}}
+
+\newcommand{\subspace}{\mathrm{space}}
+\newcommand{\subtime}{\mathrm{time}}
+
+\newcommand{\Smm}{\mathbf{\Sigma}_{\miss,\miss}}
+\newcommand{\Kmo}{\mathbf{K}_{\miss,\obs}}
+\newcommand{\Koo}{\mathbf{K}_{\obs,\obs}}
+\newcommand{\Soo}{\mathbold{\Sigma}_{\obs,\obs}}
+
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+
+% \newunicodechar{°}{\textdegree}
