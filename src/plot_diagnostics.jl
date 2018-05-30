@@ -13,12 +13,15 @@ function plot_imputations(ts, temp_impute, local_time; impt_indices=[250])
     μ = get_temp_mean(temp_impute)
     
     plt.fill_between(local_time.(ts), imputed_10, imputed_90, 
+        edgecolor="none",
+        linewidth=0,
         color=colour_pred_tntx, alpha=0.3)
     for i in impt_indices
         plt.plot(local_time.(ts), temp_impute[i,:,1],
+            linewidth=1,
             color=colour_impt_tntx)
     end
-    plt.plot(local_time.(ts), μ, color=colour_pred_tntx, linewidth=3, 
+    plt.plot(local_time.(ts), μ, color=colour_pred_tntx, linewidth=2, 
              label=L"$\mathrm{T}_\mathrm{miss} \mid \mathrm{T}_\mathrm{nearby}, \mathrm{T}_{n}, \mathrm{T}_{x}$")
 end
 function plot_truth(
@@ -75,7 +78,7 @@ function plot_predictive(
                      color=colour_hourly_nearby, 
                      marker = markers[i],
                      markersize=markersize,
-                     label=stations_metadata[station,:NAME],
+                     label=stations_metadata[station,:ICAO],
                      zorder = 10
                      )
         end
@@ -108,6 +111,8 @@ function plot_predictive(
                          μ-mean_μ-intvl_stds*sqrt.(diag(Σ_centered)),
                          μ-mean_μ+intvl_stds*sqrt.(diag(Σ_centered)),
                          zorder = 0,
+                         edgecolor="none",
+                         linewidth=0,
                          color=colour_pred_nearby, alpha=0.3)
     end
 

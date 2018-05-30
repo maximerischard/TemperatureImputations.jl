@@ -153,8 +153,8 @@ function get_chains_and_ts(fw::FittingWindow, GPmodel::AbstractString, usaf::Int
     header=String[]
     all_samples=Matrix{Float64}[]
     for sf in samplefiles
-        samples, header = readcsv(sf, Float64; header=true)
-        push!(all_samples, samples)
+        s, header = readcsv(sf, Float64; header=true)
+        push!(all_samples, s)
     end
 
     samples = cat(3, all_samples...)
@@ -162,6 +162,43 @@ function get_chains_and_ts(fw::FittingWindow, GPmodel::AbstractString, usaf::Int
     chains = Chains(samples, vec(header))
     
     ts = read_ts(fw, GPmodel, usaf)
+    return chains, ts
+end
+
+str_hour(hr::Hour) = string(hr.value)
+function read_ts(fw::FittingWindow, GPmodel::AbstractString, hr_measure_fals::Hour, usaf::Int)
+    stan_fw_dir = stan_dirname(usaf, fw)
+    stan_model_dir = joinpath(SAVED_DIR, "hr_measure", GPmodel, str_hour(hr_measure_fals))
+    stan_window_files = readdir(joinpath(stan_model_dir, stan_fw_dir))
+    ts_string = readcsv(joinpath(stan_model_dir, stan_fw_dir, "timestamps.csv"), String; header=false)
+    ts = [DateTime(s, "yyyy-mm-ddTHH:MM:SS") for s in vec(ts_string)]
+    return ts
+end
+function get_chains_and_ts(fw::FittingWindow, GPmodel::AbstractString, hr_measure_fals::Hour, usaf::Int; verbose=false)
+    stan_fw_dir = stan_dirname(usaf, fw)
+    stan_model_dir = joinpath(SAVED_DIR, "hr_measure", GPmodel, str_hour(hr_measure_fals))
+    if verbose
+        @show joinpath(stan_model_dir, stan_fw_dir)
+    end
+    stan_window_files = readdir(joinpath(stan_model_dir, stan_fw_dir))
+    if verbose
+        @show stan_window_files
+    end
+    samplefiles = [joinpath(stan_model_dir, stan_fw_dir, f) for 
+        f in stan_window_files if 
+        (startswith(f,"imputation_samples") &
+        endswith(f,".csv"))]
+    header=String[]
+    all_samples=Matrix{Float64}[]
+    for sf in samplefiles
+        s, header = readcsv(sf, Float64; header=true)
+        push!(all_samples, s)
+    end
+    @assert length(all_samples) > 1
+
+    samples = cat(3, all_samples...)
+    chains = Chains(samples, vec(header))
+    ts = read_ts(fw, GPmodel, hr_measure_fals, usaf)
     return chains, ts
 end
 
