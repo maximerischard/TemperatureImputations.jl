@@ -21,7 +21,6 @@ module TempModel
     using Proj4
     using GaussianProcesses: set_params!
     using PDMats
-    using GaussianProcesses
     include(data_dir*"/src/predict_from_nearby.jl")
     include(data_dir*"/src/preprocessing.jl")
     include(data_dir*"/src/variogram.jl")
