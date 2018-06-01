@@ -3,7 +3,6 @@ import GaussianProcesses: optimize!, get_optim_target
 import GaussianProcesses: num_params, set_params!, get_params, update_mll!
 import GaussianProcesses: update_mll_and_dmll!
 using Optim: minimizer
-import NLopt
 
 type GPRealisations
     reals::Vector{GPE}
@@ -19,20 +18,20 @@ function GPRealisations(reals::Vector{GPE})
     gpr = GPRealisations(reals, first.m, first.k, first.logNoise, NaN, [])
 end
 
-function get_params(gpr::GPRealisations; noise::Bool=true, mean::Bool=true, kern::Bool=true)
+function get_params(gpr::GPRealisations; noise::Bool=true, domean::Bool=true, kern::Bool=true)
     params = Float64[]
     if noise; push!(params, gpr.logNoise); end
-    if mean;  append!(params, get_params(gpr.m)); end
+    if domean;  append!(params, get_params(gpr.m)); end
     if kern; append!(params, get_params(gpr.k)); end
     return params
 end
-function propagate_params!(gpr::GPRealisations; noise::Bool=true, mean::Bool=true, kern::Bool=true)
+function propagate_params!(gpr::GPRealisations; noise::Bool=true, domean::Bool=true, kern::Bool=true)
     for gp in gpr.reals
         # harmonize parameters
         if kern
             gp.k = gpr.k
         end
-        if mean
+        if domean
             gp.m = gpr.m
         end
         if noise
@@ -40,12 +39,12 @@ function propagate_params!(gpr::GPRealisations; noise::Bool=true, mean::Bool=tru
         end
     end
 end
-function set_params!(gpr::GPRealisations, hyp::Vector{Float64}; noise::Bool=true, mean::Bool=true, kern::Bool=true)
-    # println("mean=$(mean)")
+function set_params!(gpr::GPRealisations, hyp::Vector{Float64}; noise::Bool=true, domean::Bool=true, kern::Bool=true)
+    # println("domean=$(domean)")
     if noise; gpr.logNoise = hyp[1]; end
-    if mean; set_params!(gpr.m, hyp[1+noise:noise+num_params(gpr.m)]); end
+    if domean; set_params!(gpr.m, hyp[1+noise:noise+num_params(gpr.m)]); end
     if kern; set_params!(gpr.k, hyp[end-num_params(gpr.k)+1:end]); end
-    propagate_params!(gpr, noise=noise, mean=mean, kern=kern)
+    propagate_params!(gpr, noise=noise, domean=domean, kern=kern)
 end
 
 function update_mll!(gpr::GPRealisations)
@@ -83,7 +82,7 @@ function update_mll_and_dmll!(gpr::GPRealisations; kwargs...)
     return update_mll_and_dmll!(gpr, Kgrads, ααinvcKIs; kwargs...)
 end
 
-function get_optim_target(gpr::GPRealisations; noise::Bool=true, mean::Bool=true, kern::Bool=true)
+function get_optim_target(gpr::GPRealisations; noise::Bool=true, domean::Bool=true, kern::Bool=true)
     Kgrads = Dict{Int,Matrix}()
     ααinvcKIs = Dict{Int,Matrix}()
     for gp in gpr.reals
@@ -95,14 +94,14 @@ function get_optim_target(gpr::GPRealisations; noise::Bool=true, mean::Bool=true
     end
     function mll(hyp::Vector{Float64})
         try
-            set_params!(gpr, hyp; noise=noise, mean=mean, kern=kern)
+            set_params!(gpr, hyp; noise=noise, domean=domean, kern=kern)
             update_mll!(gpr)
             if !isfinite(gpr.mll)
                 return Inf
             end
             return -gpr.mll
         catch err
-             if !all(isfinite(hyp))
+             if !all(isfinite.(hyp))
                 println(err)
                 return Inf
             elseif isa(err, ArgumentError)
@@ -119,15 +118,15 @@ function get_optim_target(gpr::GPRealisations; noise::Bool=true, mean::Bool=true
 
     function mll_and_dmll!(grad::Vector{Float64}, hyp::Vector{Float64})
         try
-            set_params!(gpr, hyp; noise=noise, mean=mean, kern=kern)
-            update_mll_and_dmll!(gpr, Kgrads, ααinvcKIs; noise=noise, mean=mean, kern=kern)
+            set_params!(gpr, hyp; noise=noise, domean=domean, kern=kern)
+            update_mll_and_dmll!(gpr, Kgrads, ααinvcKIs; noise=noise, domean=domean, kern=kern)
             grad[:] = -gpr.dmll
             if !isfinite(gpr.mll)
                 return Inf
             end
             return -gpr.mll
         catch err
-             if !all(isfinite(hyp))
+             if !all(isfinite.(hyp))
                 println(err)
                 return Inf
             elseif isa(err, ArgumentError)
@@ -146,29 +145,29 @@ function get_optim_target(gpr::GPRealisations; noise::Bool=true, mean::Bool=true
     end
 
     func = OnceDifferentiable(mll, dmll!, mll_and_dmll!,
-        get_params(gpr, noise=noise, mean=mean, kern=kern))
+        get_params(gpr, noise=noise, domean=domean, kern=kern))
     return func
 end
-function optimize!(gpr::GPRealisations; noise::Bool=true, mean::Bool=true, kern::Bool=true,
+function optimize!(gpr::GPRealisations; noise::Bool=true, domean::Bool=true, kern::Bool=true,
                     method=ConjugateGradient(), options=Optim.Options())
-    func = get_optim_target(gpr, noise=noise, mean=mean, kern=kern)
-    init = get_params(gpr;  noise=noise, mean=mean, kern=kern)  # Initial hyperparameter values
+    func = get_optim_target(gpr, noise=noise, domean=domean, kern=kern)
+    init = get_params(gpr;  noise=noise, domean=domean, kern=kern)  # Initial hyperparameter values
     results=optimize(func,init,method, options)  # Run optimizer
-    set_params!(gpr, minimizer(results), noise=noise,mean=mean,kern=kern)
+    set_params!(gpr, minimizer(results), noise=noise,domean=domean,kern=kern)
     update_mll!(gpr)
     return results
 end
 
-function optimize_NLopt(gpr::GPRealisations; noise::Bool=true, mean::Bool=true, kern::Bool=true,
+function optimize_NLopt(gpr::GPRealisations; noise::Bool=true, domean::Bool=true, kern::Bool=true,
                     method=:LD_LBFGS, x_tol=1e-10, f_tol=1e-10)
-    target = get_optim_target(gpr, noise=noise, mean=mean, kern=kern)
-    init_x = get_params(gpr;  noise=noise, mean=mean, kern=kern)  # Initial hyperparameter values
+    target = get_optim_target(gpr, noise=noise, domean=domean, kern=kern)
+    init_x = get_params(gpr;  noise=noise, domean=domean, kern=kern)  # Initial hyperparameter values
     count = 0
     best_x = copy(init_x)
     best_y = Inf
     function myfunc(x::Vector, grad::Vector)
         if length(grad) > 0
-            target.g!(grad, x)
+            target.df(grad, x)
         end
 
         count += 1
@@ -194,7 +193,7 @@ function optimize_NLopt(gpr::GPRealisations; noise::Bool=true, mean::Bool=true, 
     NLopt.min_objective!(opt, myfunc)
     (minf,minx,ret) = NLopt.optimize(opt, init_x)
 
-    set_params!(gpr, minx, noise=noise,mean=mean,kern=kern)
+    set_params!(gpr, minx, noise=noise,domean=domean,kern=kern)
     update_mll!(gpr)
     return minf,minx,ret,count
 end
