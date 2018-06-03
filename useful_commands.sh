@@ -1,10 +1,7 @@
 # rsync all saved files
-rsync --verbose --human-readable --progress --archive --compress --delete \
+rsync --verbose --human-readable --progress --archive --compress --update \
     ody:/n/regal/pillai_lab/mrischard/temperature_model/saved /Volumes/Samsung250GB/temperature_model/
 
-# rsync just stan samples
-rsync --verbose --human-readable --progress --archive --compress --delete \
-    ody:/n/regal/pillai_lab/mrischard/temperature_model/saved/stan_fit/ /Volumes/Samsung250GB/temperature_model/saved/stan_fit
 # or
 rsync --verbose --human-readable --progress --archive --compress \
     ody:/n/regal/pillai_lab/mrischard/temperature_model/saved/stan_fit/ /Volumes/Samsung250GB/temperature_model/saved/stan_fit
@@ -18,7 +15,7 @@ rsync --verbose --human-readable --progress --archive --compress \
 # render PDF
 source ~/bin/venv_nbconvert/bin/activate
 jupyter nbconvert --to latex --template nocode.tplx TemperatureImputations.ipynb
-latexmk -bibtex -pdf TemperatureImputations
+latexmk -gg -bibtex -xelatex TemperatureImputations.tex
 
 # pipeline1.jl
 srun -p shared --pty --mem 8000 -n 4 -N 1 -t 0-9:00 /bin/bash
@@ -40,21 +37,8 @@ sbatch /n/regal/pillai_lab/mrischard/temperature_model/batch/pipeline2_simpler.s
 CC=g++
 CXX=g++
 
-# backup
-rsync -av /n/regal/pillai_lab/mrischard/julia_lib/ ~/julia_lib
-
-
-# LaTeX
-source ~/bin/venv_nbconvert/bin/activate
-jupyter nbconvert --to latex --template nocode.tplx TemperatureImputations.ipynb
-latexmk -bibtex -pdf TemperatureImputations
-
-
 # pipeline_hr
-module load gcc/7.1.0-fasrc01 
-module load julia/0.6.0-fasrc01
-module load OpenBLAS/0.2.18-fasrc01
-
+source ~/julia_modules.sh
 cd /n/regal/pillai_lab/mrischard/temperature_model/batch/
 julia pipeline_hr.jl /n/regal/pillai_lab/mrischard/temperature_model/saved 42 simpler 17 5
 
@@ -63,3 +47,18 @@ for hr in {0..23}
 do
   sbatch /n/regal/pillai_lab/mrischard/temperature_model/batch/pipeline_hr.slurm simpler $hr
 done
+
+# copy from home to regal
+rsync --archive --verbose --human-readable --update ~/julia_lib/ /n/regal/pillai_lab/mrischard/julia_lib
+rsync --archive --verbose --human-readable --update ~/cmdstan-2.17.0/ /n/regal/pillai_lab/mrischard/cmdstan-2.17.0
+rsync --archive --verbose --human-readable --update ~/temperature_model/ /n/regal/pillai_lab/mrischard/temperature_model
+# backup from regal to home
+rsync --archive --verbose --human-readable --update /n/regal/pillai_lab/mrischard/julia_lib/ ~/julia_lib
+rsync --archive --verbose --human-readable --update /n/regal/pillai_lab/mrischard/cmdstan-2.17.0/ ~/cmdstan-2.17.0
+rsync --archive --verbose --human-readable --update /n/regal/pillai_lab/mrischard/temperature_model/ ~/temperature_model
+
+# debugging Stan
+# delete tmp files
+rm -rf $mrischard/temperature_model/tmp/imputation*
+# delete existing Stan files, e.g.
+rm -rf $mrischard/temperature_model/saved/hr_measure/simpler/5/725480_2015-05-04_to_2015-05-13/imputation*
