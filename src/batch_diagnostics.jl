@@ -128,7 +128,7 @@ function window_center(fw::FittingWindow, increment::Day)
     return FittingWindow(fw.start_date+increment,fw.end_date-increment)
 end
 
-function Chains(samples::AbstractArray{Float64, 3}, names::AbstractVector{AbstractString})
+function Chains(samples::AbstractArray{Float64, 3}, names::AbstractVector{S}) where {S<:AbstractString}
     nsamples, ncol, nchains = size(samples)
     chains = AxisArray(samples, Axis{:sample}(1:nsamples), Axis{:param}(names), Axis{:chain}(1:nchains))
     return chains

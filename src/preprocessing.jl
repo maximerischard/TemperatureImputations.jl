@@ -8,7 +8,10 @@ function read_station(usaf::Int, wban::Int, id::Int; data_dir::String=".")
                             datarow=1,
                             header=[:year, :month, :day, :hour, :min, :seconds, :temp])
     # remove missing data (null or nan)
-    station_data = station_data[.!isnan.(station_data[:temp]), :]
+    station_data = station_data[.!ismissing.(station_data[:temp]), :]
+    # station_data = station_data[.!isnan.(station_data[:temp]), :]
+    station_data = station_data[isfinite.(station_data[:temp]), :]
+    station_data[:temp] = Float64.(station_data[:temp])
     DataFrames.dropmissing!(station_data)
     station_ts = DateTime[DateTime(
         r[:year],
