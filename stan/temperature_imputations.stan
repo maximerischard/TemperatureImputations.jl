@@ -12,15 +12,16 @@ data {
     vector[N_TxTn] Tx;
     vector[N_TxTn] Tn;
 
-    // imputation points (for which we have )
+    // imputation points
     int<lower=1> Nimpt;
     int<lower=1,upper=N_TxTn> day_impute[Nimpt];
     // number of hours recorded within each day
     int<lower=1> impt_times_p_day[N_TxTn];
 
-    // prior 
+    // prior (informed by nearby hourly temperatures)
+    // Prior mean:
     vector[Nimpt] predicted_mean;
-    matrix[Nimpt,Nimpt] predicted_cov;
+    // Cholesky decomposition of the prior covariance matrix:
     matrix[Nimpt,Nimpt] predicted_cov_chol;
 
     // control smooth max hardness
