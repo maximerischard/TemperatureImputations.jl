@@ -30,16 +30,14 @@
   \medskip
 } \fi
     
- \begin{abstract}
-The Global Historical Climatology Network-Daily database contains, among other variables, daily maximum and minimum temperatures from weather stations around the globe.
-It is long known that climatological summary statistics based on daily temperature minima and maxima will not be accurate, if the bias due to the time at which the observations were collected is not accounted for. Despite some previous work, to our knowledge, there does not exist a satisfactory solution to this important problem.
-In this paper, we carefully detail the problem and develop a novel approach to address it. Our idea is to impute the hourly temperatures
-at the location of the measurements by borrowing information from the nearby stations that record hourly temperatures, which then can be used to create accurate summaries of temperature extremes.
-The key difficulty is that these imputations of the temperature curves must satisfy the constraint of falling between the observed daily minima and maxima, and attaining those values at least once in a twenty-four hour period.
-We develop a spatiotemporal Gaussian process model for imputing the hourly measurements from the nearby stations, and then develop a novel and easy to implement Markov Chain Monte Carlo technique to sample from the posterior distribution satisfying the above constraints. 
-We validate our imputation model using hourly temperature data 
-from four meteorological stations in Iowa,
-of which one is hidden and the data replaced with daily minima and maxima,
+\begin{abstract}
+It is long known that climatological summary statistics based on daily temperature minima and maxima will not be accurate, if the bias due to the time at which the observations were collected is not accounted for.
+In this paper, we detail the problem and develop a novel approach to address it.
+Our idea is to impute the hourly temperatures at the location of the measurements by borrowing information from the nearby stations that record hourly temperatures, which then can be used to create accurate summaries of temperature extremes.
+The key difficulty is that these imputed temperature curves must agree with the observed daily extrema.
+We develop a spatiotemporal Gaussian process model to pool information from the nearby stations, and then develop a novel and easy to implement Markov Chain Monte Carlo technique to sample the imputations conditionally on the observed daily extrema. 
+We validate our imputation model using hourly temperature data from four meteorological stations in Iowa,
+of which one is hidden and its data replaced with daily extrema,
 and show that the imputed temperatures recover the hidden temperatures well.
 We also demonstrate that our model can exploit information contained in the data to infer the time of daily measurements. 
 \end{abstract}
@@ -72,7 +70,7 @@ To address this issue, some homogenization methods have also employed frequency 
 
 \begin{figure}[tbp]
 \centering
-\includegraphics[height=0.4\textheight,width=0.99\textwidth,keepaspectratio]{../figures/waterloo_triangles.png}
+\includegraphics[height=0.4\textheight,width=0.99\textwidth,keepaspectratio]{../figures/waterloo_triangles.pdf}
 \caption{
 \label{fig:waterloo_triangles}
 An extract of the temperature measurements from KALO.
@@ -89,7 +87,7 @@ This has long been recognized in the scientific literature; see for example \cit
 
 \begin{figure}[tbp]
 \centering
-\includegraphics[width=0.6\textwidth]{../figures/Iowa_map.png}
+\includegraphics[width=0.6\textwidth]{../figures/Iowa_map.pdf}
 \caption{
 \label{fig:Iowa_map}
 Map of the four airport weather stations in Iowa providing hourly temperature records. 
@@ -113,7 +111,7 @@ Our goal is to address the bias that results from this measurement practice.
 
 \begin{figure}[tbp]
 \centering
-\includegraphics[height=0.3\textheight,width=0.99\textwidth,keepaspectratio]{../figures/waterloo_bias_2x2.png}
+\includegraphics[height=0.3\textheight,width=0.99\textwidth,keepaspectratio]{../figures/waterloo_bias_2x2.pdf}
 \caption{
 \label{fig:waterloo_avgTnTx}
 Mean daily \(\Tx\) (top left) and \(\Tn\) (top right), and
@@ -140,7 +138,7 @@ Such spurious trends also compromise the study of weather variability, through s
 
 % \begin{figure}[tbp]
 % \centering
-% \includegraphics[height=0.3\textheight,width=0.99\textwidth,keepaspectratio]{../figures/waterloo_meanabsdiff.png}
+% \includegraphics[height=0.3\textheight,width=0.99\textwidth,keepaspectratio]{../figures/waterloo_meanabsdiff.pdf}
 % \caption{\label{fig:waterloo_meanabsdiff}
 % Mean absolute daily change in maximum temperature (left)
 % and mean absolute daily change in minimum temperature (right)
@@ -366,7 +364,7 @@ $\ell_{\subspace{}24}$ &	($\mathrm{km}$) &		 &	1414 &	785\\
 \label{sec:predict_nearby}
 \begin{figure}[tb]
 \centering
-\includegraphics[width=0.99\textwidth]{../figures/imputations_2x2.png}
+\includegraphics[width=0.99\textwidth]{../figures/imputations_2x2.pdf}
 \caption{\label{fig:imputations_2x2}Imputations of the temperature time series at Waterloo Municipal Airport (KALO) between May 28, 2015 and June 1, 2015 (a) using only nearby data and the product of squared exponentials model; (b) using only nearby data and the sum of products model; (c) incorporating \(\Tn\) and \(\Tx\) measurements under the product of squared exponentials model; and (d) incorporating \(\Tn\) and \(\Tx\) measurements under the sum of products model. The mean is subtracted from each time series in (a) and (b) as the models leave the average temperature at the imputation site as a free parameter. For each imputation distribution, the mean is shown as a thick line, surrounded by an 80\% credible envelope in lighter color, and example imputations as thinner lines.}
 \end{figure}
 
@@ -432,7 +430,7 @@ For small \(\epsilon\), this is a reasonable approximation enabling the use of M
 
 \begin{figure}[tbp]
 \centering
-\includegraphics[height=0.3\textheight,width=0.99\textwidth,keepaspectratio]{../figures/constraints3d.png}
+\includegraphics[height=0.3\textheight,width=0.99\textwidth,keepaspectratio]{../figures/constraints3d.pdf}
 \caption{\label{fig:constraints3d}
 With three variables \(X_1\), and \(X_2\) and \(X_3\), \(\Fcond\) resides in the one-dimensional six-sided loop shown with thicker green lines. This is a 1D manifold embedded in 3D space, and possessing sharp corners, making it difficult for most MCMC algorithms to explore.}
 \end{figure}
@@ -483,7 +481,7 @@ SmoothHMC provides a generally applicable algorithm to draw from a multivariate 
 
 \begin{figure}[!tb]
 \centering
-\includegraphics[width=0.99\textwidth,height=0.55\textheight,keepaspectratio]{../figures/toy_quantiles.png}
+\includegraphics[width=0.99\textwidth,height=0.55\textheight,keepaspectratio]{../figures/toy_quantiles.pdf}
 \caption{\label{fig:toy_quantiles}(a) Prior distribution of \(X_i\) displayed as mean \(\mu_i\) (shown in every subplot to ease comparison) with 2~SD envelope; (b) Quantiles of the analytically derived posterior \(\Fcond\) conditioned on \(\Xmin\) (dark blue line) and \(\Xmax\) (red line); (c) Quantiles of the samples drawn from \(\Fcond\) using HMC (without the \(\softmax\) approximation); (d) Quantiles of the samples drawn from \(\Fcond\) using SmoothHMC.}
 \end{figure}
 
@@ -527,7 +525,7 @@ this sampling algorithm delivers a close approximation of the marginal distribut
     
 \begin{figure}[tbp]
 \centering
-\includegraphics[width=0.97\textwidth,height=0.7\textheight,keepaspectratio]{../figures/toy_joint.png}
+\includegraphics[width=0.97\textwidth,height=0.7\textheight,keepaspectratio]{../figures/toy_joint.pdf}
 \caption{\label{fig:toy_joint}
 Comparison of the joint joint PDF of \(X_{23}\) and \(X_{52}\)
 obtained analytically and from SmoothHMC samples.
@@ -629,7 +627,7 @@ we obtain a visual diagnosis of the model.
 
 \begin{figure}[!tbp]
 \centering
-\includegraphics[width=0.99\textwidth]{../figures/spatial_variogram.png}
+\includegraphics[width=0.99\textwidth]{../figures/spatial_variogram.pdf}
 \caption{\label{fig:spatial_variogram}
 Semi-variograms of the temperature temperature time series at four Iowa weather stations, each labeled by its ICAO code.
 The empirical semi-variograms are shown in black, and the fitted variograms for the three covariance models proposed in this paper are shown in color.
@@ -778,7 +776,7 @@ We view as a particular strength of our approach that the imputations are able t
 
 \begin{figure}[tbp]
 \centering
-\includegraphics[height=0.35\textheight,width=0.99\textwidth,keepaspectratio]{../figures/imputed_summary_stats.png}
+\includegraphics[height=0.35\textheight,width=0.99\textwidth,keepaspectratio]{../figures/imputed_summary_stats.pdf}
 \caption{\label{fig:imputed_summary_stats}
 Average minimum (left) and maximum (right) daily temperature obtained under varying hour of measurement from KALO data (shown in blue), and from imputations of the withheld data (shown in orange with 2~SD envelope) obtained under the \(\kSESE\) covariance function (top) and the \(\ksumprod\) covariance function (bottom).}
 \end{figure}
@@ -795,7 +793,7 @@ The product covariance \(\kSESE\) and the sum of products covariance \(\ksumprod
 
 \begin{figure}[tbp]
 \centering
-\includegraphics[width=0.9\textwidth,height=0.4\textheight,keepaspectratio]{../figures/measure_hour_example.png}
+\includegraphics[width=0.9\textwidth,height=0.4\textheight,keepaspectratio]{../figures/measure_hour_example.pdf}
 \caption{\label{fig:measure_hour_example} Constrained and unconstrained imputations in an eight-day window, assuming (top) the correct measurement hour (11:00 UTC-6), and (bottom) a wrong measurement hour (23:00 UTC-6). Assuming the wrong measurement time drives the constrained mean imputation away from the unconstrained mean imputation.}
 \end{figure}
 
@@ -809,7 +807,7 @@ We therefore do not consider the introduction of a uniform prior on \(\hour\) in
 
 \begin{figure}[tbp]
 \centering
-\includegraphics[height=0.4\textheight,width=0.9\textwidth,keepaspectratio]{../figures/hr_inference.png}
+\includegraphics[height=0.4\textheight,width=0.9\textwidth,keepaspectratio]{../figures/hr_inference.pdf}
 \caption{
     \label{fig:hr_inference}
     Concordance \(\concordance_\hour\) for imputations of temperatures at KALO assuming measurement hours \(\hour=1,\dotsc,24\). 
