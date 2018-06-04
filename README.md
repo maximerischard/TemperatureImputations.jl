@@ -8,17 +8,17 @@ The table below indicates which notebook each figure was generated in.
 
 | #  | File Name             | Notebook                            | Short Caption                                                                                                                                         |
 |----|-----------------------|-------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------|
-| 1  | waterloo_triangles    | Waterloo_bias                 | An extract of the temperature measurements from KALO showing bias due to measurement hour.                                                            |
-| 2  | Iowa_map              | JuliaGP_spatial_variogram     | Map of the four airport weather stations in Iowa providing hourly temperature records.                                                                |
-| 3  | waterloo_avgTnTx      | Waterloo_bias                 | Mean daily Tx (top left) and Tn (top right), and mean absolute daily change in Tx (bottom left) and Tn (bottom right).                                |
-| 4  | imputations_2x2       | BatchDiagnostics              | Imputations of the temperature time series at Waterloo Municipal Airport (KALO) between May 28, 2015 and June 1, 2015.                                |
-| 5  | constraints3d         | (drawn in a vector graphics editor) | With three variables X_1, and X_2 and X_3, F_{X|Xmin,Xmax} resides in the one-dimensional six-sided loop shown with thicker green lines.              |
-| 6  | toy_quantiles         | SmoothMax Simulation          | Marginal distribution of F_X and F_{X|Xmin,Xmax}.                                                                                                     |
-| 7  | toy_joint             | SmoothMax Simulation          | Comparison of the joint joint PDF of X_23 and X_52 obtained analytically and from SmoothHMC samples.                                                  |
-| 8  | spatial_variogram     | JuliaGP_spatial_variogram     | Semi-variograms of the temperature temperature time series at four Iowa weather stations.                                                             |
-| 9  | imputed_summary_stats | ImputedSummaryStatistics      | Inference from imputations of summary statistics (average Tn and average Tx).                                                                         |
-| 10 | measure_hour_example  | BatchMeasurementHour          | Constrained and unconstrained imputations in an eight-day window, assuming (top) the correct measurement hour, and (bottom) a wrong measurement hour. |
-| 11 | hr_inference          | BatchMeasurementHour          | Concordance for imputations of temperatures at KALO assuming measurement hour=1,…,24.                                                                 |
+| 1  | waterloo_triangles    | Waterloo_bias                       | An extract of the temperature measurements from KALO showing bias due to measurement hour.                                                            |
+| 2  | Iowa_map              | JuliaGP_spatial_variogram           | Map of the four airport weather stations in Iowa providing hourly temperature records.                                                                |
+| 3  | waterloo_avgTnTx      | Waterloo_bias                       | Mean daily Tx (top left) and Tn (top right), and mean absolute daily change in Tx (bottom left) and Tn (bottom right).                                |
+| 4  | imputations_2x2       | BatchDiagnostics                    | Imputations of the temperature time series at Waterloo Municipal Airport (KALO) between May 28, 2015 and June 1, 2015.                                |
+| 5  | constraints3d         | (drawn in a vector graphics editor) | With three variables X_1, and X_2 and X_3, F_{X                                                                                                       |
+| 6  | toy_quantiles         | SmoothMax Simulation                | Marginal distribution of F_X and F_{X                                                                                                                 |
+| 7  | toy_joint             | SmoothMax Simulation                | Comparison of the joint joint PDF of X_23 and X_52 obtained analytically and from SmoothHMC samples.                                                  |
+| 8  | spatial_variogram     | JuliaGP_spatial_variogram           | Semi-variograms of the temperature temperature time series at four Iowa weather stations.                                                             |
+| 9  | imputed_summary_stats | ImputedSummaryStatistics            | Inference from imputations of summary statistics (average Tn and average Tx).                                                                         |
+| 10 | measure_hour_example  | BatchMeasurementHour                | Constrained and unconstrained imputations in an eight-day window, assuming (top) the correct measurement hour, and (bottom) a wrong measurement hour. |
+| 11 | hr_inference          | BatchMeasurementHour                | Concordance for imputations of temperatures at KALO assuming measurement hour=1,…,24.                                                                 |
 
 # Temperature Models
 
