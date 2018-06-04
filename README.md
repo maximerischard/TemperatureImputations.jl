@@ -1,6 +1,14 @@
 This repository contains code and jupyter notebooks for the paper “Bias correction in daily maximum and minimum temperature measurements through Gaussian process modeling” available on [arxiv.org](https://arxiv.org/abs/1805.10214).
 The code and notebooks are (almost all) written in the [julia](https://julialang.org) programming language.
 
+# Data
+
+The data used in our paper is hourly temperature measurements from the Integrated Surface Database (ISD), 
+which is a compilation of global weather data containing approximately 14,000 active stations.
+It is maintained in the United States by NOAA's National Centers for Environmental Information (NCEI).
+The data is freely available from (https://www.ncdc.noaa.gov/isd).
+The 2015 ISD temperature data from four Iowa stations that we use throughout the paper is reproduced in this repository in the `data2015` directory.
+
 # List of Figures
 
 The figures in the manuscript are generated in notebooks, so they are fully reproducible.
@@ -41,3 +49,4 @@ for obtaining temperature imputations using SmoothHMC, starting with
 a fitted spatio-temporal kernel (SExSE in this case).
 To scale up, the imputations for the entire year are performed on a cluster,
 using the code and slurm files in the `batch` directory.
+
