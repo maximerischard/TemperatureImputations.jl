@@ -161,7 +161,7 @@ Our idea therefore is to impute the hourly time series of temperatures
 at the location of the \(\Tx\)/\(\Tn\) measurements.
 In turn, the imputed time series can be used to create accurate summaries of temperature extremes.
 
-Our imputation strategy is to borrow information from the nearby weather stations, usually located at airports, that record the current temperature about once an hour.
+Our imputation strategy borrows information from the nearby weather stations, usually located at airports, that record the current temperature about once an hour.
 For this purpose, we use the publicly available temperature data provided by ISD.
 Although it should be noted that the sampling times are not always equally spaced, we refer to these records as ``hourly'' throughout this paper.
 They often cannot be used directly for climatology, as the weather stations that provide them are not always as carefully documented, calibrated, and situated as the research stations included in the GHCND. 
@@ -393,7 +393,7 @@ The two \(\mathbold{\Sigma}\) matrices have an additional \(\sigman^2\) diagonal
 In \autoref{fig:imputations_2x2}(a), we show an example of predictions obtained from this spatio-temporal model. 
 We withheld temperature measurements from KALO (shown in black), and then used data from the three remaining stations (KCID, KDSM and KMCW, shown in orange) to predict the 2015 temperature time series At KALO.
 To speed up computations, we process 73 days of data at a time, with 48 days overlapping between adjacent prediction windows so that predictions can always be made away from the edge of the prediction window (except at the start and end of the year).
-The predictions can be seen to combine information from the three other stations, giving less weight to KDSM, which is further away from KALO.
+The predictions can be seen to combine information from the three other stations, giving less weight to KDSM, which is furthest away from KALO.
 We will discuss the quality of these predictions in more detail in \autoref{sec:diagnostics}, after completing the exposition of our imputation strategy.
 
 \section{Imputing by Conditioning on Extrema}
