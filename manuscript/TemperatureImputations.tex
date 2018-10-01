@@ -610,9 +610,11 @@ This success demonstrates that SmoothHMC is capable of imputing temperature time
 \subsection{Variogram}\label{variogram}
 
 Model fit can be visually inspected by plotting temporal and spatial semi-variograms. 
-The semi-variogram  of a stationary spatio-temporal process \(Y(\xvec,t)\) is a function of the spatial lag \(\hvec\) and the temporal lag \(r\) \citep[see for example][chapter 6]{sherman2011spatial}:
+The semi-variogram  of a stationary spatio-temporal process \(Y(\xvec,t)\) defined on \(\reals^p \times \reals\) is a function of the spatial lag \(\hvec\) and the temporal lag \(r\) \citep[see for example][chapter 6]{sherman2011spatial}:
 \begin{equation}
     \gamma\del{\hvec,r} = \frac{1}{2} \E\sbr{\del{Y\del{\xvec,t}-Y\del{\xvec+\hvec,t+r}}^2}
+    \quad
+    \forall \hvec \in \reals^p,\ r \in \reals
     % &= \var\del{ Y\del{\xvec,t}} - \cov\del{ \del{Y\del{\xvec,t}} , Y\del{\xvec+\hvec,t+r}}\,.
 \end{equation}
 For a Gaussian Process model, with a stationary covariance function \(k(\hvec,r)=k(\xvec,\xvec+\hvec,t,t+r)\), this can be expressed as:
@@ -838,7 +840,7 @@ has been replaced by \(\Tx\)/\(\Tn\) observations made at \(\hour=11\).
 We use SmoothHMC to impute the withheld data for all of 2015 under each possible measurement hour \(\hour=0,1,\cdots,23\).
 For each set of imputations, we compute the posterior mean \(\mu\del{\hour}\) from the SmoothHMC samples, 
 and the concordance \(\concordance_\hour\) \autoref{eq:concordance} (by necessity, modified to treat the center of each 73-day prediction window as an independent prediction).
-Pleasantly, the concordance is highest when the true hour of measurement is used so that, in this example at least, the correct hour of measurement would be infered.
+The concordance is highest for the true hour of measurement so that, in this example at least, the correct hour of measurement would be inferred.
 
 \section{Conclusion}\label{sec:conclusion}
 
