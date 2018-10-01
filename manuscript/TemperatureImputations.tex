@@ -824,7 +824,7 @@ Rather unsurprisingly, assuming an incorrect measurement time leads to wildly in
 But notice also that assuming the wrong time causes the mean constrained imputation to depart further from the unconstrained imputation
 (that is, the green and orange lines are further apart).
 This can be interpreted as an indication of an incompatibility between \(\T_\obs\) and \(\Tn\)/\(\Tx\), caused by assuming the wrong \(\hour\).
-We therefore propose to calculate the probability \(\concordance_\hour\) of the mean constrained imputation under the unconstrained posterior given by \(\autoref{eq:unconstrained_post}\), which we interpret as a measure of concordance between \(\T_\obs\) and \(\Tn\)/\(\Tx\):
+We therefore propose to calculate the log probability \(\concordance_\hour\) of the mean constrained imputation under the unconstrained posterior given by \(\autoref{eq:unconstrained_post}\), which we interpret as a measure of concordance between \(\T_\obs\) and \(\Tn\)/\(\Tx\):
 \begin{equation}
 % \begin{split}
     \concordance_\hour = \log \Pr\del{ \T_\miss \! = \! \mu\del{\hour} \mid \T_\obs }
@@ -863,7 +863,7 @@ In order to condition the imputations on the daily \(\Tx\) and \(\Tn\), we devel
 It showed an excellent ability to sample from the conditional distribution in an example where the distribution function can also be obtained analytically.
 SmoothHMC is the main technical contribution of this paper, and we believe the method could find applications beyond the present setting.
 
-We used this method to obtained imputations of the temperature time series that satisfied the constraints imposed by the measured \(\Tn\) and \(\Tx\).
+We used this method to obtain imputations of the temperature time series that satisfied the constraints imposed by the measured \(\Tn\) and \(\Tx\).
 The imputation of withheld temperatures at KALO track the true temperatures, within a root mean square error of \(1.02\,\degreeC\).
 We view as particularly encouraging that the imputations successfully capture the uncertainty and sometimes bimodality in the time of the maximum or minimum temperature on days where this time is difficult to infer from the available information.
 
