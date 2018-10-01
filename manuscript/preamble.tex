@@ -108,6 +108,7 @@
 \newcommand{\xvec}{\mathbold{x}}
 \newcommand{\hvec}{\mathbold{h}}
 \newcommand{\indep}{\perp}
+% iid
 \makeatletter
 \newcommand*{\iid}{%
     \@ifnextchar{.}%
@@ -115,6 +116,9 @@
         {i.\,i.\,d.\@}%
 }
 \makeatother
+\newcommand{\mathiid}{\text{\iid}}
+\newcommand{\simiid}{\overset{\mathiid}{\sim}}
+%
 \newcommand{\trans}{^{\intercal}}
 \newcommand{\sigmaf}{\sigma_{\mathrm{GP}}}
 \newcommand{\sigman}{\sigma_{\epsilon}}
