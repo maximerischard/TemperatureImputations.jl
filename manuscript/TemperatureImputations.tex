@@ -219,7 +219,7 @@ with \(\T_{ij}\) modeled as in \autoref{eq:gpmodel}.
 
 \subsection{Fitting the Spatiotemporal Model}\label{fitting-the-spatiotemporal-model}
 
-Software is readily available in many programming languages for fitting Gaussian process models, including inference on the covariance parameters. We chose to use the julia \texttt{GaussianProcesses.jl} package to fit the above spatiotemporal model to the hourly temperatures at four Iowa weather stations.
+Software is readily available in many programming languages for fitting Gaussian process models, including inference on the covariance parameters. We chose to use the julia \texttt{GaussianProcesses.jl} package to apply the above spatiotemporal model to the hourly temperatures at four Iowa weather stations.
 The Iowa data set includes 47,864 measurements, which is computationally challenging to fit directly with a single Gaussian process.
 There are many methods to handle large data sets with Gaussian processes: for example \citet{quinonero2007approximation} review sparse approximations to Gaussian processes from a machine learning perspective, while \citet{banerjee2008gaussian} develop a method specifically for large spatial data sets.
 For simplicity, we chose instead to divide the data into 10-day chunks, modeled as independent Gaussian processes with shared hyperparameters.
