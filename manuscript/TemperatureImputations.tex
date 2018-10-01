@@ -690,7 +690,7 @@ Model & \multicolumn{1}{l}{log-} & \(\var(\error)\) & \(\widehat{\var}(\error)\)
 \end{center}
 \end{table}
 
-For our purposes, it isn't sufficient for the spatio-temporal model to yield good predictions; we also require a good estimate of its own accuracy.
+For our purposes, it is not sufficient for the spatio-temporal model to yield good predictions; we also require a good estimate of its own accuracy.
 We estimate the error variance expected by the model by sampling random draws \(\T^{(k)}_\miss\), \(k=1,\dotsc,K\) from the multivariate normal posterior distribution \(\T_{\miss,i} \mid \T_\obs\), and computing the variance between the samples and the posterior expectation:
 \begin{equation}
 \widehat{\var}\del{\error} = \frac{1}{K} \sum_{k=1}^K \var_i \cbr{\T^{(k)}_{\miss,i} - \E\del{\T_{\miss,i} \mid \T_\obs}}
