@@ -245,12 +245,11 @@ which we denote \(\kSESE\) to distinguish it from the covariance functions devel
 % 0 &\text{otherwise}\,.
 % \end{cases}
 % \end{equation}
-Our model thus has four free parameters, \(\sigma_{\subtime}\), \(\ell_{\subtime}\), \(\ell_{\subspace}\) and \(\sigman\), which we fit by maximizing the marginal likelihood of \(\T\), the complete 2015 temperature time series provided at the four Iowa weather stations:
-\begin{equation}
-\label{eq:optimization}
-\widehat\sigma_{\subtime},\widehat\ell_{\subtime},\widehat\ell_{\subspace},\widehat\sigman = \argmax_{\sigma_{\subtime},\ell_{\subtime},\ell_{\subspace},\sigman} \cbr{ \Pr\del{ \T \mid {\sigma_{\subtime},\ell_{\subtime},\ell_{\subspace},\sigman} } }\,.
-\end{equation}
-The fitted covariance  values are found in \autoref{table:fitted_params}.
+\label{sec:hyperparameters}
+Our model thus has four free parameters, \(\sigma_{\subtime}\), \(\ell_{\subtime}\), \(\ell_{\subspace}\) and \(\sigman\), which we fit by maximizing the marginal likelihood \( \Pr\del{ \T \mid {\sigma_{\subtime},\ell_{\subtime},\ell_{\subspace},\sigman} }\) of \(\T\), the complete 2015 temperature time series provided at the four Iowa weather stations.
+We values of the resulting maximum likelihood estimates (MLE) 
+\(\widehat\sigma_{\subtime}\), \(\widehat\ell_{\subtime}\), \(\widehat\ell_{\subspace}\), and \(\widehat\sigman\)
+can be found in \autoref{table:fitted_params}.
 
 % \begin{table}[tbp]
 % \begin{center}
@@ -749,7 +748,7 @@ Fitted covariance parameters for \(\kdiurn\) and \(\ksumprod\) are found in \aut
 We now have three competing Gaussian process models, with covariance functions \(\kSESE\), \(\kdiurn\), and \(\ksumprod\) respectively. 
 We can compare them in four ways.
 Firstly, the variogram fit in \autoref{fig:spatial_variogram} is visibly improved by the introduction of the the diurnal component in \(\kdiurn\), and by the additional spatio-temporal correlation decay components in \(\ksumprod\).
-Secondly, the marginal log-likelihood is the quantity maximized by the parameter fitting procedure in \autoref{eq:optimization}, with maximized values found in the second column of \autoref{table:diagnostics}.
+Secondly, the marginal log-likelihood is the quantity maximized by the MLE hyperparameter fitting procedure of \autoref{sec:hyperparameters}, with maximized values found in the second column of \autoref{table:diagnostics}.
 The more complex models indeed yield a higher log-likelihood, promising a better model fit which should yield better predictions.
 Thirdly, we compare the variance of the error in the predicted temperatures specified in \autoref{eq:varerr} when withholding all the data from a test station. 
 Averaged over all of 2015, this is given in the third column of \autoref{table:diagnostics}, and shows more mixed results.
