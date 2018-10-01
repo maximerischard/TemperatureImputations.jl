@@ -400,7 +400,7 @@ Our aim is not simply to predict temperatures at a location with no measurements
 This is an instance of a more general statistical problem: if a random \(p\)-vector \(\cbr{X_i:~i=1,\dotsc,p}\) has a known distribution \(F_X\), and its maximum \(\Xmax = \max_i\cbr{X_i}\) and minimum \(\Xmin = \min_i\cbr{X_i}\) are measured, how does one draw samples from \(\Fcond\), the distribution of \(X\) conditional on \(\Xmax\) and \(\Xmin\)?
 Conditional draws from \(\Fcond\) need to respect three constraints: one component of \(X\) must be equal to \(\Xmin\), another to \(\Xmax\), and all other components must lie between \(\Xmin\) and \(\Xmax\).
 
-Conceptually, we could implement a valid imputation algorithm by drawing random samples \(F_X\),
+Conceptually, we could implement a valid imputation algorithm by drawing random samples from \(F_X\),
 and accepting only those samples that satisfy the three constraints.
 Unfortunately, if \(F_X\) is a continuous distribution, the probability of a random draw from \(F_X\) satisfying such sharp constraints is zero.
 One could envision adding some tolerance, so that samples with minimum and maximum within a small margin of \(\Xmax\) and \(\Xmin\) are retained, but as the dimensionality \(p\) grows, the rejection probability will rapidly go to 1, thus requiring huge sample sizes.
