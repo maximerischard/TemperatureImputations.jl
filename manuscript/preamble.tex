@@ -108,7 +108,13 @@
 \newcommand{\xvec}{\mathbold{x}}
 \newcommand{\hvec}{\mathbold{h}}
 \newcommand{\indep}{\perp}
-\newcommand{\iid}{iid}
+\makeatletter
+\newcommand*{\iid}{%
+    \@ifnextchar{.}%
+        {i.\,i.\,d}%
+        {i.\,i.\,d.\@}%
+}
+\makeatother
 \newcommand{\trans}{^{\intercal}}
 \newcommand{\sigmaf}{\sigma_{\mathrm{GP}}}
 \newcommand{\sigman}{\sigma_{\epsilon}}
