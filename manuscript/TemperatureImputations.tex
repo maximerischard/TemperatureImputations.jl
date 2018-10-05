@@ -607,45 +607,48 @@ This success demonstrates that SmoothHMC is capable of imputing temperature time
 \section{Model Diagnostics}
 \label{sec:diagnostics}
 
-\subsection{Variogram}\label{variogram}
+\subsection{Semivariogram}
+\label{sec:semivariogram}
 
-Model fit can be visually inspected by plotting temporal and spatial semi-variograms. 
-The semi-variogram  of a stationary spatio-temporal process \(Y(\xvec,t)\) defined on \(\reals^p \times \reals\) is a function of the spatial lag \(\hvec\) and the temporal lag \(r\) \citep[see for example][chapter 6]{sherman2011spatial}:
+Model fit can be visually inspected by plotting temporal and spatial semivariograms. 
+The semivariogram  of a stationary spatio-temporal process \(Y(\xvec,t)\) defined on \(\reals^2 \times \reals\) is a function of the spatial lag \(\hvec\) and the temporal lag \(r\) \citep[see for example][chapter 6]{sherman2011spatial}:
 \begin{equation}
-    \gamma\del{\hvec,r} = \frac{1}{2} \E\sbr{\del{Y\del{\xvec,t}-Y\del{\xvec+\hvec,t+r}}^2}
+    \gamma\del{\hvec,r} = 
+    % \V\sbr{Y(\xvec+\hvec, t+r) - Y(\xvec,t)}
+    \frac{1}{2} \E\sbr{\del{Y\del{\xvec,t}-Y\del{\xvec+\hvec,t+r}}^2}
     \quad
     \forall \hvec \in \reals^p,\ r \in \reals
-    % &= \var\del{ Y\del{\xvec,t}} - \cov\del{ \del{Y\del{\xvec,t}} , Y\del{\xvec+\hvec,t+r}}\,.
+    \,.
 \end{equation}
-For a Gaussian Process model, with a stationary covariance function \(k(\hvec,r)=k(\xvec,\xvec+\hvec,t,t+r)\), this can be expressed as:
+defined for all \(\hvec \in \reals^2\), \(r \in \reals\) except at the origin.
+For a Gaussian process with stationary covariance function \(k(\hvec,r)=k(\xvec,\xvec+\hvec,t,t+r)\) and independent measurement noise with variance $\sigman^2$, this simplifies to:
 \begin{equation}
     \label{eq:gp_variogram}
     \gamma\del{\hvec,r} = \sigman^2 + k\del{0,0} - k(\hvec,r)\,.
 \end{equation}
-From the data, the variogram can also be estimated empirically, by averaging the square differences of any two observations that are separated by \(\hvec\) in space, and \(r\) in time (in practice, time lags are binned).
-By comparing the empirical variogram to the variogram of the fitted covariance, 
-we obtain a visual diagnosis of the model.
+From the data, the variogram $2\gamma$ can be estimated empirically, by averaging the square differences of all pairs of observations that are separated by \(\hvec\) in space, and \(r\) in time (in practice, time lags are binned).
+By comparing the empirical semivariogram to the semivariogram of the fitted covariance, we obtain a visual diagnosis of the model.
 
 \begin{figure}[!tbp]
 \centering
 \includegraphics[width=0.99\textwidth]{../figures/spatial_variogram.pdf}
 \caption{\label{fig:spatial_variogram}
-Semi-variograms of the temperature temperature time series at four Iowa weather stations, each labeled by its ICAO code.
-The empirical semi-variograms are shown in black, and the fitted variograms for the three covariance models proposed in this paper are shown in color.
-The temporal semi-variograms are shown on the diagonal, while the off-diagonal plots show the semi-variograms as a function of time lag for a fixed distance \(\hvec\) equal to the distance between the two stations.
+    Semivariograms of the temperature temperature time series at four Iowa weather stations, each labeled by its ICAO code.
+    The empirical semivariograms are shown in black, and the fitted variograms for the three covariance models proposed in this paper are shown in color.
+    The temporal semivariograms are shown on the diagonal, while the off-diagonal plots show the semivariograms as a function of time lag for a fixed distance \(\hvec\) equal to the distance between the two stations.
 }
 \end{figure}
 
-In our Iowa example, there are only four possible locations. For each location, we plot the empirical temporal variogram \(\widehat\gamma\del{0,r}\). Then, for each pair of stations separated by \(\hvec\) (fixed), we can also plot the estimate \(\widehat\gamma\del{\hvec,r}\). 
-We overlay the model's semi-variogram from equation \autoref{eq:gp_variogram}, resulting in \autoref{fig:spatial_variogram}.
-For each variogram, we have removed the effect of the \(k_\mu\) covariance, which would shift the variogram between two stations by a large arbitrary constant.
-Correspondingly, we subtract the mean of each observed time series before obtaining the empirical variogram.
+In our Iowa example, there are only four possible locations. For each location, we plot the empirical temporal semivariogram \(\widehat\gamma\del{0,r}\). Then, for each pair of stations separated by \(\hvec\) (fixed), we can also plot the estimate \(\widehat\gamma\del{\hvec,r}\). 
+We overlay the model's semivariogram from equation \autoref{eq:gp_variogram}, resulting in \autoref{fig:spatial_variogram}.
+For each semivariogram, we have removed the effect of the \(k_\mu\) covariance, which would shift the semivariogram between two stations by a large arbitrary constant.
+Correspondingly, we subtract the mean of each observed time series before obtaining the empirical semivariogram.
 
-We notice that the variogram of the model with product covariance \autoref{eq:ksese} tracks the empirical variogram well at short lags, but fails to capture the periodicity in the empirical variogram, and the fit degrades at long lag. We improve the model in \autoref{sec:improving_model}.
+We notice that the semivariogram of the model with product covariance \autoref{eq:ksese} tracks the empirical semivariogram well at short lags, but fails to capture the periodicity in the empirical semivariogram, and the fit degrades at long lag. We improve the model in \autoref{sec:improving_model}.
 
 \subsection{Error and Expected Error}
 
-The variogram gives us a visual diagnostic of the overall model fit. 
+The semivariogram gives us a visual diagnostic of the overall model fit. 
 To quantify the model's predictive ability in the Iowa example, we compare the posterior mean temperature to the withheld truth, and obtain the empirical mean squared error (MSE) for $N$ predictions as:
 \begin{equation}
     \label{eq:mse}
@@ -711,9 +714,9 @@ However, the model is overly optimistic, and the expected errors underestimate t
 \label{sec:improving_model}
 
 In this section, we develop more sophisticated Gaussian process covariances than the simple product of squared exponential kernels \(\kSESE\) \autoref{eq:ksese}. 
-We then assess whether these models improve the variogram and the predictive diagnostics that we presented in \autoref{sec:diagnostics}.
+We then assess whether these models improve the semivariogram and the predictive diagnostics that we presented in \autoref{sec:diagnostics}.
 
-The most salient feature of the empirical variogram that is not captured by the \(\kSESE\) covariance is the oscillation with a 24-hour period.
+The most salient feature of the empirical semivariogram that is not captured by the \(\kSESE\) covariance is the oscillation with a 24-hour period.
 It is intuitively clear that the diurnal cycle induces this periodic covariance, and that our model should be improved by incorporating this feature.
 Gaussian processes allow for periodic components of the covariance, for example the periodic squared exponential covariance function, which we use with a 24-hour period
 \begin{equation}
@@ -749,7 +752,7 @@ Fitted covariance parameters for \(\kdiurn\) and \(\ksumprod\) are found in \aut
 
 We now have three competing Gaussian process models, with covariance functions \(\kSESE\), \(\kdiurn\), and \(\ksumprod\) respectively. 
 We can compare them in four ways.
-Firstly, the variogram fit in \autoref{fig:spatial_variogram} is visibly improved by the introduction of the the diurnal component in \(\kdiurn\), and by the additional spatio-temporal correlation decay components in \(\ksumprod\).
+Firstly, the semivariogram fit in \autoref{fig:spatial_variogram} is visibly improved by the introduction of the the diurnal component in \(\kdiurn\), and by the additional spatio-temporal correlation decay components in \(\ksumprod\).
 Secondly, the marginal log-likelihood is the quantity maximized by the MLE hyperparameter fitting procedure of \autoref{sec:hyperparameters}, with maximized values found in the second column of \autoref{table:diagnostics}.
 The more complex models indeed yield a higher log-likelihood, promising a better model fit which should yield better predictions.
 Thirdly, we compare the variance of the error in the predicted temperatures specified in \autoref{eq:varerr} when withholding all the data from a test station. 
