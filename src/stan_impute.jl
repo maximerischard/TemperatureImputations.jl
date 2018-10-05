@@ -1,5 +1,3 @@
-using Base.Dates: Day, Hour
-
 function prep_data(nearby_pred::NearbyPrediction, TnTx::DataFrame, 
                 date_start::Date, hr_measure::Hour, impute_window::Day)
     #=window_start = DateTime(date_start) + hr_measure - Day(1)=#
@@ -15,8 +13,8 @@ function prep_data(nearby_pred::NearbyPrediction, TnTx::DataFrame,
     window_days = collect(date_start:Day(1):date_end)
     window_TnTx=TnTx[[d ∈ window_days for d in TnTx[:ts_day]],:]
 
-    day_impute = Dates.Day.(ts_window_day .- minimum(ts_window_day))
-    day_impute_numeric = Dates.value.(day_impute) .+ 1
+    day_impute = Day.(ts_window_day .- minimum(ts_window_day))
+    day_impute_numeric = value.(day_impute) .+ 1
     # day_impute = convert(Vector{Int}, Dates.value(ts_window_day .- minimum(ts_window_day))+1
     imputation_data = Dict(
         "N_TxTn" => nrow(window_TnTx),
@@ -62,16 +60,19 @@ function get_imputation_model(; pdir=pwd())
 
             // control smooth max hardness
             real<lower=0> k_smoothmax;
+			// real<lower=0> sigma_mu;
+            real<lower=0> epsilon;
         }
         parameters {
             vector[Nimpt] w_uncorr;
-            real mu;
+            // real mu;
         }
         transformed parameters {
             vector[Nimpt] temp_impt;
             real Tsmoothmax[N_TxTn];
             real Tsmoothmin[N_TxTn];  
-            temp_impt = mu + predicted_mean + predicted_cov_chol*w_uncorr;
+            // temp_impt = mu + predicted_mean + predicted_cov_chol*w_uncorr;
+            temp_impt = predicted_mean + predicted_cov_chol*w_uncorr;
             {
                 int istart;
                 istart = 1;
@@ -90,16 +91,16 @@ function get_imputation_model(; pdir=pwd())
         }
         model {
             w_uncorr ~ normal(0,1);
-            mu ~ normal(0, 100.0);
-            Tn ~ normal(Tsmoothmin, 0.1);
-            Tx ~ normal(Tsmoothmax, 0.1);
+            // mu ~ normal(0, sigma_mu);
+            Tn ~ normal(Tsmoothmin, epsilon);
+            Tx ~ normal(Tsmoothmax, epsilon);
         }
     """
-    stanmodel = Stanmodel(
-        name="imputation", 
-        model=imputation_model, 
-        pdir=pdir, 
-        useMamba=false)
+    stanmodel = Stanmodel(;
+        	name="imputation", 
+        	model=imputation_model, 
+        	pdir=pdir, 
+        )
     return stanmodel
 end
 

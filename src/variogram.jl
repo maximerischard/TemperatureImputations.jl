@@ -1,5 +1,5 @@
 # Empirical variograms
-type Variogram
+mutable struct Variogram
     bins::AbstractVector
     sqdiff_accum::Vector{Float64}
     npairs::Vector{Int}
@@ -10,7 +10,7 @@ type Variogram
         return new(bins, sqdiff_accum, npairs)
     end
 end 
-variog(v::Variogram) = v.sqdiff_accum ./ (v.npairs.*2)
+semivariog(v::Variogram) = v.sqdiff_accum ./ (v.npairs.*2)
 
 function timeseries_variogram(times, values, bins)
     v = Variogram(bins)

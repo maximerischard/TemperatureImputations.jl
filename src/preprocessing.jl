@@ -1,6 +1,5 @@
 using DataFrames
 using CSV
-using Base.Dates: Hour, Day, Millisecond, Date
 
 function read_station(usaf::Int, wban::Int, id::Int; data_dir::String=".")
     fn = @sprintf("%06d.%05d.processed.2015.2015.csv", usaf, wban)
@@ -31,7 +30,7 @@ function read_isdList(;data_dir::String=".")
         # header=1,
         # weakrefstrings=false
         # )
-    isdList = DataFrames.readtable(joinpath(data_dir,"isdList.csv"))
+    isdList = CSV.read(joinpath(data_dir,"isdList.csv"), DataFrame)
 
     # Project onto Euclidean plane
     epsg=Proj4.Projection(Proj4.epsg[2794])
@@ -64,8 +63,8 @@ function test_data(hourly::DataFrame, istation::Int, hr_measure::Hour)
     TnTx = DataFrames.by(hourly_test, :ts_day, df -> DataFrame(
         Tn=minimum(df[:temp]), 
         Tx=maximum(df[:temp]),
-        Tn_time=df[:ts][indmin(df[:temp])],
-        Tx_time=df[:ts][indmax(df[:temp])],
+        Tn_time=df[:ts][argmin(df[:temp])],
+        Tx_time=df[:ts][argmax(df[:temp])],
         times_p_day=DataFrames.nrow(df),
     ))
     return TnTx

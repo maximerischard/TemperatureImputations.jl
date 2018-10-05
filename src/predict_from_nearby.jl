@@ -4,7 +4,7 @@ function subset(df, from, to)
     return df[after_from .& before_to, :]
 end
 
-type NearbyPrediction
+mutable struct NearbyPrediction
     ts::Vector{DateTime}
     μ::Vector{Float64}
     Σ::PDMat{Float64,Array{Float64,2}}
@@ -15,9 +15,10 @@ function add_diag!(Σ::PDMats.PDMat, a::Float64)
     for i in 1:size(mat,1)
         mat[i,i] += a
     end
-    copy!(Σ.chol.factors, mat)
-    cholfact!(Σ.chol.factors, Symbol(Σ.chol.uplo))
-    @assert maximum(abs, mat .- full(Σ.chol)) < 1e-10
+    copyto!(Σ.chol.factors, mat)
+    # cholfact!(Σ.chol.factors, Symbol(Σ.chol.uplo))
+    cholesky!(Hermitian(Σ.chol.factors, Symbol(Σ.chol.uplo)))
+    @assert maximum(abs, mat .- Matrix(Σ.chol)) < 1e-10
     return Σ
 end
 

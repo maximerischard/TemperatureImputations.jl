@@ -1,5 +1,5 @@
 using StatsBase: midpoints, Weights
-using Base.Dates: Millisecond
+using Dates: Millisecond
 function mean_temp{V1<:AbstractVector, V2<:AbstractVector}(temp::V1, ts::V2)
     temp_midpoints = midpoints(temp)
     diff_ts = diff(ts) ./ Millisecond(1)

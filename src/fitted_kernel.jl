@@ -160,10 +160,36 @@ function fitted_sptemp_simpler(;kmean=true)
         k_means = SEIso(log(1.0), log(10.0))
         k_spatiotemporal = k_spatiotemporal + fix(Masked(k_means, [2,3]))
     end
-    # logNoise TBD
     hyp = [-1.72527,-0.210656,0.950124,13.574,0.0544504,0.653978,0.538881,0.125985,10.9932,-0.605542,-1.2208,-0.946048,-1.0721,9.20607,0.229593,2.18355,1.29463,-1.14171,12.8224,0.182608]
     set_params!(k_spatiotemporal, hyp[2:end])
     logNoise=hyp[1]
     return k_spatiotemporal, logNoise
 end
 
+function fitted_sptemp_matern(;kmean=true)
+    k1 = fix(Periodic(log(1.0),log(3.0),log(24.0)), :lp)
+    k2 = RQIso(log(0.5),0.0,0.0)  # half an hour
+    k3 = RQIso(log(2.0),0.0,0.0)  # two hours
+    k4 = RQIso(log(12.0),0.0,0.0) # twelve hours
+
+    ksp1 = fix(Mat32Iso(log(5e4), log(1.0)), :lσ)
+    ksp2 = fix(Mat32Iso(log(5e4), log(1.0)), :lσ)
+    ksp3 = fix(Mat32Iso(log(5e4), log(1.0)), :lσ)
+    ksp4 = fix(Mat32Iso(log(5e4), log(1.0)), :lσ)
+    k_means = SEIso(log(1), log(10.0))
+
+    k_spatiotemporal = Masked(k1, [1]) * Masked(ksp1, [2,3]) +
+                     Masked(k2, [1])  * Masked(ksp2, [2,3]) +
+                     Masked(k3, [1]) * Masked(ksp3, [2,3]) +
+                     Masked(k4, [1])  * Masked(ksp4, [2,3])
+
+    if kmean
+        k_means = SEIso(log(1.0), log(20.0))
+        k_spatiotemporal = k_spatiotemporal + fix(Masked(k_means, [2,3]))
+    end
+    # hyperparameters fitted in `FitGP_spatiotemp_spatial_matern.ipynb`:
+    hyp = [-1.72361, -0.200613, 1.0075, 14.0162, -1.20089, -0.703055, -1.07354, 9.35237, 0.678935, -0.0278533, 0.244548, 11.1962, 2.18646, 1.45579, -0.924148, 13.3052]
+    set_params!(k_spatiotemporal, hyp[2:end])
+    logNoise=hyp[1]
+    return k_spatiotemporal, logNoise
+end

@@ -14,7 +14,8 @@ using JLD
 using Distances
 using AxisArrays
 using DataFrames: by, head
-using Base.Dates: tonext, Hour, Day
+using Dates: tonext, Hour, Day
+using LinearAlgebra: cholesky!, Hermitian
 
 const janfirst = Date(2015, 1, 1)
 const stan_increment = Day(3)
@@ -43,9 +44,10 @@ function add_diag!(Σ::PDMats.PDMat, a::Float64)
     for i in 1:size(mat,1)
         mat[i,i] += a
     end
-    copy!(Σ.chol.factors, mat)
-    cholfact!(Σ.chol.factors, Symbol(Σ.chol.uplo))
-    @assert sumabs(mat .- full(Σ.chol)) < 1e-8
+    copyto!(Σ.chol.factors, mat)
+    # cholfact!(Σ.chol.factors, Symbol(Σ.chol.uplo))
+    cholesky!(Hermitian(Σ.chol.factors, Symbol(Σ.chol.uplo)))
+    @assert sumabs(mat .- Matrix(Σ.chol)) < 1e-8
     return Σ
 end
 
@@ -290,7 +292,7 @@ function find_best_window(t::DateTime, cands::Vector{WindowTime})
     inside_windows = t_inside_wt.(t, cands)
     incl_wdows = cands[inside_windows]
     buffers = [buffer(t, wt) for wt in incl_wdows]
-    imax = indmax(buffers)
+    imax = argmax(buffers)
     return find(inside_windows)[imax]
 end
 
@@ -322,7 +324,7 @@ function get_diagnostics(
     iinside = argsubset(ts, ts_start, ts_end)
     ts = ts[iinside]
     μ = nearby.μ[iinside]
-    Σ = full(nearby.Σ)[iinside,iinside]
+    Σ = PDMats.full(nearby.Σ)[iinside,iinside]
     nobsv = length(μ)
     
     centering = eye(nobsv) .- (1.0/nobsv) .* ones(nobsv, nobsv)

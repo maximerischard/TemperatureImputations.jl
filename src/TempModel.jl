@@ -1,10 +1,22 @@
 module TempModel
+    using Statistics: mean
+
     using GaussianProcesses
+    using GaussianProcesses: Mean, Kernel, evaluate, metric
+    import GaussianProcesses: optimize!, get_optim_target
+    import GaussianProcesses: num_params, set_params!, get_params, update_mll!
+    import GaussianProcesses: update_mll_and_dmll!
+
     using PDMats
     using Optim
-    using Stan
+    using Optim: minimizer
+    using CmdStan
     import Proj4
     import NLopt
+    using Dates: Day, Hour, DateTime, Date, Millisecond, value
+    using Printf: @sprintf
+    using LinearAlgebra: cholesky!, Hermitian
+
     include("GPrealisations.jl")
     include("utils.jl")
     include("preprocessing.jl")

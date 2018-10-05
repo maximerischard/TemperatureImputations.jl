@@ -1,5 +1,3 @@
-using Base.Dates: Day, Hour
-
 function old_measurement_date(t::DateTime, hr_measure::Hour)
     if Hour(t) <= hr_measure
         # if the time now is before the measurement time,
