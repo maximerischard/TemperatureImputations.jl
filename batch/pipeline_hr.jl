@@ -12,6 +12,7 @@ using DocOpt
 
 using Stan
 using GaussianProcesses
+using Proj4
 using PDMats: PDMat
 using Base.Dates: Day, Hour
 using JLD
