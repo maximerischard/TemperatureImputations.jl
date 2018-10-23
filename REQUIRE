@@ -3,5 +3,9 @@ GaussianProcesses
 PDMats
 Optim
 Proj4
-Stan
+CmdStan
 NLopt
+CSV
+DocOpt
+JLD
+DataFrames

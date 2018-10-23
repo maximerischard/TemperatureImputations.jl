@@ -4,30 +4,18 @@ doc = """
     * Save the predictive mean and covariance.
 
     Usage:
-        pipeline1.jl <model>
+        pipeline1.jl <model> <data_dir> <save_dir>
 """
 using DocOpt
 using DataFrames
+using JLD
+using TempModel
+using Dates: Date
 
 arguments = docopt(doc)
 GPmodel = arguments["<model>"]
-data_dir="../"
-module TempModel
-    data_dir="../"
-    using TimeSeries
-    using DataFrames
-    using DataFrames: by
-    using GaussianProcesses
-    using Proj4
-    using GaussianProcesses: set_params!
-    using PDMats
-    include(data_dir*"/src/predict_from_nearby.jl")
-    include(data_dir*"/src/preprocessing.jl")
-    include(data_dir*"/src/variogram.jl")
-    include(data_dir*"/src/fitted_kernel.jl")
-end
-
-using JLD
+data_dir= arguments["<data_dir>"]
+save_dir= arguments["<save_dir>"]
 
 global k_spatiotemporal
 global logNoise
@@ -63,15 +51,16 @@ increm=(maximum(hourly_cat[:ts])-minimum(hourly_cat[:ts])) / 15
 window=3*increm
 
 while true
+    global dt_start
     dt_end=dt_start+window
-    saved_dir = joinpath(pwd(), data_dir*"/saved/predictions_from_nearby", GPmodel)
-    if !isdir(saved_dir)
-        mkdir(saved_dir)
+    savemodel_dir = joinpath(pwd(), joinpath(save_dir, "predictions_from_nearby", GPmodel)
+    if !isdir(savemodel_dir)
+        mkdir(savemodel_dir)
     end
     nearby_pred = TempModel.predict_from_nearby(hourly_cat, isdSubset, 
         k_spatiotemporal, logNoise,
         itest, dt_start, dt_end)
-    save(joinpath(saved_dir,
+    save(joinpath(savemodel_dir,
                  @sprintf("%d_%s_to_%s.jld", 
                     test_usaf, 
                     Date(dt_start), 
