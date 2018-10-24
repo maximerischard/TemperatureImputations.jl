@@ -16,6 +16,7 @@ arguments = docopt(doc)
 GPmodel = arguments["<model>"]
 data_dir= arguments["<data_dir>"]
 save_dir= arguments["<save_dir>"]
+println("directory for saved files: ", save_dir)
 
 global k_spatiotemporal
 global logNoise
@@ -53,7 +54,7 @@ window=3*increm
 while true
     global dt_start
     dt_end=dt_start+window
-    savemodel_dir = joinpath(pwd(), joinpath(save_dir, "predictions_from_nearby", GPmodel)
+    savemodel_dir = joinpath(save_dir, "predictions_from_nearby", GPmodel)
     if !isdir(savemodel_dir)
         mkdir(savemodel_dir)
     end

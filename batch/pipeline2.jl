@@ -6,58 +6,35 @@ doc = """
     This script constrains those posteriors to be within the measured Tn&Tx.
 
     Usage:
-        pipeline2.jl <saved_dir> <windownum> <model>
+        pipeline2.jl <windownum> <model> <data_dir> <save_dir>
 """
 using DocOpt
 arguments = docopt(doc)
 
-saved_dir = arguments["<saved_dir>"]
-saved_dir = joinpath(saved_dir)
-println("directory for saved files: ", saved_dir)
+save_dir = arguments["<save_dir>"]
+save_dir = joinpath(save_dir)
+println("directory for saved files: ", save_dir)
 windownum = parse(Int, arguments["<windownum>"])
 GPmodel = arguments["<model>"]
 
-using Stan
-using GaussianProcesses
-using Proj4
-using PDMats: PDMat
+using CmdStan
 using Base.Dates: Day, Hour
 using JLD
-using GaussianProcesses: SumKernel
+using TempModel
 
 stan_days = Day(9)
 stan_increment = Day(3)
 
-root_dir = ".."
-include(joinpath(root_dir,"src/utils.jl"))
-include(joinpath(root_dir,"src/preprocessing.jl"))
-
-isdList=read_isdList(;data_dir=root_dir)
+isdList = TempModel.read_isdList(; data_dir=data_dir)
 isdSubset=isdList[[(usaf in (725450,725460,725480,725485)) for usaf in isdList[:USAF]],:]
 isdSubset
 
-hourly_cat=read_Stations(isdSubset; data_dir=root_dir)
+hourly_cat=TempModel.read_Stations(isdSubset; data_dir=data_dir)
 itest=3
 test_usaf=isdSubset[itest,:USAF]
 hr_measure = Hour(17)
 
-TnTx = test_data(hourly_cat, itest, hr_measure)
-
-module TempModel
-    root_dir = ".."
-    using PDMats
-    using PDMats: PDMat
-    using GaussianProcesses: GP, Kernel, MeanZero, predict
-    using Base.Dates: Day, Hour
-    using Stan
-    using DataFrames
-    using DataFrames: by
-    using GaussianProcesses
-
-    include(joinpath(root_dir, "src/utils.jl"))
-    include(joinpath(root_dir, "src/predict_from_nearby.jl"))
-    include(joinpath(root_dir, "src/stan_impute.jl"))
-end
+TnTx = TempModel.test_data(hourly_cat, itest, hr_measure)
 
 type FittingWindow
     start_date::Date
@@ -123,7 +100,7 @@ println("STAN fitting window: ", stan_window)
 best_window = find_best_window(stan_window, nearby_windows)
 println("using nearby-predictions from: ", best_window)
 
-nearby_pred=load(joinpath(saved_dir,
+nearby_pred=load(joinpath(save_dir,
                         "predictions_from_nearby",
                         GPmodel,
                         predictions_fname(test_usaf, best_window),
@@ -136,7 +113,7 @@ function stan_dirname(usaf::Int, fw::FittingWindow)
                     usaf, fw.start_date, fw.end_date)
 end
 
-stan_dir = joinpath(saved_dir,"stan_fit", GPmodel, stan_dirname(test_usaf, stan_window))
+stan_dir = joinpath(save_dir,"stan_fit", GPmodel, stan_dirname(test_usaf, stan_window))
 if !isdir(stan_dir)
     mkpath(stan_dir)
 end
@@ -149,7 +126,7 @@ rm(joinpath(stan_dir, "tmp"))
 writecsv(joinpath(stan_dir,"timestamps.csv"), reshape(ts_window, length(ts_window), 1))
 
 for fname in ("imputation","imputation_build.log","imputation_run.log","imputation.hpp")
-    tmpdir = joinpath(saved_dir, "..", "tmp")
+    tmpdir = joinpath(save_dir, "..", "tmp")
     file_path = joinpath(tmpdir, fname)
     if isfile(file_path)
         cp(file_path, joinpath(stan_dir,fname), remove_destination=true)
