@@ -24,7 +24,7 @@ function read_station(usaf::Int, wban::Int, id::Int; data_dir::String=".")
     station_data[:station] = id
     return station_data
 end
-function read_isdList(;data_dir::String=".")
+function read_isdList(;data_dir::String=".", epsg::Int=2794)
     # Read stations data
     # isdList = CSV.read(joinpath(data_dir,"isdList.csv"), DataFrame;
         # header=1,
@@ -33,12 +33,18 @@ function read_isdList(;data_dir::String=".")
     isdList = CSV.read(joinpath(data_dir,"isdList.csv"), DataFrame)
 
     # Project onto Euclidean plane
-    epsg=Proj4.Projection(Proj4.epsg[2794])
+    epsg=Proj4.Projection(Proj4.epsg[epsg])
     wgs84=Proj4.Projection("+proj=longlat +datum=WGS84 +no_defs")
     isdProj = Proj4.transform(wgs84,epsg, hcat(isdList[:LON], isdList[:LAT]))
     isdList[:X_PRJ] = isdProj[:,1]
     isdList[:Y_PRJ] = isdProj[:,2]
     return isdList
+end
+function stations_with_data(isdList::DataFrame; data_dir::String=".")
+    data_files = readdir(joinpath(data_dir, "data2015"))
+    data_files = filter(s -> endswith(s, ".csv"), data_files)
+    data_USAF_WBAN = [parse.(Int, split(s, ".")[1:2]) for s in data_files]
+    isd_wData = filter(row -> [row[:USAF], row[:WBAN]] ∈ data_USAF_WBAN, isdList)
 end
 function add_ts_hours!(df::DataFrame)
     # timestamps in hours
@@ -68,4 +74,13 @@ function test_data(hourly::DataFrame, istation::Int, hr_measure::Hour)
         times_p_day=DataFrames.nrow(df),
     ))
     return TnTx
+end
+function find_nearest(isdList::DataFrame, USAF::Int, k_nearest::Int)
+    test_station = isdList[isdList[:USAF].==USAF, :]
+    @assert nrow(test_station) == 1
+    distances = sqrt.((test_station[:X_PRJ].-isdList[:X_PRJ]).^2 
+                   .+ (test_station[:Y_PRJ].-isdList[:Y_PRJ]).^2)
+    nearest_rows = sortperm(distances)
+    nearest_and_test = isdList[nearest_rows[1:2+k_nearest-1], :]
+    return nearest_and_test
 end
