@@ -98,7 +98,7 @@ function get_optim_target(gpr::GPRealisations; noise::Bool=true, domean::Bool=tr
             elseif isa(err, ArgumentError)
                 println(err)
                 return Inf
-            elseif isa(err, Base.LinAlg.PosDefException)
+            elseif isa(err, LinearAlgebra.PosDefException)
                 println(err)
                 return Inf
             else
@@ -123,7 +123,7 @@ function get_optim_target(gpr::GPRealisations; noise::Bool=true, domean::Bool=tr
             elseif isa(err, ArgumentError)
                 println(err)
                 return Inf
-            elseif isa(err, Base.LinAlg.PosDefException)
+            elseif isa(err, LinearAlgebra.PosDefException)
                 println(err)
                 return Inf
             else
