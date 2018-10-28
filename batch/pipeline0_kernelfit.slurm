@@ -9,6 +9,7 @@
 #SBATCH --mail-user=mrischard@g.harvard.edu
 #SBATCH --array 1-2           # identifies job within batch
 
+source ~/julia_modules.sh
 test_ICAOs=(KWRB KMXF KJAN KESF KSJT KPHX KPOB KCAE KBNA KLRF KTIK KABQ KFAT 
             KDCA KBWI KDOV KWRI KLYH KEKN KFTK KCMH KIND KSPI KCOU KICT KHVE 
             KTPH KPVD KBDL KAOO KSYR KDSM KLBF KCPR KCON KMPV KMLT KMKG KVOK
