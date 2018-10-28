@@ -14,13 +14,17 @@ arguments = docopt(doc)
 save_dir = arguments["<save_dir>"]
 save_dir = joinpath(save_dir)
 println("directory for saved files: ", save_dir)
+data_dir = arguments["<data_dir>"]
+data_dir = joinpath(data_dir)
 windownum = parse(Int, arguments["<windownum>"])
 GPmodel = arguments["<model>"]
 
 using CmdStan
-using Base.Dates: Day, Hour
+using Dates: Day, Hour, Date, DateTime
 using JLD
 using TempModel
+using LinearAlgebra
+using PDMats
 
 stan_days = Day(9)
 stan_increment = Day(3)
@@ -36,7 +40,7 @@ hr_measure = Hour(17)
 
 TnTx = TempModel.test_data(hourly_cat, itest, hr_measure)
 
-type FittingWindow
+struct FittingWindow
     start_date::Date
     end_date::Date
 end
@@ -52,6 +56,7 @@ dt_start=DateTime(2015,1,1,0,0,0)
 increm=(maximum(hourly_cat[:ts])-minimum(hourly_cat[:ts])) / 15
 window=3*increm
 while true
+	global dt_start
     dt_end=dt_start+window
     sdate = Date(dt_start)
     edate = Date(dt_end)
@@ -86,7 +91,7 @@ end
 function find_best_window(wind::FittingWindow, cands::Vector{FittingWindow})
     incl_wdows = [fw for fw in cands if a_isinside_b(wind, fw)]
     buffers = [buffer(wind, fw) for fw in incl_wdows]
-    imax = indmax(buffers)
+    imax = argmax(buffers)
     best_window = incl_wdows[imax]
     return best_window
 end
@@ -144,7 +149,6 @@ imputation_model.tmpdir = stan_dir;
     imputation_model, 
     [imputation_data], 
     stan_dir,
-    CmdStanDir=Stan.CMDSTAN_HOME, 
     summary=false, 
     diagnostics=false
     )

@@ -16,6 +16,7 @@ arguments = docopt(doc)
 GPmodel = arguments["<model>"]
 data_dir= arguments["<data_dir>"]
 save_dir= arguments["<save_dir>"]
+save_dir = joinpath(save_dir)
 println("directory for saved files: ", save_dir)
 
 global k_spatiotemporal

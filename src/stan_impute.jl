@@ -25,8 +25,9 @@ function prep_data(nearby_pred::NearbyPrediction, TnTx::DataFrame,
         "impt_times_p_day" => window_TnTx[:times_p_day],
         "predicted_mean" => μ_window,
         "predicted_cov" => Σ_window.mat,
-        "predicted_cov_chol" => full(Σ_window.chol[:L]),
-        "k_smoothmax" => 10.0,
+        "predicted_cov_chol" => Matrix(Σ_window.chol.L),
+        "k_smoothmax" => 20.0,
+        "epsilon" => 0.01,
     )
     return imputation_data, ts_window
 end
