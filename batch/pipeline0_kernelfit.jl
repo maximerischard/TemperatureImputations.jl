@@ -12,17 +12,18 @@ using DocOpt
 import TempModel
 using Printf: @printf, @sprintf
 import JSON
+using DataFrames: nrow
 
 arguments = docopt(doc)
 ICAO = arguments["<ICAO>"]
 @show ICAO
 GPmodel = arguments["<model>"]
 @show GPmodel
-data_dir= arguments["<data_dir>"]
+data_dir= joinpath(arguments["<data_dir>"])
 @show data_dir
-save_dir= arguments["<save_dir>"]
+save_dir= joinpath(arguments["<save_dir>"])
 @show save_dir
-k_nearest = parseInt(arguments["<kn>"])
+k_nearest = parse(Int, arguments["--knearest"])
 @show k_nearest
 
 global k_spatiotemporal
@@ -85,31 +86,56 @@ open(filepath, "w") do io
     JSON.print(io, output_dictionary, indent)
 end
 
+# the code below is just to nicely print the results
+# all the required output information is already
+# saved in the json file above
+
+ksum, k_st = k_spatiotemporal.kleft, k_spatiotemporal.kright
+ksum, k_st = ksum.kleft, ksum.kright
+k4, ksp4 = k_st.kleft, k_st.kright
+k4 = k4.kernel
+ksp4 = ksp4.kernel.kernel
+
+ksum, k_st = ksum.kleft, ksum.kright
+k3, ksp3 = k_st.kleft, k_st.kright
+k3 = k3.kernel
+ksp3 = ksp3.kernel.kernel
+
+ksum, k_st = ksum.kleft, ksum.kright
+k2, ksp2 = k_st.kleft, k_st.kright
+k2 = k2.kernel
+ksp2 = ksp2.kernel.kernel
+
+k_st = ksum
+k1, ksp1 = k_st.kleft, k_st.kright
+k1 = k1.kernel.kernel
+ksp1 = ksp1.kernel.kernel
+
 print("k₁: Periodic \n=================\n")
-@printf("σ: %5.3f\n", √k1.kernel.σ2)
-@printf("l: %5.3f\n", √k1.kernel.ℓ2)
-@printf("p: %5.0f hours\n", k1.kernel.p)
+@printf("σ: %5.3f\n", √k1.σ2)
+@printf("l: %5.3f\n", √k1.ℓ2)
+@printf("p: %5.0f hours\n", k1.p)
 print("> spatial decay:\n")
-@printf("l: %5.3f km\n", ksp1.kernel.ℓ / 1000)
+@printf("l: %5.3f km\n", ksp1.ℓ / 1000)
 print("\nk₂: RQIso \n=================\n")
 @printf("σ: %5.3f\n", √k2.σ2)
 @printf("l: %5.3f hours\n", √ k2.ℓ2)
 @printf("α: %5.3f\n", k2.α)
 print("> spatial decay:\n")
 # @printf("σ: %5.3f\n", √ksp2.σ2)
-@printf("l: %5.3f km\n", ksp2.kernel.ℓ / 1000)
+@printf("l: %5.3f km\n", ksp2.ℓ / 1000)
 print("\nk₃: SEIso \n=================\n")
 @printf("σ: %5.3f\n", √k3.σ2)
 @printf("l: %5.3f hours\n", √k3.ℓ2)
 print("> spatial decay:\n")
 # @printf("σ: %5.3f\n", √ksp3.σ2)
-@printf("l: %5.3f km\n", ksp3.kernel.ℓ / 1000)
+@printf("l: %5.3f km\n", ksp3.ℓ / 1000)
 print("\nk₄: RQIso \n=================\n")
 @printf("σ: %5.3f\n", √k4.σ2)
 @printf("l: %5.3f days\n", √k4.ℓ2 / 24)
 @printf("α: %5.3f\n",  k4.α)
 print("> spatial decay:\n")
 # @printf("σ: %5.3f\n", √ksp4.σ2)
-@printf("l: %5.3f km\n", ksp4.kernel.ℓ / 1000)
+@printf("l: %5.3f km\n", ksp4.ℓ / 1000)
 print("\n=================\n")
 @printf("σy: %5.3f\n", exp(opt_out[:hyp][1]))
