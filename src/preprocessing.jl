@@ -35,7 +35,7 @@ function read_isdList(;data_dir::String=".", epsg::Int=2794)
     # Project onto Euclidean plane
     epsg=Proj4.Projection(Proj4.epsg[epsg])
     wgs84=Proj4.Projection("+proj=longlat +datum=WGS84 +no_defs")
-    isdProj = Proj4.transform(wgs84,epsg, hcat(isdList[:LON], isdList[:LAT]))
+    isdProj = Proj4.transform(wgs84, epsg, hcat(isdList[:LON], isdList[:LAT]))
     isdList[:X_PRJ] = isdProj[:,1]
     isdList[:Y_PRJ] = isdProj[:,2]
     return isdList
@@ -45,6 +45,7 @@ function stations_with_data(isdList::DataFrame; data_dir::String=".")
     data_files = filter(s -> endswith(s, ".csv"), data_files)
     data_USAF_WBAN = [parse.(Int, split(s, ".")[1:2]) for s in data_files]
     isd_wData = filter(row -> [row[:USAF], row[:WBAN]] ∈ data_USAF_WBAN, isdList)
+    return isd_wData
 end
 function add_ts_hours!(df::DataFrame)
     # timestamps in hours
@@ -75,8 +76,8 @@ function test_data(hourly::DataFrame, istation::Int, hr_measure::Hour)
     ))
     return TnTx
 end
-function find_nearest(isdList::DataFrame, USAF::Int, k_nearest::Int)
-    test_station = isdList[isdList[:USAF].==USAF, :]
+function find_nearest(isdList::DataFrame, USAF::Int, WBAN::Int, k_nearest::Int)
+    test_station = isdList[(isdList[:USAF].==USAF) .& (isdList[:WBAN].==WBAN), :]
     @assert nrow(test_station) == 1
     distances = sqrt.((test_station[:X_PRJ].-isdList[:X_PRJ]).^2 
                    .+ (test_station[:Y_PRJ].-isdList[:Y_PRJ]).^2)

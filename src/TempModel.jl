@@ -24,4 +24,5 @@ module TempModel
     include("stan_impute.jl")
     include("fitted_kernel.jl")
     include("variogram.jl")
+    include("covariance.jl")
 end
