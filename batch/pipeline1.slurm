@@ -2,7 +2,7 @@
 #SBATCH -J pipeline_nearby   # name for job array
 #SBATCH -p shared            # Partition
 #SBATCH -t 0-12:00:00        # Running time of 12 hours
-#SBATCH --mem-per-cpu 8000   # request 8GB memory
+#SBATCH --mem 8000   # request 8GB memory
 #SBATCH -n 4                 # 1 core
 #SBATCH -N 1                 # All cores on one machine
 #SBATCH --mail-type=ALL      # Type of email notification- BEGIN,END,FAIL,ALL

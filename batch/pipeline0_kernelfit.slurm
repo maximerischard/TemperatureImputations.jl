@@ -2,12 +2,12 @@
 #SBATCH -J pipeline_kernelfit # name for job array
 #SBATCH -p shared             # Partition
 #SBATCH -t 0-24:00:00         # Running time of 24 hours
-#SBATCH --mem-per-cpu 8000    # request 8GB memory
+#SBATCH --mem 16000           # request 16GB memory
 #SBATCH -n 2                  # 2 cores
 #SBATCH -N 1                  # All cores on one machine
 #SBATCH --mail-type=ALL       # Type of email notification- BEGIN,END,FAIL,ALL
 #SBATCH --mail-user=mrischard@g.harvard.edu
-#SBATCH --array 1-2           # identifies job within batch
+#SBATCH --array 32,47       # 27,28,29,35,36,38,39          # identifies job within batch
 
 source ~/julia_modules.sh
 test_ICAOs=(KWRB KMXF KJAN KESF KSJT KPHX KPOB KCAE KBNA KLRF KTIK KABQ KFAT 

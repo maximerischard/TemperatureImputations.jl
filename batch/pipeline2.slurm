@@ -2,7 +2,7 @@
 #SBATCH -J stan_pipeline2    # name for job array
 #SBATCH -p shared            # Partition
 #SBATCH -t 0-1:00:00        # Running time of 1 hour
-#SBATCH --mem-per-cpu 4000   # request 4GB memory
+#SBATCH --mem 4000   # request 4GB memory
 #SBATCH -n 4                 # 4 cores
 #SBATCH -N 1                 # All cores on one machine
 #SBATCH --mail-type=ALL      # Type of email notification- BEGIN,END,FAIL,ALL
