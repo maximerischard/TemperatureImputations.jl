@@ -75,14 +75,14 @@ isd_nearest_and_test = TempModel.find_nearest(isd_wData, USAF, WBAN, k_nearest)
 
 @show isd_nearest_and_test
 
-hourly_cat=TempModel.read_Stations(isd_nearest_and_test; data_dir=data_dir)
+@time hourly_cat=TempModel.read_Stations(isd_nearest_and_test; data_dir=data_dir)
 itest=1 # first row of isd_nearest_and_test is the test station
 
 dt_start=DateTime(2015,1,1,0,0,0)
 increm=(maximum(hourly_cat[:ts])-minimum(hourly_cat[:ts])) / 15
 window=3*increm
 
-while true
+@time while true
     global dt_start
     dt_end=dt_start+window
     savemodel_dir = joinpath(save_dir, "predictions_from_nearby", GPmodel)
@@ -93,8 +93,9 @@ while true
     if !isdir(savemodel_dir)
         mkdir(savemodel_dir)
     end
+    @show dt_start, dt_end
     GC.gc()
-    nearby_pred = TempModel.predict_from_nearby(hourly_cat, isd_nearest_and_test, 
+    @time nearby_pred = TempModel.predict_from_nearby(hourly_cat, isd_nearest_and_test, 
         k_spatiotemporal, logNoise,
         itest, dt_start, dt_end)
     save(joinpath(savemodel_dir,
