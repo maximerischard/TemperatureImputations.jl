@@ -152,10 +152,10 @@ function fitted_sptemp_simpler(;kmean=true)
     ksp3 = SEIso(log(2*10^5), log(1.0))
     ksp4 = SEIso(log(2*10^5), log(1.0))
 
-    k_spatiotemporal = Masked(k1, [1]) * Masked(ksp1, [2,3]) +
-                     Masked(k2, [1])  * Masked(ksp2, [2,3]) +
-                     Masked(k3b, [1]) * Masked(ksp3, [2,3]) +
-                     Masked(k4, [1])  * Masked(ksp4, [2,3])
+    k_spatiotemporal = Masked(k1, [1])  * Masked(ksp1, [2,3]) +
+                       Masked(k2, [1])  * Masked(ksp2, [2,3]) +
+                       Masked(k3b, [1]) * Masked(ksp3, [2,3]) +
+                       Masked(k4, [1])  * Masked(ksp4, [2,3])
     if kmean
         k_means = SEIso(log(1.0), log(10.0))
         k_spatiotemporal = k_spatiotemporal + fix(Masked(k_means, [2,3]))
@@ -179,9 +179,9 @@ function fitted_sptemp_matern(;kmean=true)
     k_means = SEIso(log(1), log(10.0))
 
     k_spatiotemporal = Masked(k1, [1]) * Masked(ksp1, [2,3]) +
-                     Masked(k2, [1])  * Masked(ksp2, [2,3]) +
-                     Masked(k3, [1]) * Masked(ksp3, [2,3]) +
-                     Masked(k4, [1])  * Masked(ksp4, [2,3])
+                       Masked(k2, [1]) * Masked(ksp2, [2,3]) +
+                       Masked(k3, [1]) * Masked(ksp3, [2,3]) +
+                       Masked(k4, [1]) * Masked(ksp4, [2,3])
 
     if kmean
         k_means = SEIso(log(1.0), log(20.0))

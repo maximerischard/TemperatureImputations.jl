@@ -5,21 +5,20 @@ function read_station(usaf::Int, wban::Int, id::Int; data_dir::String=".")
     fn = @sprintf("%06d.%05d.processed.2015.2015.csv", usaf, wban)
     station_data = CSV.read(joinpath(data_dir, "data2015", fn), DataFrame,
                             datarow=1,
-                            header=[:year, :month, :day, :hour, :min, :seconds, :temp])
+                            header=[:year, :month, :day, :hour, :min, :seconds, :temp],
+                            types=Dict(:year=>Int64, :month=>Int64, :day=>Int64, 
+                                       :hour=>Int64, :min=>Int64, :seconds=>Int64,
+                                       :temp=>Float64),
+                            )
+    DataFrames.dropmissing!(station_data)
     # remove missing data (null or nan)
     station_data = station_data[.!ismissing.(station_data[:temp]), :]
     # station_data = station_data[.!isnan.(station_data[:temp]), :]
     station_data = station_data[isfinite.(station_data[:temp]), :]
-    station_data[:temp] = Float64.(station_data[:temp])
-    DataFrames.dropmissing!(station_data)
-    station_ts = DateTime[DateTime(
-        r[:year],
-        r[:month],
-        r[:day],
-        r[:hour],
-        r[:min],
-        r[:seconds]
-        ) for r in DataFrames.eachrow(station_data)]
+    # station_data[:temp] = Float64.(station_data[:temp])
+    station_ts = DateTime[DateTime(r[:year], r[:month], r[:day],
+                                   r[:hour], r[:min], r[:seconds]) 
+                          for r in DataFrames.eachrow(station_data)]
     station_data[:ts] = station_ts
     station_data[:station] = id
     return station_data

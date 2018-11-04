@@ -18,7 +18,7 @@ function add_diag!(Σ::PDMats.PDMat, a::Float64)
     copyto!(Σ.chol.factors, mat)
     # cholfact!(Σ.chol.factors, Symbol(Σ.chol.uplo))
     cholesky!(Hermitian(Σ.chol.factors, Symbol(Σ.chol.uplo)))
-    @assert maximum(abs, mat .- Matrix(Σ.chol)) < 1e-10
+    # @assert maximum(abs, mat .- Matrix(Σ.chol)) < 1e-10
     return Σ
 end
 
