@@ -79,8 +79,11 @@ isd_nearest_and_test = TempModel.find_nearest(isd_wData, USAF, WBAN, k_nearest)
 itest=1 # first row of isd_nearest_and_test is the test station
 
 dt_start=DateTime(2015,1,1,0,0,0)
-increm=(maximum(hourly_cat[:ts])-minimum(hourly_cat[:ts])) / 15
+mintime = DateTime(2015,1,1,0,0,0)
+maxtime = DateTime(2016,1,1,0,0,0)
+increm=(maxtime-mintime) / 15
 window=3*increm
+dt_start = mintime
 
 @time while true
     global dt_start
@@ -103,8 +106,8 @@ window=3*increm
                     USAF, 
                     WBAN,
                     ICAO,
-                    dt_start, 
-                    dt_end)), 
+                    Date(dt_start), 
+                    Date(dt_end))), 
         "nearby_pred", 
         nearby_pred)
     if dt_end >= maximum(hourly_cat[:ts])
