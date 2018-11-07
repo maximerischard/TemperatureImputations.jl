@@ -17,6 +17,7 @@ module TempModel
     import NLopt
     using Dates: Day, Hour, DateTime, Date, Millisecond, value
     using Printf: @sprintf
+    using LinearAlgebra
     using LinearAlgebra: cholesky!, Hermitian
 
     include("GPrealisations.jl")

@@ -28,6 +28,7 @@ function optim_kernel(k_spatiotemporal::Kernel, logNoise_init::Float64,
     local min_neg_ll
     local min_hyp
     local opt_out
+    println("begin optimization")
     if method == :NLopt
         min_neg_ll, min_hyp, ret, count = TempModel.optimize_NLopt(reals, domean=false, x_tol=x_tol, f_tol=f_tol)
         opt_out = (min_neg_ll, min_hyp, ret, count)
