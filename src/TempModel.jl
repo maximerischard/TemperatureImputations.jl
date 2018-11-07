@@ -6,6 +6,8 @@ module TempModel
     import GaussianProcesses: optimize!, get_optim_target
     import GaussianProcesses: num_params, set_params!, get_params, update_mll!
     import GaussianProcesses: update_mll_and_dmll!
+    import GaussianProcesses: KernelData
+    using GaussianProcesses: MaskedData, Masked, EmptyData, PairData, kernel_data_key, PairKernel, leftkern, rightkern, FixedKernel
 
     using PDMats
     using Optim

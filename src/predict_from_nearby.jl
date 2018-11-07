@@ -22,6 +22,31 @@ function add_diag!(Σ::PDMats.PDMat, a::Float64)
     return Σ
 end
 
+const KernelDict = Dict{String,KernelData}
+function masked_empty(masked::Masked, X1::AbstractMatrix, X2::AbstractMatrix)
+    X1view = view(X1,masked.active_dims,:)
+    X2view = view(X2,masked.active_dims,:)
+	wrappeddata = EmptyData()
+    return MaskedData(X1view, X2view, wrappeddata)
+end
+function emptydata_cache(k::Kernel, X1::AbstractMatrix, X2::AbstractMatrix, cache::KernelDict=KernelDict())
+    key = kernel_data_key(k, X1, X2)
+    if typeof(k) <: Masked
+        kdata = masked_empty(k, X1, X2)
+    elseif typeof(k) <: PairKernel
+        emptydata_cache(leftkern(k), X1, X2, cache)
+        emptydata_cache(rightkern(k), X1, X2, cache)
+        return cache
+    elseif typeof(k) <: FixedKernel
+        emptydata_cache(k.kernel, X1, X2, cache)
+        return cache
+    else
+        kdata = EmptyData()
+    end
+    cache[key] = kdata
+    return cache
+end 
+
 function predict_from_nearby(hourly_data::DataFrame, stationDF::DataFrame, 
         k::Kernel, logNoise::Float64, 
         target::Int, from::DateTime, to::DateTime)
@@ -43,8 +68,19 @@ function predict_from_nearby(hourly_data::DataFrame, stationDF::DataFrame,
     test_Y_PRJ = stationDF[:Y_PRJ][test_subset[:station]]
     test_X = [test_subset[:ts_hours] test_X_PRJ test_Y_PRJ]
 
-    train_GP = GP(train_X', train_Y, MeanZero(), k, logNoise);
-    test_pred=GaussianProcesses.predict_f(train_GP, test_X'; full_cov=true);
+    @show nrow(train_subset)
+    @show nrow(test_subset)
+
+    X = Matrix(train_X')
+    masked_cache = emptydata_cache(k, X, X)
+    println("train kernel data")
+    @time kdata = KernelData(k, X, X, masked_cache)
+    println("train GP")
+    @time train_GP = GPE(X, train_Y, MeanZero(), k, logNoise, kdata);
+    println("predictions")
+    Xtest = Matrix(test_X')
+    @time test_pred=GaussianProcesses.predict_f(train_GP, Xtest; full_cov=true);
+    println("add noise")
     add_diag!(test_pred[2], exp(2*logNoise))
     return NearbyPrediction(test_subset[:ts], test_pred[1], test_pred[2])
 end
