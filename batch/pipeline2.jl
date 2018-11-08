@@ -6,7 +6,7 @@ doc = """
     This script constrains those posteriors to be within the measured Tn&Tx.
 
     Usage:
-        pipeline2.jl <ICAO> <windownum> <model> <data_dir> <save_dir>
+        pipeline2.jl <ICAO> <model> <windownum> <data_dir> <save_dir>
 """
 using DocOpt
 arguments = docopt(doc)
@@ -52,8 +52,8 @@ let
 end
 
 struct FittingWindow
-    start_date::Date
-    end_date::Date
+    start_date::DateTime
+    end_date::DateTime
 end
 
 function predictions_fname(usaf::Int, wban::Int, icao::String, fw::FittingWindow)
@@ -72,7 +72,7 @@ window=3*increm
 while true
 	global dt_start
     dt_end=dt_start+window
-    fwindow = FittingWindow(sdate,edate)
+    fwindow = FittingWindow(dt_start,dt_end)
     push!(nearby_windows, fwindow)
     if dt_end >= maxtime
         break
@@ -88,6 +88,11 @@ function a_isinside_b(a::FittingWindow, b::FittingWindow)
     end_before = a.end_date <= b.end_date
     return start_after & end_before
 end
+function overlap(a::FittingWindow, b::FittingWindow)
+	a_after_b = a.start_date >= b.end_date
+	b_after_a = b.start_date >= a.end_date
+	return !(a_after_b || b_after_a)
+end
 """
     How much buffer time is there on either side of the window?
 """
@@ -101,14 +106,14 @@ end
     with the largest buffer on either sides.
 """
 function find_best_window(wind::FittingWindow, cands::Vector{FittingWindow})
-    incl_wdows = [fw for fw in cands if a_isinside_b(wind, fw)]
+    incl_wdows = [fw for fw in cands if overlap(wind, fw)]
     buffers = [buffer(wind, fw) for fw in incl_wdows]
     imax = argmax(buffers)
     best_window = incl_wdows[imax]
     return best_window
 end
 
-janfirst = Date(2015,1,1)
+janfirst = DateTime(2014,12,31,hr_measure.value,0,0)
 stan_start = janfirst + (windownum-1)*stan_increment
 stan_end = stan_start + stan_days
 stan_window = FittingWindow(stan_start, stan_end)
@@ -122,11 +127,12 @@ nearby_path = joinpath(save_dir, "predictions_from_nearby", GPmodel,
 @show nearby_path
 nearby_pred=load(nearby_path)["nearby_pred"];
 
-imputation_data, ts_window = TempModel.prep_data(nearby_pred, TnTx, stan_window.start_date, hr_measure, stan_days)
+start_date = Date(stan_window.start_date)+Day(1) # date of first measurement
+imputation_data, ts_window = TempModel.prep_data(nearby_pred, TnTx, start_date, hr_measure, stan_days)
 
 function stan_dirname(usaf::Int, wban::Int, icao::String, fw::FittingWindow)
     return @sprintf("%d_%d_%s_%s_to_%s/", 
-                    usaf, wban, icao, fw.start_date, fw.end_date)
+                    usaf, wban, icao, Date(fw.start_date), Date(fw.end_date))
 end
 
 stan_dir = joinpath(save_dir,"stan_fit", GPmodel, ICAO, stan_dirname(USAF, WBAN, ICAO, stan_window))
@@ -139,10 +145,10 @@ for fname in readdir(joinpath(stan_dir, "tmp"))
 end
 rm(joinpath(stan_dir, "tmp"))
 
-CSV.write(joinpath(stan_dir,"timestamps.csv"), reshape(ts_window, length(ts_window), 1))
+CSV.write(joinpath(stan_dir,"timestamps.csv"), DataFrame(ts=ts_window), writeheader=false)
 
 for fname in ("imputation","imputation_build.log","imputation_run.log","imputation.hpp")
-    tmpdir = joinpath(save_dir, "..", "tmp")
+    tmpdir = joinpath(save_dir, "tmp")
     file_path = joinpath(tmpdir, fname)
     if isfile(file_path)
         cp(file_path, joinpath(stan_dir,fname), force=true)
