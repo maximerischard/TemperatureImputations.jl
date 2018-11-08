@@ -2,8 +2,8 @@ import Base.+
 using TimeSeries
 using DataFrames
 using GaussianProcesses
-using GaussianProcesses: Mean, Kernel, evaluate, metric, IsotropicData, VecF64
-using GaussianProcesses: Stationary, KernelData, MatF64, predict
+using GaussianProcesses: Mean, Kernel, evaluate, metric, IsotropicData
+using GaussianProcesses: Stationary, KernelData, predict
 import GaussianProcesses: optimize!, get_optim_target, cov, grad_slice!
 import GaussianProcesses: num_params, set_params!, get_params, update_mll!, update_mll_and_dmll!
 import GaussianProcesses: get_param_names, cov!, addcov!, multcov!
@@ -16,6 +16,8 @@ using AxisArrays
 using DataFrames: by, head
 using Dates: tonext, Hour, Day
 using LinearAlgebra: cholesky!, Hermitian
+using LinearAlgebra
+using Random
 
 const janfirst = Date(2015, 1, 1)
 const stan_increment = Day(3)
@@ -51,24 +53,30 @@ function add_diag!(Σ::PDMats.PDMat, a::Float64)
     return Σ
 end
 
-type FittingWindow
+struct FittingWindow
     start_date::Date
     end_date::Date
 end
-type WindowTime
+struct WindowTime
     start_time::DateTime
     end_time::DateTime
 end
 
-function predictions_fname(usaf::Int, fw::FittingWindow)
-    return @sprintf("%d_%s_to_%s.jld", 
-                    usaf, fw.start_date, fw.end_date)
+#=function predictions_fname(usaf::Int, fw::FittingWindow)=#
+    #=return @sprintf("%d_%s_to_%s.jld", =#
+                    #=usaf, fw.start_date, fw.end_date)=#
+#=end=#
+function predictions_fname(usaf::Int, wban::Int, icao::String, fw::FittingWindow)
+     @sprintf("%d_%d_%s_%s_to_%s.jld", 
+        usaf, wban, icao,
+        Date(fw.start_date), Date(fw.end_date))
 end
 
-function get_nearby(fw::FittingWindow, GPmodel::AbstractString, usaf::Int)
-    saved_dir = joinpath(SAVED_DIR, "predictions_from_nearby", GPmodel)
-    pred_fname = predictions_fname(usaf, fw)
+function get_nearby(fw::FittingWindow, GPmodel::AbstractString, usaf::Int, wban::Int, icao::String)
+    saved_dir = joinpath(SAVED_DIR, "predictions_from_nearby", GPmodel, icao)
+    pred_fname = predictions_fname(usaf, wban, icao, fw)
     nearby_pred=load(joinpath(saved_dir, pred_fname))["nearby_pred"]
+    return nearby_pred
 end
 
 function print_diagnostics(nearby::TempModel.NearbyPrediction,
@@ -251,7 +259,7 @@ end
 
 mse(yhat::Vector,y::Vector) = mean((y.-yhat).^2)
 verr(yhat::Vector,y::Vector) = var(y.-yhat)
-type ImputationDiagnostic
+struct ImputationDiagnostic
     sumEVarError::Float64
     sumSE::Float64
     n::Int
@@ -300,7 +308,7 @@ end
 ###### Nearby-only predictions ########
 #######################################
 
-type NearbyPredDiagnostic
+struct NearbyPredDiagnostic
     sumEVarError::Float64
     sumVarError::Float64
     n::Int

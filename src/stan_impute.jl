@@ -1,7 +1,5 @@
 function prep_data(nearby_pred::NearbyPrediction, TnTx::DataFrame, 
                 date_start::Date, hr_measure::Hour, impute_window::Day)
-    #=window_start = DateTime(date_start) + hr_measure - Day(1)=#
-    #=window_end = window_start + impute_window=#
     date_end = date_start + impute_window - Day(1)
     in_window = [(date_start <= measurement_date(ts, hr_measure) <= date_end) for ts in nearby_pred.ts]
     ts_window = nearby_pred.ts[in_window]

@@ -7,6 +7,7 @@ function optim_kernel(k_spatiotemporal::Kernel, logNoise_init::Float64,
     tstart=0.0
     nobsv=0
     max_time = maximum(hourly_data[:ts_hours])
+    println("creating GP chunks")
     while tstart < max_time
         tend=tstart+chunk_width
         in_chunk= tstart .<= hourly_data[:ts_hours] .< tend
