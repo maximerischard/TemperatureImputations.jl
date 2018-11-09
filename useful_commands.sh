@@ -34,8 +34,7 @@ julia pipeline1.jl diurnal
 # pipeline2
 cd /n/regal/pillai_lab/mrischard/TempModel/batch/
 julia pipeline2.jl /n/regal/pillai_lab/mrischard/TempModel/saved ${SLURM_ARRAY_TASK_ID} simpler
-cd ~/logs/
-sbatch /n/regal/pillai_lab/mrischard/TempModel/batch/pipeline2.slurm matern
+cd ~/logs && sbatch /n/regal/pillai_lab/mrischard/TempModel/batch/pipeline2.slurm matern KWRB
 
 # Stan on Odyssey
 # had to edit make/local to prevent stan from trying to use clang++ (which isn't available on odyssey)

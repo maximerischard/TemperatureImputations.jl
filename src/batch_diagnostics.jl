@@ -2,22 +2,22 @@ import Base.+
 using TimeSeries
 using DataFrames
 using GaussianProcesses
-using GaussianProcesses: Mean, Kernel, evaluate, metric, IsotropicData
-using GaussianProcesses: Stationary, KernelData, predict
-import GaussianProcesses: optimize!, get_optim_target, cov, grad_slice!
-import GaussianProcesses: num_params, set_params!, get_params, update_mll!, update_mll_and_dmll!
-import GaussianProcesses: get_param_names, cov!, addcov!, multcov!
-import Proj4
+#=using GaussianProcesses: Mean, Kernel, evaluate, metric, IsotropicData=#
+#=using GaussianProcesses: Stationary, KernelData, predict=#
+#=import GaussianProcesses: num_params, set_params!, get_params, update_mll!, update_mll_and_dmll!=#
+#=import GaussianProcesses: get_param_names=#
+#=import Proj4=#
 import PDMats
 # import Mamba
 using JLD
-using Distances
+#=using Distances=#
 using AxisArrays
 using DataFrames: by, head
 using Dates: tonext, Hour, Day
 using LinearAlgebra: cholesky!, Hermitian
 using LinearAlgebra
 using Random
+using Printf
 
 const janfirst = Date(2015, 1, 1)
 const stan_increment = Day(3)
@@ -75,7 +75,8 @@ end
 function get_nearby(fw::FittingWindow, GPmodel::AbstractString, usaf::Int, wban::Int, icao::String)
     saved_dir = joinpath(SAVED_DIR, "predictions_from_nearby", GPmodel, icao)
     pred_fname = predictions_fname(usaf, wban, icao, fw)
-    nearby_pred=load(joinpath(saved_dir, pred_fname))["nearby_pred"]
+    pred_fpath = joinpath(saved_dir, pred_fname)
+    nearby_pred = load(pred_fpath)["nearby_pred"]
     return nearby_pred
 end
 
