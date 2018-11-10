@@ -131,11 +131,11 @@ start_date = Date(stan_window.start_date)+Day(1) # date of first measurement
 imputation_data, ts_window = TempModel.prep_data(nearby_pred, TnTx, start_date, hr_measure, stan_days)
 
 function stan_dirname(usaf::Int, wban::Int, icao::String, fw::FittingWindow)
-    return @sprintf("%d_%d_%s_%s_to_%s/", 
-                    usaf, wban, icao, Date(fw.start_date), Date(fw.end_date))
+    return @sprintf("%s/%d_%d_%s_%s_to_%s/", 
+                    icao, usaf, wban, icao, Date(fw.start_date), Date(fw.end_date))
 end
 
-stan_dir = joinpath(save_dir,"stan_fit", GPmodel, ICAO, stan_dirname(USAF, WBAN, ICAO, stan_window))
+stan_dir = joinpath(save_dir,"stan_fit", GPmodel, stan_dirname(USAF, WBAN, ICAO, stan_window))
 if !isdir(stan_dir)
     mkpath(stan_dir)
 end

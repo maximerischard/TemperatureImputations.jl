@@ -66,11 +66,11 @@ function plot_predictive(
     Σ = nearby_pred.Σ
     nobsv = length(μ)
     
-    centering = eye(nobsv) .- (1.0/nobsv) .* ones(nobsv, nobsv)
+    centering = Matrix(1.0I, nobsv, nobsv) .- (1.0/nobsv) .* ones(nobsv, nobsv)
     Σ_centered = centering * Σ.mat * centering
     distr = MultivariateNormal(μ, Σ)
     if neighbours
-        markers = ["v", "1", "p", "s"]
+        markers = ["v", "1", "p", "s", "X"]
         for (i,station) in enumerate(unique(train_subset[:station]))
             sdata = train_subset[train_subset[:station].==station,:]
             ts=sdata[:ts]
@@ -100,7 +100,7 @@ function plot_predictive(
                  zorder=20)
     end
     if mean_impt
-        plt.plot(local_time.(ts), μ-mean_μ, color=colour_pred_nearby, linewidth=2, 
+        plt.plot(local_time.(ts), μ.-mean_μ, color=colour_pred_nearby, linewidth=2, 
                  zorder=30,
                  label=L"$\mathrm{T}_\mathrm{miss} \mid \mathrm{T}_\mathrm{nearby}$")
 
@@ -108,8 +108,8 @@ function plot_predictive(
         intvl_stds = -quantile(Normal(0,1), (1-intvl_width)/2)
 
         plt.fill_between(local_time.(ts), 
-                         μ-mean_μ-intvl_stds*sqrt.(diag(Σ_centered)),
-                         μ-mean_μ+intvl_stds*sqrt.(diag(Σ_centered)),
+                         μ.-mean_μ.-intvl_stds.*sqrt.(diag(Σ_centered)),
+                         μ.-mean_μ.+intvl_stds.*sqrt.(diag(Σ_centered)),
                          zorder = 0,
                          edgecolor="none",
                          linewidth=0,
@@ -139,7 +139,7 @@ function plot_residuals(nearby::TempModel.NearbyPrediction, test_data)
     Σ = nearby.Σ
     nobsv = length(μ)
     
-    centering = eye(nobsv) .- (1.0/nobsv) .* ones(nobsv, nobsv)
+    centering = Matrix(1.0I, nobsv, nobsv) .- (1.0/nobsv) .* ones(nobsv, nobsv)
     Σ_centered = centering * Σ.mat * centering
     distr = MultivariateNormal(μ, Σ)
     temp_true = test_subset[:temp]

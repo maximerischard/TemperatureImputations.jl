@@ -1,6 +1,8 @@
 import Base.+
 using TimeSeries
 using DataFrames
+using DelimitedFiles
+using CSV
 using GaussianProcesses
 #=using GaussianProcesses: Mean, Kernel, evaluate, metric, IsotropicData=#
 #=using GaussianProcesses: Stationary, KernelData, predict=#
@@ -92,7 +94,7 @@ function print_diagnostics(nearby::TempModel.NearbyPrediction,
     Σ = nearby.Σ
     nobsv = length(μ)
     
-    centering = eye(nobsv) .- (1.0/nobsv) .* ones(nobsv, nobsv)
+    centering = Matrix(1.0I, nobsv, nobsv) .- (1.0/nobsv) .* ones(nobsv, nobsv)
     Σ_centered = centering * Σ.mat * centering
     distr = MultivariateNormal(μ, Σ)
 #     println("sum(Σ_centered)=", sum(Σ_centered*Σ_centered))
@@ -105,9 +107,9 @@ function print_diagnostics(nearby::TempModel.NearbyPrediction,
     @printf("var(truth - predicted mean)= %.3f\n", var(μ .- temp_true))
 end
 
-function stan_dirname(usaf::Int, fw::FittingWindow)
-    return @sprintf("%d_%s_to_%s/", 
-                    usaf, fw.start_date, fw.end_date)
+function stan_dirname(usaf::Int, wban::Int, icao::String, fw::FittingWindow)
+    return @sprintf("%s/%d_%d_%s_%s_to_%s/", 
+                    icao, usaf, wban, icao, Date(fw.start_date)-Day(1), Date(fw.end_date)-Day(1))
 end
 
 function t_inside_wt(t::DateTime, wt::WindowTime)
@@ -145,16 +147,20 @@ function Chains(samples::AbstractArray{Float64, 3}, names::AbstractVector{S}) wh
     return chains
 end
 
-function read_ts(fw::FittingWindow, GPmodel::AbstractString, usaf::Int)
-    stan_fw_dir = stan_dirname(usaf, fw)
+function read_ts(fw::FittingWindow, GPmodel::AbstractString, usaf::Int, wban::Int, icao::String)
+    stan_fw_dir = stan_dirname(usaf, wban, icao, fw)
     stan_model_dir = joinpath(SAVED_DIR, "stan_fit", GPmodel)
     stan_window_files = readdir(joinpath(stan_model_dir, stan_fw_dir))
-    ts_string = readcsv(joinpath(stan_model_dir, stan_fw_dir, "timestamps.csv"), String; header=false)
-    ts = [DateTime(s, "yyyy-mm-ddTHH:MM:SS") for s in vec(ts_string)]
+    ts_path = joinpath(stan_model_dir, stan_fw_dir, "timestamps.csv")
+    ts = CSV.read(ts_path, DataFrame;  header=[:ts], datarow=1, allowmissing=:none)[:ts]
+    ts::Vector{DateTime}
     return ts
 end
-function get_chains_and_ts(fw::FittingWindow, GPmodel::AbstractString, usaf::Int)
-    stan_fw_dir = stan_dirname(usaf, fw)
+function read_samples_csv(samples_path::String)
+    data, header = DelimitedFiles.readdlm(samples_path, ',', Float64, '\n'; comments=true, header=true) 
+end
+function get_chains_and_ts(fw::FittingWindow, GPmodel::AbstractString, usaf::Int, wban::Int, icao::String)
+    stan_fw_dir = stan_dirname(usaf, wban, icao, fw)
     stan_model_dir = joinpath(SAVED_DIR, "stan_fit", GPmodel)
     stan_window_files = readdir(joinpath(stan_model_dir, stan_fw_dir))
     samplefiles = [joinpath(stan_model_dir, stan_fw_dir, f) for 
@@ -164,7 +170,7 @@ function get_chains_and_ts(fw::FittingWindow, GPmodel::AbstractString, usaf::Int
     header=String[]
     all_samples=Matrix{Float64}[]
     for sf in samplefiles
-        s, header = readcsv(sf, Float64; header=true)
+        s, header = read_samples_csv(sf)
         push!(all_samples, s)
     end
 
@@ -172,21 +178,22 @@ function get_chains_and_ts(fw::FittingWindow, GPmodel::AbstractString, usaf::Int
     # chains = Mamba.Chains(samples; start=1, thin=1, chains=[i for i in 1:4], names=vec(header))
     chains = Chains(samples, vec(header))
     
-    ts = read_ts(fw, GPmodel, usaf)
+    ts = read_ts(fw, GPmodel, usaf, wban, icao)
     return chains, ts
 end
 
 str_hour(hr::Hour) = string(hr.value)
-function read_ts(fw::FittingWindow, GPmodel::AbstractString, hr_measure_fals::Hour, usaf::Int)
-    stan_fw_dir = stan_dirname(usaf, fw)
+function read_ts(fw::FittingWindow, GPmodel::AbstractString, hr_measure_fals::Hour, usaf::Int, wban::Int, icao::String)
+    stan_fw_dir = stan_dirname(usaf, wban, icao, fw)
     stan_model_dir = joinpath(SAVED_DIR, "hr_measure", GPmodel, str_hour(hr_measure_fals))
     stan_window_files = readdir(joinpath(stan_model_dir, stan_fw_dir))
-    ts_string = readcsv(joinpath(stan_model_dir, stan_fw_dir, "timestamps.csv"), String; header=false)
-    ts = [DateTime(s, "yyyy-mm-ddTHH:MM:SS") for s in vec(ts_string)]
+    ts_path = joinpath(stan_model_dir, stan_fw_dir, "timestamps.csv")
+    ts = CSV.read(ts_path, DataFrame;  header=[:ts], datarow=1, allowmissing=:none)[:ts]
+    ts::Vector{DateTime}
     return ts
 end
-function get_chains_and_ts(fw::FittingWindow, GPmodel::AbstractString, hr_measure_fals::Hour, usaf::Int; verbose=false)
-    stan_fw_dir = stan_dirname(usaf, fw)
+function get_chains_and_ts(fw::FittingWindow, GPmodel::AbstractString, hr_measure_fals::Hour, usaf::Int, wban::Int, icao::String; verbose=false)
+    stan_fw_dir = stan_dirname(usaf, wban, icao, fw)
     stan_model_dir = joinpath(SAVED_DIR, "hr_measure", GPmodel, str_hour(hr_measure_fals))
     if verbose
         @show joinpath(stan_model_dir, stan_fw_dir)
@@ -202,14 +209,14 @@ function get_chains_and_ts(fw::FittingWindow, GPmodel::AbstractString, hr_measur
     header=String[]
     all_samples=Matrix{Float64}[]
     for sf in samplefiles
-        s, header = readcsv(sf, Float64; header=true)
+        s, header = read_samples_csv(sf)
         push!(all_samples, s)
     end
     @assert length(all_samples) > 1
 
     samples = cat(3, all_samples...)
     chains = Chains(samples, vec(header))
-    ts = read_ts(fw, GPmodel, hr_measure_fals, usaf)
+    ts = read_ts(fw, GPmodel, hr_measure_fals, usaf, wban, icao)
     return chains, ts
 end
 
@@ -336,7 +343,7 @@ function get_diagnostics(
     Σ = PDMats.full(nearby.Σ)[iinside,iinside]
     nobsv = length(μ)
     
-    centering = eye(nobsv) .- (1.0/nobsv) .* ones(nobsv, nobsv)
+    centering = Matrix(1.0I, nobsv, nobsv) .- (1.0/nobsv) .* ones(nobsv, nobsv)
     Σ_centered = centering * Σ * centering
     distr = MultivariateNormal(μ, Σ)
     temp_true = test_subset[:temp]
