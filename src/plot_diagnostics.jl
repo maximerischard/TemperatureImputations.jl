@@ -66,7 +66,7 @@ function plot_predictive(
     Σ = nearby_pred.Σ
     nobsv = length(μ)
     
-    centering = Matrix(1.0I, nobsv, nobsv) .- (1.0/nobsv) .* ones(nobsv, nobsv)
+    centering = Matrix(1.0I, nobsv, nobsv) .- (1.0/nobsv)
     Σ_centered = centering * Σ.mat * centering
     distr = MultivariateNormal(μ, Σ)
     if neighbours
@@ -139,7 +139,7 @@ function plot_residuals(nearby::TempModel.NearbyPrediction, test_data)
     Σ = nearby.Σ
     nobsv = length(μ)
     
-    centering = Matrix(1.0I, nobsv, nobsv) .- (1.0/nobsv) .* ones(nobsv, nobsv)
+    centering = Matrix(1.0I, nobsv, nobsv) .- (1.0/nobsv)
     Σ_centered = centering * Σ.mat * centering
     distr = MultivariateNormal(μ, Σ)
     temp_true = test_subset[:temp]

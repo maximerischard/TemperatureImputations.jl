@@ -94,7 +94,7 @@ function print_diagnostics(nearby::TempModel.NearbyPrediction,
     Σ = nearby.Σ
     nobsv = length(μ)
     
-    centering = Matrix(1.0I, nobsv, nobsv) .- (1.0/nobsv) .* ones(nobsv, nobsv)
+    centering = Matrix(1.0I, nobsv, nobsv) .- (1.0/nobsv)
     Σ_centered = centering * Σ.mat * centering
     distr = MultivariateNormal(μ, Σ)
 #     println("sum(Σ_centered)=", sum(Σ_centered*Σ_centered))
@@ -343,7 +343,7 @@ function get_diagnostics(
     Σ = PDMats.full(nearby.Σ)[iinside,iinside]
     nobsv = length(μ)
     
-    centering = Matrix(1.0I, nobsv, nobsv) .- (1.0/nobsv) .* ones(nobsv, nobsv)
+    centering = Matrix(1.0I, nobsv, nobsv) .- (1.0/nobsv)
     Σ_centered = centering * Σ * centering
     distr = MultivariateNormal(μ, Σ)
     temp_true = test_subset[:temp]

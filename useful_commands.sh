@@ -27,9 +27,10 @@ sbatch --account=huybers_lab /n/regal/pillai_lab/mrischard/TempModel/batch/pipel
 srun -p shared --pty --mem 8000 -n 4 -N 1 -t 0-9:00 /bin/bash
 
 source ~/julia_modules.sh
-
 cd /n/regal/pillai_lab/mrischard/TempModel/batch/
 julia pipeline1.jl diurnal
+
+cd ~/logs && sbatch /n/regal/pillai_lab/mrischard/TempModel/batch/pipeline1_ICAO.slurm matern
 
 # pipeline2
 cd /n/regal/pillai_lab/mrischard/TempModel/batch/
@@ -56,7 +57,7 @@ done
 # copy from home to regal
 rsync --archive --verbose --human-readable --update ~/julia_lib/ /n/regal/pillai_lab/mrischard/julia_lib
 rsync --archive --verbose --human-readable --update ~/cmdstan-2.17.0/ /n/regal/pillai_lab/mrischard/cmdstan-2.17.0
-rsync --archive --verbose --human-readable --update ~/TempModel/ /n/regal/pillai_lab/mrischard/TempModel
+rsync --archive --verbose --human-readable ~/TempModel/ /n/regal/pillai_lab/mrischard/TempModel
 # backup from regal to home
 rsync --archive --verbose --human-readable --update /n/regal/pillai_lab/mrischard/julia_lib/ ~/julia_lib
 rsync --archive --verbose --human-readable --update /n/regal/pillai_lab/mrischard/cmdstan-2.17.0/ ~/cmdstan-2.17.0
@@ -64,6 +65,7 @@ rsync --archive --verbose --human-readable --update /n/regal/pillai_lab/mrischar
 
 # log into github
 ssh -T git@github.com
+
 
 # debugging Stan
 # delete tmp files

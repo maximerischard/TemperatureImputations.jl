@@ -1,12 +1,8 @@
-data_dir = "../"
-include(data_dir*"/src/TempModel.jl")
-
 """
     Convenience function for all notebooks to load and preprocess the Iowa data.
 """
 function prepare_iowa_data(data_dir)
     # obtain the list of stations
-    logging(DevNull; kind=:warn)
     isdList=TempModel.read_isdList(;data_dir=data_dir)
     # just the Iowa stations
     isdSubset=isdList[[(usaf in (725450,725460,725480,725485)) for usaf in isdList[:USAF]],:]
@@ -14,7 +10,6 @@ function prepare_iowa_data(data_dir)
     # obtain the hourly temperature measurements for those stations
     hourly_data = TempModel.read_Stations(isdSubset; data_dir=data_dir)
     hourly_data[:hour] = round.(hourly_data[:ts], Dates.Hour)
-    logging()
 
     # mark station 3 (Waterloo) as the test station
     itest=3

@@ -59,7 +59,7 @@ function get_imputation_model(; pdir=pwd())
 
             // control smooth max hardness
             real<lower=0> k_smoothmax;
-			// real<lower=0> sigma_mu;
+            // real<lower=0> sigma_mu;
             real<lower=0> epsilon;
         }
         parameters {
@@ -96,9 +96,9 @@ function get_imputation_model(; pdir=pwd())
         }
     """
     stanmodel = Stanmodel(;
-        	name="imputation", 
-        	model=imputation_model, 
-        	pdir=pdir, 
+            name="imputation", 
+            model=imputation_model, 
+            pdir=pdir, 
         )
     return stanmodel
 end
