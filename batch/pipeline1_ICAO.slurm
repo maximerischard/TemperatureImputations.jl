@@ -7,13 +7,13 @@
 #SBATCH -N 1                 # All cores on one machine
 #SBATCH --mail-type=ALL      # Type of email notification- BEGIN,END,FAIL,ALL
 #SBATCH --mail-user=mrischard@g.harvard.edu
-#SBATCH --array 1-2         # identifies job within batch
+#SBATCH --array 1,3,4,5,7,14,15,16,18,20,21,24,26,28,29,31,32,33,34,36,37,38,39,40,41
 
 source ~/julia_modules.sh
-test_ICAOs=(KWRB KMXF KJAN KESF KSJT KPHX KPOB KCAE KBNA KLRF KTIK KABQ KFAT 
-            KDCA KBWI KDOV KWRI KLYH KEKN KFTK KCMH KIND KSPI KCOU KICT KHVE 
-            KTPH KPVD KBDL KAOO KSYR KDSM KLBF KCPR KCON KMPV KMLT KMKG KVOK
-            KHON KAXN KLWT KMUO KBNO KBIS KYKM KCEF KAFF)
+test_ICAOs=(KABE KABQ KABR KATL KAUG KBDL KBHM KBIS KBNA KBWI KCAE KCEF KCMH
+            KCOS KCRW KDLH KDSM KEUG KFAT KFYV KGTF KICT KIND KINW KJAN KJAX
+            KLBF KLEX KLSE KMPV KMWL KOKC KPIH KPLN KPVD KRDU KROA KSEA KSGF
+            KSHV KSLC KSPI KSYR KTPH)
 ICAO=${test_ICAOs[$SLURM_ARRAY_TASK_ID-1]}
 GPmodel=$1
 cd /n/regal/pillai_lab/mrischard/TempModel/batch/
