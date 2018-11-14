@@ -1,10 +1,10 @@
 # rsync all saved files
 rsync --verbose --human-readable --progress --archive --compress --update \
-    ody:/n/regal/pillai_lab/mrischard/TempModel/saved /Volumes/Samsung250GB/TempModel/
+    ody:/n/regal/pillai_lab/mrischard/saved/ /Volumes/Samsung250GB/saved
 
 # or
 rsync --verbose --human-readable --progress --archive --compress \
-    ody:/n/regal/pillai_lab/mrischard/TempModel/saved/stan_fit/ /Volumes/Samsung250GB/TempModel/saved/stan_fit
+    ody:/n/regal/pillai_lab/mrischard/saved/stan_fit/ /Volumes/Samsung250GB/saved/stan_fit
 
 # rsync just stan samples for hour measurement
 rsync --verbose --human-readable --progress --archive --compress \
@@ -62,6 +62,9 @@ rsync --archive --verbose --human-readable ~/TempModel/ /n/regal/pillai_lab/mris
 rsync --archive --verbose --human-readable --update /n/regal/pillai_lab/mrischard/julia_lib/ ~/julia_lib
 rsync --archive --verbose --human-readable --update /n/regal/pillai_lab/mrischard/cmdstan-2.17.0/ ~/cmdstan-2.17.0
 rsync --archive --verbose --human-readable --update /n/regal/pillai_lab/mrischard/TempModel/ ~/TempModel
+
+# backup from regal to huybers_lab storage
+rsync --archive --verbose --human-readable --update /n/regal/pillai_lab/mrischard/saved/ /n/huybers_lab/mrischard/saved
 
 # log into github
 ssh -T git@github.com
