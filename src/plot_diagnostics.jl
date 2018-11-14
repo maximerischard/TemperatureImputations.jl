@@ -127,6 +127,7 @@ function plot_predictive(
                  color=colour_truth, label="true hourly")
     end
     plt.gca()[:xaxis][:set_major_formatter](plt.matplotlib[:dates][:DateFormatter]("%Y-%m-%d"))
+    plt.gcf()[:autofmt_xdate]()
     plt.xlim(local_time.(xlim))
 end
 function plot_residuals(nearby::TempModel.NearbyPrediction, test_data)

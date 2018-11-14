@@ -1,7 +1,6 @@
 import Base.+
 using TimeSeries
 using DataFrames
-using DelimitedFiles
 using CSV
 using GaussianProcesses
 #=using GaussianProcesses: Mean, Kernel, evaluate, metric, IsotropicData=#
@@ -74,10 +73,10 @@ function predictions_fname(usaf::Int, wban::Int, icao::String, fw::FittingWindow
         Date(fw.start_date), Date(fw.end_date))
 end
 
-function get_nearby(fw::FittingWindow, GPmodel::AbstractString, usaf::Int, wban::Int, icao::String)
-    saved_dir = joinpath(SAVED_DIR, "predictions_from_nearby", GPmodel, icao)
+function get_nearby(fw::FittingWindow, GPmodel::AbstractString, usaf::Int, wban::Int, icao::String, saved_dir::String)
+    pred_dir = joinpath(saved_dir, "predictions_from_nearby", GPmodel, icao)
     pred_fname = predictions_fname(usaf, wban, icao, fw)
-    pred_fpath = joinpath(saved_dir, pred_fname)
+    pred_fpath = joinpath(pred_dir, pred_fname)
     nearby_pred = load(pred_fpath)["nearby_pred"]
     return nearby_pred
 end
@@ -109,7 +108,9 @@ end
 
 function stan_dirname(usaf::Int, wban::Int, icao::String, fw::FittingWindow)
     return @sprintf("%s/%d_%d_%s_%s_to_%s/", 
-                    icao, usaf, wban, icao, Date(fw.start_date)-Day(1), Date(fw.end_date)-Day(1))
+                    icao, usaf, wban, icao,
+                    Date(fw.start_date)-Day(1), Date(fw.end_date)-Day(1))
+                    # Date(fw.start_date)-Day(0), Date(fw.end_date)-Day(0))
 end
 
 function t_inside_wt(t::DateTime, wt::WindowTime)
@@ -147,9 +148,9 @@ function Chains(samples::AbstractArray{Float64, 3}, names::AbstractVector{S}) wh
     return chains
 end
 
-function read_ts(fw::FittingWindow, GPmodel::AbstractString, usaf::Int, wban::Int, icao::String)
+function read_ts(fw::FittingWindow, GPmodel::AbstractString, usaf::Int, wban::Int, icao::String, saved_dir::String)
     stan_fw_dir = stan_dirname(usaf, wban, icao, fw)
-    stan_model_dir = joinpath(SAVED_DIR, "stan_fit", GPmodel)
+    stan_model_dir = joinpath(saved_dir,  "stan_fit", GPmodel)
     stan_window_files = readdir(joinpath(stan_model_dir, stan_fw_dir))
     ts_path = joinpath(stan_model_dir, stan_fw_dir, "timestamps.csv")
     ts = CSV.read(ts_path, DataFrame;  header=[:ts], datarow=1, allowmissing=:none)[:ts]
@@ -157,11 +158,31 @@ function read_ts(fw::FittingWindow, GPmodel::AbstractString, usaf::Int, wban::In
     return ts
 end
 function read_samples_csv(samples_path::String)
-    data, header = DelimitedFiles.readdlm(samples_path, ',', Float64, '\n'; comments=true, header=true) 
+    types = Dict(:lp__ => Float64, :accept_stat__ => Float64,
+                 :stepsize__ => Float64, :treedepth__ => Int64,
+                 :n_leapfrog__ => Int64, :divergent__ => Int64,
+                 :energy__ => Float64)
+    for i in 1:1000 # arbitrary number of times
+        types[Symbol("w_uncorr.", i)] = Float64
+        types[Symbol("temp_impt.", i)] = Float64
+        types[Symbol("Tsmoothmin.", i)] = Float64
+        types[Symbol("Tsmoothmax.", i)] = Float64
+    end
+    samples_df = CSV.File(samples_path, 
+            comment="#",
+            header=38, # hacky pending https://github.com/JuliaData/CSV.jl/issues/351
+            skipto=43, # hacky
+            allowmissing=:none, types=types,
+            ) |> DataFrame;
+    data = Matrix{Float64}(samples_df)
+    header = String.(names(samples_df))
+    # DelimitedFiles.readdlm is too slow
+    # data, header = DelimitedFiles.readdlm(samples_path, ',', Float64, '\n'; comments=true, header=true) 
+    return data, header
 end
-function get_chains_and_ts(fw::FittingWindow, GPmodel::AbstractString, usaf::Int, wban::Int, icao::String)
+function get_chains_and_ts(fw::FittingWindow, GPmodel::AbstractString, usaf::Int, wban::Int, icao::String, saved_dir::String)
     stan_fw_dir = stan_dirname(usaf, wban, icao, fw)
-    stan_model_dir = joinpath(SAVED_DIR, "stan_fit", GPmodel)
+    stan_model_dir = joinpath(saved_dir, "stan_fit", GPmodel)
     stan_window_files = readdir(joinpath(stan_model_dir, stan_fw_dir))
     samplefiles = [joinpath(stan_model_dir, stan_fw_dir, f) for 
         f in stan_window_files if 
@@ -174,16 +195,16 @@ function get_chains_and_ts(fw::FittingWindow, GPmodel::AbstractString, usaf::Int
         push!(all_samples, s)
     end
 
-    samples = cat(3, all_samples...)
+    samples = cat(all_samples..., dims=3)
     # chains = Mamba.Chains(samples; start=1, thin=1, chains=[i for i in 1:4], names=vec(header))
     chains = Chains(samples, vec(header))
     
-    ts = read_ts(fw, GPmodel, usaf, wban, icao)
+    ts = read_ts(fw, GPmodel, usaf, wban, icao, saved_dir)
     return chains, ts
 end
 
 str_hour(hr::Hour) = string(hr.value)
-function read_ts(fw::FittingWindow, GPmodel::AbstractString, hr_measure_fals::Hour, usaf::Int, wban::Int, icao::String)
+function read_ts(fw::FittingWindow, GPmodel::AbstractString, hr_measure_fals::Hour, usaf::Int, wban::Int, icao::String, saved_dir::String)
     stan_fw_dir = stan_dirname(usaf, wban, icao, fw)
     stan_model_dir = joinpath(SAVED_DIR, "hr_measure", GPmodel, str_hour(hr_measure_fals))
     stan_window_files = readdir(joinpath(stan_model_dir, stan_fw_dir))
@@ -192,7 +213,7 @@ function read_ts(fw::FittingWindow, GPmodel::AbstractString, hr_measure_fals::Ho
     ts::Vector{DateTime}
     return ts
 end
-function get_chains_and_ts(fw::FittingWindow, GPmodel::AbstractString, hr_measure_fals::Hour, usaf::Int, wban::Int, icao::String; verbose=false)
+function get_chains_and_ts(fw::FittingWindow, GPmodel::AbstractString, hr_measure_fals::Hour, usaf::Int, wban::Int, icao::String, saved_dir::String; verbose=false)
     stan_fw_dir = stan_dirname(usaf, wban, icao, fw)
     stan_model_dir = joinpath(SAVED_DIR, "hr_measure", GPmodel, str_hour(hr_measure_fals))
     if verbose
@@ -214,9 +235,9 @@ function get_chains_and_ts(fw::FittingWindow, GPmodel::AbstractString, hr_measur
     end
     @assert length(all_samples) > 1
 
-    samples = cat(3, all_samples...)
+    samples = cat(all_samples..., dims=3)
     chains = Chains(samples, vec(header))
-    ts = read_ts(fw, GPmodel, hr_measure_fals, usaf, wban, icao)
+    ts = read_ts(fw, GPmodel, hr_measure_fals, usaf, wban, icao, saved_dir)
     return chains, ts
 end
 
@@ -236,7 +257,7 @@ function get_param_names(chains::AxisArray)
     # there should be a more elegant way to obtain the names of an axis
     PARAM = Axis{:param}
     jparam = axisdim(chains, PARAM)
-    param_axis = axes(chains)[jparam]
+    param_axis = AxisArrays.axes(chains)[jparam]
     param_names = axisvalues(param_axis)[1]
     return param_names
 end
@@ -250,7 +271,7 @@ end
 
 function get_temp_percentiles(temp_impute)
     stacked_impute=vcat((temp_impute[:,:,i] for i in 1:size(temp_impute,3))...)
-    sorted_impute = sort(stacked_impute,1)
+    sorted_impute = sort(stacked_impute, dims=1)
     nsamples=size(sorted_impute,1)
     # extract  10th and 90th percentiles
     # of the imputations
@@ -260,7 +281,7 @@ function get_temp_percentiles(temp_impute)
 end
 function get_temp_mean(temp_impute)
     stacked_impute=vcat((temp_impute[:,:,i] for i in 1:size(temp_impute,3))...)
-    μ = vec(mean(stacked_impute, 1))
+    μ = vec(mean(stacked_impute, dims=1))
     return μ
 end
 
@@ -274,10 +295,10 @@ struct ImputationDiagnostic
 end
 EVarError(diag::ImputationDiagnostic) = diag.sumEVarError / diag.n
 mse(diag::ImputationDiagnostic) = diag.sumSE / diag.n
-function ImputationDiagnostic{A<:AbstractArray{Float64, 3}}(temp_impute::A, test_truth::DataFrame)
+function ImputationDiagnostic(temp_impute::AbstractArray{Float64,3}, test_truth::DataFrame)
     stacked_impute=vcat((temp_impute[:,:,i] for i in 1:size(temp_impute,3))...)
     temp_true = test_truth[:temp]
-    μ = vec(mean(stacked_impute, 1))
+    μ = vec(mean(stacked_impute, dims=1))
     evar_err = mean(mse(μ, stacked_impute[i,:]) for i in 1:size(stacked_impute,1))
     MSE = mse(μ, temp_true)
     n = length(μ)
