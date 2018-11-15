@@ -11,6 +11,9 @@ function prep_data(nearby_pred::NearbyPrediction, TnTx::DataFrame,
     window_days = collect(date_start:Day(1):date_end)
     window_TnTx=TnTx[[d ∈ window_days for d in TnTx[:ts_day]],:]
 
+    mean_TnTx = (mean(window_TnTx[:Tn]) + mean(window_TnTx[:Tx])) / 2
+    shifted_μ = μ_window .+ mean_TnTx .- mean(μ_window)
+
     day_impute = Day.(ts_window_day .- minimum(ts_window_day))
     day_impute_numeric = value.(day_impute) .+ 1
     # day_impute = convert(Vector{Int}, Dates.value(ts_window_day .- minimum(ts_window_day))+1
@@ -21,7 +24,7 @@ function prep_data(nearby_pred::NearbyPrediction, TnTx::DataFrame,
         "Nimpt" => sum(in_window),
         "day_impute" => day_impute_numeric,
         "impt_times_p_day" => window_TnTx[:times_p_day],
-        "predicted_mean" => μ_window,
+        "predicted_mean" => shifted_μ,
         "predicted_cov" => Σ_window.mat,
         "predicted_cov_chol" => Matrix(Σ_window.chol.L),
         "k_smoothmax" => 20.0,
