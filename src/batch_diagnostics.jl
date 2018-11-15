@@ -333,6 +333,44 @@ function find_best_window(t::DateTime, cands::Vector{WindowTime})
     return find(inside_windows)[imax]
 end
 
+function daily_best(all_posteriors)
+    unique_days = Set{Date}()
+    for day_post in all_posteriors
+        day_post["days"] = Date.(day_post["days"], "yyyy-mm-dd")
+        day_post["cov"] = hcat(day_post["cov"]...)::Matrix{Float64}
+        union!(unique_days, day_post["days"])
+    end
+
+    days_vec = sort(collect(unique_days))
+    ndays = length(unique_days)
+    day_buffer = fill(0, ndays)
+    day_means = Vector{Float64}(undef, ndays)
+    day_cov = zeros(Float64, ndays, ndays)
+    buffer_cov = fill(0, ndays, ndays)
+
+    for day_post in all_posteriors
+        days = day_post["days"]
+        post_mean, post_cov = day_post["mean"], day_post["cov"]
+        buffer = min.(1:1:length(days), length(days):-1:1)
+        cross_buffer = min.(buffer, buffer')
+        ifirst = findfirst(isequal(days[1]), days_vec)
+        days_indices = ifirst:(ifirst+length(days)-1)
+        is_better = findall(buffer .> day_buffer[days_indices])
+        better_indices = days_indices[is_better]
+        
+        cov_view_days = @view(day_cov[days_indices,days_indices])
+        buf_cov_view  = @view(buffer_cov[days_indices,days_indices])
+        is_better_cov = findall(cross_buffer .> buf_cov_view)
+        
+        day_means[better_indices] = post_mean[is_better]
+        day_buffer[better_indices] = buffer[is_better]
+        copyto!(@view(cov_view_days[is_better_cov]), post_cov[is_better_cov])
+        copyto!(@view(buf_cov_view[is_better_cov]), cross_buffer[is_better_cov])
+    end
+    @assert minimum(day_buffer) > 0
+    return days_vec, day_means, day_cov, day_buffer, buffer_cov
+end
+
 #######################################
 ###### Nearby-only predictions ########
 #######################################

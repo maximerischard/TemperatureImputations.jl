@@ -8,21 +8,24 @@ colour_impt_tntx = cbbPalette[3]
 colour_tn = cbbPalette[5]
 colour_tx = "red"
 
-function plot_imputations(ts, temp_impute, local_time; impt_indices=[250])
+function plot_imputations(ts, temp_impute, local_time; plot_mean=true, impt_indices=[250])
     imputed_10, imputed_90 = get_temp_percentiles(temp_impute)
     μ = get_temp_mean(temp_impute)
+    label = L"$\mathrm{T}_\mathrm{miss} \mid \mathrm{T}_\mathrm{nearby}, \mathrm{T}_{n}, \mathrm{T}_{x}$"
     
     plt.fill_between(local_time.(ts), imputed_10, imputed_90, 
         edgecolor="none",
         linewidth=0,
+        label = plot_mean ? "" : label,
         color=colour_pred_tntx, alpha=0.3)
     for i in impt_indices
         plt.plot(local_time.(ts), temp_impute[i,:,1],
             linewidth=1,
             color=colour_impt_tntx)
     end
-    plt.plot(local_time.(ts), μ, color=colour_pred_tntx, linewidth=2, 
-             label=L"$\mathrm{T}_\mathrm{miss} \mid \mathrm{T}_\mathrm{nearby}, \mathrm{T}_{n}, \mathrm{T}_{x}$")
+    if plot_mean
+        plt.plot(local_time.(ts), μ, color=colour_pred_tntx, linewidth=2, label=label)
+    end
 end
 function plot_truth(
         test_data::DataFrame, 

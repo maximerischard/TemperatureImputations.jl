@@ -73,7 +73,7 @@ function get_means_by_day(chains, ts, hr_measure)
     ts_mid, ts_diff = midpoints(ts), diff(ts)
     ts_mid_day = TempModel.measurement_date.(ts_mid, hr_measure)
     nsamples, ntimes, nchains = size(chains)
-    days = unique(ts_mid_day)
+    days = sort(unique(ts_mid_day))
     ndays = length(days)
     means_by_day = Array{Float64}(undef, nsamples, nchains, ndays)#Dict{eltype(days), Matrix{Float64}}()
     for iday in 1:ndays
