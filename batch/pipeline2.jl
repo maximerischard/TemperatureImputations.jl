@@ -6,7 +6,7 @@ doc = """
     This script constrains those posteriors to be within the measured Tn&Tx.
 
     Usage:
-        pipeline2.jl <ICAO> <model> <windownum> <data_dir> <save_dir>
+        pipeline2.jl <ICAO> <model> <windownum> <data_dir> <save_dir> [--cheat]
 """
 using DocOpt
 arguments = docopt(doc)
@@ -21,6 +21,8 @@ ICAO = arguments["<ICAO>"]
 @show ICAO
 GPmodel = arguments["<model>"]
 @show GPmodel
+cheat = arguments["--cheat"]
+@show cheat
 
 using CmdStan
 using Dates
@@ -32,6 +34,7 @@ using LinearAlgebra
 using PDMats
 using DataFrames
 using Printf
+using Statistics
 
 stan_days = Day(9)
 stan_increment = Day(3)
@@ -126,6 +129,44 @@ nearby_path = joinpath(save_dir, "predictions_from_nearby", GPmodel,
                        ICAO, predictions_fname(USAF, WBAN, ICAO, best_window))
 @show nearby_path
 nearby_pred=load(nearby_path)["nearby_pred"];
+"""
+    In order to test whether the overestimated variance is causing
+    the bias in yearly imputed mean temperatures, I'm going
+    to rescale the predictive variances down so the
+    standardized errors have variance 1.
+    The function name is meant as a reminder that this is not
+    an actual solution, just a diagnostic, as it requires
+    access to the very truth that we are ultimately trying to impute.
+"""
+function variancecheat(nearby::TempModel.NearbyPrediction, truth::DataFrame)
+    μ, Σ, nearbyts = nearby.μ, nearby.Σ, nearby.ts
+    nobsv = length(nearbyts)
+    centering = Matrix(1.0I, nobsv, nobsv) .- (1.0/nobsv)
+    Σcentered = centering * Matrix(Σ) * centering
+    Σmeanshift = Matrix(Σ) .- Σcentered
+    
+    # find the corresponding indices in `truth`
+    ifirst = findfirst(isequal(nearbyts[1]), truth[:ts])
+    ilast = ifirst + nobsv - 1
+    @assert nearbyts[end] == truth[:ts][ilast]
+    
+    error = truth[ifirst:ilast,:temp] .- μ
+    error .-= mean(error)
+    stdpred = sqrt.(diag(Σcentered))
+    sigma = error ./ stdpred
+    @show mean(sigma), std(sigma) # should be 0,1
+    scale = var(sigma)
+    Σscaled = scale .* Σcentered
+    
+    # add some variance back in for an overall shift
+    Σreshifted = Σscaled .+ mean(Σmeanshift) + 1e-12*I
+    return TempModel.NearbyPrediction(nearbyts, μ, PDMats.PDMat(Symmetric(Σreshifted)))
+end
+if cheat
+    @warn("THIS IS CHEATING!")
+    truth = TempModel.read_Stations(test_station; data_dir=data_dir)
+    global nearby_pred = variancecheat(nearby_pred, truth)
+end
 
 start_date = Date(stan_window.start_date)+Day(1) # date of first measurement
 imputation_data, ts_window = TempModel.prep_data(nearby_pred, TnTx, start_date, hr_measure, stan_days)
@@ -136,6 +177,9 @@ function stan_dirname(usaf::Int, wban::Int, icao::String, fw::FittingWindow)
 end
 
 stan_dir = joinpath(save_dir,"stan_fit", GPmodel, stan_dirname(USAF, WBAN, ICAO, stan_window))
+if cheat
+    stan_dir = joinpath(save_dir,"stan_fit", GPmodel, "cheat", stan_dirname(USAF, WBAN, ICAO, stan_window))
+end
 if !isdir(stan_dir)
     mkpath(stan_dir)
 end
