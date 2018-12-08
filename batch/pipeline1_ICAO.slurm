@@ -1,8 +1,8 @@
 #!/bin/bash
 #SBATCH -J pipeline_nearby   # name for job array
 #SBATCH -p shared            # Partition
-#SBATCH -t 0-2:00:00        # Running time of 2 hours
-#SBATCH --mem 12000          # request 16GB memory
+#SBATCH -t 0-2:00:00         # Running time of 2 hours
+#SBATCH --mem 12000          # request 12GB memory
 #SBATCH -n 4                 # 4 cores
 #SBATCH -N 1                 # All cores on one machine
 #SBATCH --mail-type=ALL      # Type of email notification- BEGIN,END,FAIL,ALL
@@ -19,4 +19,5 @@ GPmodel=$1
 cd /n/home04/mrischard/TempModel/batch/
 echo "command line arguments"
 echo "GPmodel" $GPmodel
+echo "ICAO" $ICAO
 julia pipeline1.jl $ICAO $GPmodel /n/home04/mrischard/TempModel/data /n/regal/pillai_lab/mrischard/saved --knearest=5
