@@ -10,11 +10,15 @@ mutable struct NearbyPrediction
     Σ::PDMat{Float64,Array{Float64,2}}
 end
 
-function add_diag!(Σ::PDMats.PDMat, a::Float64)
-    mat = Σ.mat
+function add_diag!(mat::AbstractMatrix, a::Float64)
     for i in 1:size(mat,1)
         mat[i,i] += a
     end
+    return mat
+end
+function add_diag!(Σ::PDMats.PDMat, a::Float64)
+    mat = Σ.mat
+    add_diag!(mat, a)
     copyto!(Σ.chol.factors, mat)
     # cholfact!(Σ.chol.factors, Symbol(Σ.chol.uplo))
     cholesky!(Hermitian(Σ.chol.factors, Symbol(Σ.chol.uplo)))
