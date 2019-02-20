@@ -65,7 +65,7 @@ function read_Stations(isdSubset; data_dir::String=".")
 end
 function test_data(hourly::DataFrame, istation::Int, hr_measure::Hour)
     hourly_test = hourly[hourly[:station] .== istation,:]
-    hourly_test[:ts_day] = [measurement_date(t, hr_measure) for t in hourly_test[:ts]]
+    hourly_test[:ts_day] = measurement_date.(hourly_test[:ts], hr_measure)
     TnTx = DataFrames.by(hourly_test, :ts_day, df -> DataFrame(
         Tn=minimum(df[:temp]), 
         Tx=maximum(df[:temp]),
