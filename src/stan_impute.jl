@@ -1,5 +1,6 @@
 function prep_data(nearby_pred::NearbyPrediction, TnTx::DataFrame, 
-                date_start::Date, hr_measure::Hour, impute_window::Day)
+                date_start::Date, hr_measure::Hour, impute_window::Day;
+                ksmoothmax::Float64, epsilon::Float64)
     date_end = date_start + impute_window - Day(1)
     in_window = [(date_start <= measurement_date(ts, hr_measure) <= date_end) for ts in nearby_pred.ts]
     ts_window = nearby_pred.ts[in_window]
@@ -27,8 +28,8 @@ function prep_data(nearby_pred::NearbyPrediction, TnTx::DataFrame,
         "predicted_mean" => shifted_μ,
         "predicted_cov" => Σ_window.mat,
         "predicted_cov_chol" => Matrix(Σ_window.chol.L),
-        "k_smoothmax" => 20.0,
-        "epsilon" => 0.01,
+        "k_smoothmax" => ksmoothmax,
+        "epsilon" => epsilon,
     )
     return imputation_data, ts_window
 end

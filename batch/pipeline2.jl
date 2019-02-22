@@ -6,7 +6,7 @@ doc = """
     This script constrains those posteriors to be within the measured Tn&Tx.
 
     Usage:
-        pipeline2.jl <ICAO> <model> <windownum> <data_dir> <save_dir> [--cheat]
+        pipeline2.jl <ICAO> <model> <windownum> <data_dir> <save_dir> --ksmoothmax=<ksmoothmax> --epsilon=<epsilon> [--cheat]
 """
 using DocOpt
 arguments = docopt(doc)
@@ -22,6 +22,10 @@ ICAO = arguments["<ICAO>"]
 GPmodel = arguments["<model>"]
 @show GPmodel
 cheat = arguments["--cheat"]
+@show cheat
+ksmoothmax = parse(Float64, arguments["<ksmoothmax>"])
+epsilon = parse(Float64, arguments["<epsilon>"])
+@show ksmoothmax
 @show cheat
 
 using CmdStan
@@ -169,7 +173,7 @@ if cheat
 end
 
 start_date = Date(stan_window.start_date)+Day(1) # date of first measurement
-imputation_data, ts_window = TempModel.prep_data(nearby_pred, TnTx, start_date, hr_measure, stan_days)
+imputation_data, ts_window = TempModel.prep_data(nearby_pred, TnTx, start_date, hr_measure, stan_days; ksmoothmax=ksmoothmax, epsilon=epsilon)
 
 function stan_dirname(usaf::Int, wban::Int, icao::String, fw::FittingWindow)
     return @sprintf("%s/%d_%d_%s_%s_to_%s/", 

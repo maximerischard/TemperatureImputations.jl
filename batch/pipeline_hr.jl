@@ -6,7 +6,7 @@ doc = """
     This script constrains those posteriors to be within the measured Tn&Tx.
 
     Usage:
-        pipeline2.jl <saved_dir> <windownum> <model> <hr_measure_true> <hr_measure_fals>
+        pipeline2.jl <saved_dir> <windownum> <model> <hr_measure_true> <hr_measure_fals> --ksmoothmax=<ksmoothmax> --epsilon=<epsilon>
 """
 using DocOpt
 
@@ -25,6 +25,8 @@ windownum = parse(Int, arguments["<windownum>"])
 GPmodel = arguments["<model>"]
 hr_measure_true = Hour(parse(Int, arguments["<hr_measure_true>"]))
 hr_measure_fals = Hour(parse(Int, arguments["<hr_measure_fals>"]))
+ksmoothmax = parse(Float64, arguments["<ksmoothmax>"])
+epsilon = parse(Float64, arguments["<epsilon>"])
 
 root_dir = ".."
 
@@ -132,7 +134,7 @@ nearby_pred=load(joinpath(saved_dir,
                         predictions_fname(test_usaf, best_window),
                 ))["nearby_pred"];
 
-imputation_data, ts_window = TempModel.prep_data(nearby_pred, TnTx_fals, stan_window.start_date, hr_measure_fals, stan_days)
+imputation_data, ts_window = TempModel.prep_data(nearby_pred, TnTx_fals, stan_window.start_date, hr_measure_fals, stan_days; ksmoothmax=ksmoothmax, epsilon=epsilon)
 
 function stan_dirname(usaf::Int, fw::FittingWindow)
     return @sprintf("%d_%s_to_%s/", 
