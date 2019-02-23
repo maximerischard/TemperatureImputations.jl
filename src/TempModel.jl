@@ -28,4 +28,5 @@ module TempModel
     include("fitted_kernel.jl")
     include("variogram.jl")
     include("covariance.jl")
+    include("smoothhmc.jl")
 end
