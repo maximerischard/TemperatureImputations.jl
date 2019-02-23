@@ -17,7 +17,7 @@ function fitted_temporal()
     return k_time, logNoise
 end
 
-function fitted_sptemp_fixedvar(;kmean=true)
+function fitted_sptemp_fixedvar(;kmean::Bool)
     k1 = fix(Periodic(0.0,0.0,log(24.0)), :lp)
     k2 = RQIso(0.0,0.0,0.0)
     k3 = SEIso(0.0,0.0)
@@ -54,7 +54,7 @@ function fitted_sptemp_fixedvar(;kmean=true)
     return k_spatiotemporal, logNoise
 end
 
-function fitted_sptemp_freevar(;kmean=true)
+function fitted_sptemp_freevar(;kmean::Bool)
     k_time,_ = fitted_temporal()
     k1,k2,k3,k4,k5,k6=k_time.kerns
     ksp1 = SEIso(log(2*10^5), log(1.0))
@@ -79,7 +79,7 @@ function fitted_sptemp_freevar(;kmean=true)
     return k_spatiotemporal, logNoise
 end
 
-function fitted_sptemp_sumprod(;kmean=true)
+function fitted_sptemp_sumprod(;kmean::Bool)
     k1 = fix(Periodic(0.0,0.0,log(24.0)), :lp)
     k2 = RQIso(0.0,0.0,0.0)
     k3 = SEIso(0.0,0.0)
@@ -110,7 +110,7 @@ function fitted_sptemp_sumprod(;kmean=true)
     return k_spatiotemporal, logNoise
 end
 
-function fitted_sptemp_SExSE(;kmean=true)
+function fitted_sptemp_SExSE(;kmean::Bool)
     k_time = SEIso(0.0,0.0)
     k_spatial = fix(SEIso(log(2*10^5), log(1.0)), :lσ)
     k_spatiotemporal = Masked(k_time, [1]) * Masked(k_spatial, [2,3])
@@ -124,7 +124,7 @@ function fitted_sptemp_SExSE(;kmean=true)
     return k_spatiotemporal, logNoise
 end
 
-function fitted_sptemp_diurnal(;kmean=true)
+function fitted_sptemp_diurnal(;kmean::Bool)
     k_time = SEIso(0.0,0.0)
     k_spatial = fix(SEIso(log(2*10^5), log(1.0)), :lσ)
     k_periodic = fix(Periodic(log(1.0), -1.0, log(24.0)), :lp)
@@ -141,7 +141,7 @@ function fitted_sptemp_diurnal(;kmean=true)
     return k_spatiotemporal, logNoise
 end
 
-function fitted_sptemp_simpler(;kmean=true)
+function fitted_sptemp_simpler(;kmean::Bool)
     k1 = fix(Periodic(0.0,0.0,log(24.0)), :lp)
     k2 = RQIso(0.0,0.0,0.0)
     k3b = RQIso(0.0,0.0,0.0)
@@ -166,27 +166,40 @@ function fitted_sptemp_simpler(;kmean=true)
     return k_spatiotemporal, logNoise
 end
 
-function fitted_sptemp_matern(;kmean=true)
-    k1 = fix(Periodic(log(1.0),log(3.0),log(24.0)), :lp)
-    k2 = RQIso(log(0.5),0.0,0.0)  # half an hour
-    k3 = RQIso(log(2.0),0.0,0.0)  # two hours
-    k4 = RQIso(log(12.0),0.0,0.0) # twelve hours
+function kernel_sptemp_matern(;kmean::Bool)
+    kt1 = Periodic(log(1.0),log(3.0),log(24.0))
+    kt2 = RQIso(log(0.5),0.0,0.0)  # half an hour
+    kt3 = RQIso(log(2.0),0.0,0.0)  # two hours
+    kt4 = RQIso(log(12.0),0.0,0.0) # twelve hours
 
-    ksp1 = fix(Mat32Iso(log(5e4), log(1.0)), :lσ)
-    ksp2 = fix(Mat32Iso(log(5e4), log(1.0)), :lσ)
-    ksp3 = fix(Mat32Iso(log(5e4), log(1.0)), :lσ)
-    ksp4 = fix(Mat32Iso(log(5e4), log(1.0)), :lσ)
-    k_means = SEIso(log(1), log(10.0))
+    ksp1 = Mat32Iso(log(5e4), log(1.0))
+    ksp2 = Mat32Iso(log(5e4), log(1.0))
+    ksp3 = Mat32Iso(log(5e4), log(1.0))
+    ksp4 = Mat32Iso(log(5e4), log(1.0))
+    
+    k_means = SEIso(log(1), log(40.0))
+    
+    kprod(ktime, kspace) = Masked(ktime, [1]) * 
+                           Masked(fix(kspace, :lσ), [2,3])
 
-    k_spatiotemporal = Masked(k1, [1]) * Masked(ksp1, [2,3]) +
-                       Masked(k2, [1]) * Masked(ksp2, [2,3]) +
-                       Masked(k3, [1]) * Masked(ksp3, [2,3]) +
-                       Masked(k4, [1]) * Masked(ksp4, [2,3])
-
+    k_spatiotemporal = kprod(fix(kt1, :lp), ksp1) +
+                       kprod(kt2, ksp2) +
+                       kprod(kt3, ksp3) +
+                       kprod(kt4, ksp4)
     if kmean
-        k_means = SEIso(log(1.0), log(20.0))
-        k_spatiotemporal = k_spatiotemporal + fix(Masked(k_means, [2,3]))
+        k_spatiotemporal += fix(Masked(k_means, [2,3]))
     end
+    return Dict(
+        :time1=>kt1, :time2=>kt2, :time3=>kt3, :time4=>kt4,
+        :space1=>ksp1, :space2=>ksp2, :space3=>ksp3, :space4=>ksp4,
+        :mean=>k_means,
+        :spatiotemporal => k_spatiotemporal
+        )
+end
+
+function fitted_sptemp_matern(;kmean::Bool)
+    kdict = kernel_sptemp_matern(kmean=kmean)
+    k_spatiotemporal = kdict[:spatiotemporal]
     # hyperparameters fitted in `FitGP_spatiotemp_spatial_matern.ipynb`:
     hyp = [-1.72361, -0.200613, 1.0075, 14.0162, -1.20089, -0.703055, -1.07354, 9.35237, 0.678935, -0.0278533, 0.244548, 11.1962, 2.18646, 1.45579, -0.924148, 13.3052]
     set_params!(k_spatiotemporal, hyp[2:end])
