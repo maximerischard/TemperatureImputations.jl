@@ -124,7 +124,7 @@ end
 
 function arg_test_fw(test::DataFrame, fw::FittingWindow, hr_measure::Hour)
     ts = test[:ts]
-    in_window = t_inside_fw.(ts, fw, hr_measure)
+    in_window = t_inside_fw.(ts, Ref(fw), hr_measure)
     return in_window
 end
 function get_test_fw(test::DataFrame, fw::FittingWindow, hr_measure::Hour)

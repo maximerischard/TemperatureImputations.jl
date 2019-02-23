@@ -177,8 +177,8 @@ function optimize_NLopt(gpr::GPRealisations; noise::Bool=true, domean::Bool=true
 
     lower = Array{Float64}(undef, nparams)
     upper = Array{Float64}(undef, nparams)
-    lower = init_x - 3.0
-    upper = init_x + 3.0
+    lower = init_x .- 3.0
+    upper = init_x .+ 3.0
     NLopt.lower_bounds!(opt, lower)
     NLopt.upper_bounds!(opt, upper)
     NLopt.xtol_rel!(opt, x_tol)
