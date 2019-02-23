@@ -8,6 +8,7 @@
 #SBATCH --mail-type=ALL      # Type of email notification- BEGIN,END,FAIL,ALL
 #SBATCH --mail-user=mrischard@g.harvard.edu
 
+export JULIA_DEPOT_PATH="${HOME}/julia_depots/climate"
 source ~/julia_modules.sh
 cd /n/regal/pillai_lab/mrischard/TempModel/batch/
 echo "command line arguments"

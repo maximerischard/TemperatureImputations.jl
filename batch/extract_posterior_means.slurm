@@ -7,8 +7,9 @@
 #SBATCH -N 1                 # All cores on one machine
 #SBATCH --mail-type=ALL      # Type of email notification- BEGIN,END,FAIL,ALL
 #SBATCH --mail-user=mrischard@g.harvard.edu
-#SBATCH --array 1,3,17,20,30,31,32,33,34,36,37,38,40,43
+#SBATCH --array 6
 
+export JULIA_DEPOT_PATH="${HOME}/julia_depots/climate"
 source ~/julia_modules.sh
 test_ICAOs=(KABE KABQ KABR KATL KAUG KBDL KBHM KBIS KBNA KBWI KCAE KCEF KCMH
             KCOS KCRW KDLH KDSM KEUG KFAT KFYV KGTF KICT KIND KINW KJAN KJAX

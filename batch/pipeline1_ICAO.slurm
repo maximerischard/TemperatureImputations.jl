@@ -7,7 +7,7 @@
 #SBATCH -N 1                 # All cores on one machine
 #SBATCH --mail-type=ALL      # Type of email notification- BEGIN,END,FAIL,ALL
 #SBATCH --mail-user=mrischard@g.harvard.edu
-#SBATCH --array 1,3,4,5,7,14,15,16,18,20,21,24,26,28,29,31,32,33,34,36,37,38,39,40,41
+#SBATCH --array 1,3,4,5,7,12,14,15,16,17,18,20,21,24,26,28,29,30,31,32,33,34,35,36,37,38,39,40,41,43,44
 
 source ~/julia_modules.sh
 test_ICAOs=(KABE KABQ KABR KATL KAUG KBDL KBHM KBIS KBNA KBWI KCAE KCEF KCMH

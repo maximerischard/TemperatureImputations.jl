@@ -9,6 +9,7 @@
 #SBATCH --mail-user=mrischard@g.harvard.edu
 #SBATCH --array 1-119
 
+export JULIA_DEPOT_PATH="${HOME}/julia_depots/climate"
 source ~/julia_modules.sh
 cd /n/regal/pillai_lab/mrischard/temperature_model/batch/
 echo "command line arguments"

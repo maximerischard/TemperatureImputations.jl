@@ -9,6 +9,7 @@
 #SBATCH --mail-user=mrischard@g.harvard.edu
 #SBATCH --array 1,3,4,5,7,14,15,16,18,20,21,24,26,28,29,31,32,33,34,36,37,38,39,40,41
 
+export JULIA_DEPOT_PATH="${HOME}/julia_depots/climate"
 source ~/julia_modules.sh
 test_ICAOs=(KABE KABQ KABR KATL KAUG KBDL KBHM KBIS KBNA KBWI KCAE KCEF KCMH
             KCOS KCRW KDLH KDSM KEUG KFAT KFYV KGTF KICT KIND KINW KJAN KJAX

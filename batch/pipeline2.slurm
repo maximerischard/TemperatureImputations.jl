@@ -7,12 +7,13 @@
 #SBATCH -N 1                 # All cores on one machine
 #SBATCH --mail-type=ALL      # Type of email notification- BEGIN,END,FAIL,ALL
 #SBATCH --mail-user=mrischard@g.harvard.edu
-#SBATCH --array 1-119       # identifies job within batch 
+#SBATCH --array 1-119        # identifies job within batch 
 
 #test_ICAOs=(KWRB KMXF KJAN KESF KSJT KPHX KPOB KCAE KBNA KLRF KTIK KABQ KFAT 
             #KDCA KBWI KDOV KWRI KLYH KEKN KFTK KCMH KIND KSPI KCOU KICT KHVE 
             #KTPH KPVD KBDL KAOO KSYR KDSM KLBF KCPR KCON KMPV KMLT KMKG KVOK
             #KHON KAXN KLWT KMUO KBNO KBIS KYKM KCEF KAFF)
+export JULIA_DEPOT_PATH="${HOME}/julia_depots/climate"
 source ~/julia_modules.sh
 echo "command line arguments"
 GPmodel=$1
