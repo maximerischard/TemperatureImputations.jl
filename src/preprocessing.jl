@@ -10,7 +10,7 @@ function read_station(usaf::Int, wban::Int, id::Int; data_dir::String=".")
                                        :hour=>Int64, :min=>Int64, :seconds=>Int64,
                                        :temp=>Float64),
                             )
-    DataFrames.dropmissing!(station_data)
+    DataFrames.dropmissing!(station_data, disallowmissing=true)
     # remove missing data (null or nan)
     station_data = station_data[.!ismissing.(station_data[:temp]), :]
     # station_data = station_data[.!isnan.(station_data[:temp]), :]
