@@ -27,28 +27,50 @@ function plot_imputations(ts, temp_impute, local_time; plot_mean=true, impt_indi
         plt.plot(local_time.(ts), μ, color=colour_pred_tntx, linewidth=2, label=label)
     end
 end
+
+function plot_TnTx(hourly_data, station, hr_measure, local_time::Function; linewidth=3, zorder=-1, kwargs...)
+    hourly_test = hourly_data[hourly_data[:station] .== station, :]
+    TnTx = TempModel.test_data(hourly_test, station, hr_measure)
+    hourly_test[:ts_day] = TempModel.measurement_date.(hourly_test[:ts], hr_measure)
+    hourly_TnTx = join(hourly_test, TnTx, on=:ts_day)
+    local_ts = local_time.(hourly_TnTx[:ts])
+    plt.plot(local_ts, hourly_TnTx[:Tn], # where="pre",
+             color=colour_tn, linewidth=linewidth, zorder=zorder, label=L"$T_n$"; kwargs...)
+    plt.plot(local_ts, hourly_TnTx[:Tx], # where="pre",
+             color=colour_tx, linewidth=linewidth, zorder=zorder, label=L"$T_x$"; kwargs...)
+end
+
 function plot_truth(
         test_data::DataFrame, 
         window::FittingWindow, 
         hr_measure::Hour,
         local_time::Function; 
-        tntx::Bool=false, markersize=5)
+        markersize=5)
     test_window = get_test_fw(test_data, window, hr_measure)
     ts = test_window[:ts]
     temp = test_window[:temp]
-    Tn = test_window[:Tn]
-    Tx = test_window[:Tx]
     plt.plot(local_time.(ts), temp,
         marker="o",
         markersize=markersize,
         color=colour_truth, label="true hourly")
-    if tntx
-        plt.step(local_time.(ts), Tn, where="pre",
-            color=colour_tn, linewidth=3, label=L"$T_n$",
-            zorder=-1)
-        plt.step(local_time.(ts), Tx, where="pre",
-            color=colour_tx, linewidth=3, label=L"$T_x$",
-            zorder=-1)
+end
+function plot_neighbours(train_data, stations_metadata, local_time::Function, xlim::Tuple{DateTime,DateTime}; subtractmean::Bool, kwargs...)
+    train_subset = subset(train_data, xlim[1], xlim[2])
+    markers = ["v", "1", "p", "s", "X"]
+    stations = unique(train_subset[:station])
+    for (i,station) in enumerate(stations)
+        sdata = train_subset[train_subset[:station].==station,:]
+        ts = sdata[:ts]
+        y = sdata[:temp]
+        if subtractmean
+            y .-= mean(temp)
+        end
+        label = stations_metadata[station, :ICAO]
+        plt.plot(local_time.(ts), y;
+                 marker = markers[i],
+                 label=label,
+                 kwargs...
+                 )
     end
 end
 function plot_predictive(
@@ -57,10 +79,11 @@ function plot_predictive(
         local_time::Function,
         xlim::Tuple{DateTime,DateTime};
         truth::Bool=true,
-        neighbours::Bool=true,
+        # neighbours::Bool=true, # use plot_neighbours instead
         mean_impt::Bool=true,
         imputations::Int=0,
-        markersize=5
+        markersize=5,
+        intvl_width = 0.8,
         )
 
     test_subset = subset(test_data, xlim[1], xlim[2])
@@ -72,20 +95,6 @@ function plot_predictive(
     centering = Matrix(1.0I, nobsv, nobsv) .- (1.0/nobsv)
     Σ_centered = centering * Σ.mat * centering
     distr = MultivariateNormal(μ, Σ)
-    if neighbours
-        markers = ["v", "1", "p", "s", "X"]
-        for (i,station) in enumerate(unique(train_subset[:station]))
-            sdata = train_subset[train_subset[:station].==station,:]
-            ts=sdata[:ts]
-            plt.plot(local_time.(ts), sdata[:temp].-mean(sdata[:temp]), 
-                     color=colour_hourly_nearby, 
-                     marker = markers[i],
-                     markersize=markersize,
-                     label=stations_metadata[station,:ICAO],
-                     zorder = 10
-                     )
-        end
-    end
     ts=nearby_pred.ts
     in_window = (xlim[1] .<= ts) .& (ts .<= xlim[2])
     mean_μ = mean(μ[in_window])
@@ -103,16 +112,15 @@ function plot_predictive(
                  zorder=20)
     end
     if mean_impt
-        plt.plot(local_time.(ts), μ.-mean_μ, color=colour_pred_nearby, linewidth=2, 
+        plt.plot(local_time.(ts[in_window]), μ[in_window].-mean_μ, color=colour_pred_nearby, linewidth=2, 
                  zorder=30,
                  label=L"$\mathrm{T}_\mathrm{miss} \mid \mathrm{T}_\mathrm{nearby}$")
 
-        intvl_width = 0.8
         intvl_stds = -quantile(Normal(0,1), (1-intvl_width)/2)
 
-        plt.fill_between(local_time.(ts), 
-                         μ.-mean_μ.-intvl_stds.*sqrt.(diag(Σ_centered)),
-                         μ.-mean_μ.+intvl_stds.*sqrt.(diag(Σ_centered)),
+        plt.fill_between(local_time.(ts[in_window]), 
+                         μ[in_window].-mean_μ.-intvl_stds.*sqrt.(diag(Σ_centered)[in_window]),
+                         μ[in_window].-mean_μ.+intvl_stds.*sqrt.(diag(Σ_centered)[in_window]),
                          zorder = 0,
                          edgecolor="none",
                          linewidth=0,
