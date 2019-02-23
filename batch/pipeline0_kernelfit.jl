@@ -2,17 +2,19 @@ doc = """
     * Fit the hyperparameters of the spatiotemporal GP model to nearby hourly data.
 
     Usage:
-        pipeline0_kernelfit.jl <ICAO> <model> <data_dir> <save_dir> [--knearest=<kn>]
+        pipeline0_kernelfit.jl <ICAO> <model> <data_dir> <save_dir> [--knearest=<kn>] [--crossval]
 
     Options:
-        -h --help     Show this screen.
-        --knearest=<kn> Number of nearby stations to include [default: 5]
+        -h --help        Show this screen.
+        --knearest=<kn>  Number of nearby stations to include [default: 5]
+        --crossval       Use cross-validation
 """
 using DocOpt
 import TempModel
 using Printf: @printf, @sprintf
 import JSON
 using DataFrames: nrow
+using Dates: Day
 
 arguments = docopt(doc)
 ICAO = arguments["<ICAO>"]
@@ -23,8 +25,11 @@ data_dir= joinpath(arguments["<data_dir>"])
 @show data_dir
 save_dir= joinpath(arguments["<save_dir>"])
 @show save_dir
+@assert isdir(save_dir)
 k_nearest = parse(Int, arguments["--knearest"])
 @show k_nearest
+crossval = arguments["--crossval"]::Bool
+@show crossval
 
 global k_spatiotemporal
 global logNoise
@@ -41,7 +46,9 @@ elseif GPmodel=="diurnal"
 elseif GPmodel=="simpler"
     k_spatiotemporal,logNoise = TempModel.fitted_sptemp_simpler()
 elseif GPmodel=="matern"
-    k_spatiotemporal,logNoise = TempModel.fitted_sptemp_matern()
+    kdict = TempModel.kernel_sptemp_matern(;kmean=true)
+    k_spatiotemporal = kdict[:spatiotemporal]
+    logNoise = -1.0
 else
     error(@sprintf("unknown model: %s", GPmodel))
 end
@@ -60,24 +67,55 @@ isd_nearest = isd_nearest_and_test[2:end,:]
 
 hourly_data = TempModel.read_Stations(isd_nearest; data_dir=data_dir)
 
-@time opt_out = TempModel.optim_kernel(k_spatiotemporal, logNoise, isd_nearest, hourly_data, :Optim);
+if !crossval
+    @time opt_out = TempModel.optim_kernel(k_spatiotemporal, logNoise, isd_nearest, hourly_data, :Optim; window=Day(10));
+    hyp = opt_out[:hyp]
+    output_dictionary = Dict{String,Any}(
+        "mll" => opt_out[:mll],
+        "hyp" => opt_out[:hyp],
+        "logNoise" => opt_out[:logNoise],
+        "test_ICAO" => ICAO,
+        "test_USAF" => USAF,
+        "test_WBAN" => WBAN,
+        "nearby_ICAO" => isd_nearest[:ICAO],
+        "nearby_USAF" => isd_nearest[:USAF],
+        "nearby_WBAN" => isd_nearest[:WBAN],
+        "GPmodel" => GPmodel
+       )
+else
+    @time opt_out = TempModel.optim_kernel(k_spatiotemporal, logNoise, isd_nearest, hourly_data, :Optim; window=Day(8), x_tol=1e-5, f_tol=1e-5);
+    hyp = opt_out[:hyp]
+    opt_out_CV = TempModel.optim_kernel_CV(k_spatiotemporal, hyp[1], 
+                                           isd_nearest, hourly_data,
+                                           :Optim;
+                                           window=Day(8), # shorter window is faster
+                                           )
+    hypCV = opt_out_CV[:hyp]
+    reals, folds = make_chunks_and_folds(k_spatiotemporal, hypCV[1], isd_nearest, 
+            hourly_data; window=Day(10));
+    mll = reals.mll
+    output_dictionary = Dict{String,Any}(
+        "mll" => mll,
+        "CV" => opt_out_CV[:mll],
+        "hyp" => opt_out_CV[:hyp],
+        "logNoise" => opt_out_CV[:logNoise],
+        "test_ICAO" => ICAO,
+        "test_USAF" => USAF,
+        "test_WBAN" => WBAN,
+        "nearby_ICAO" => isd_nearest[:ICAO],
+        "nearby_USAF" => isd_nearest[:USAF],
+        "nearby_WBAN" => isd_nearest[:WBAN],
+        "GPmodel" => GPmodel
+       )
+end
 
-output_dictionary = Dict{String,Any}(
-    "mll" => opt_out[:mll],
-    "hyp" => opt_out[:hyp],
-    "logNoise" => opt_out[:logNoise],
-    "test_ICAO" => ICAO,
-    "test_USAF" => USAF,
-    "test_WBAN" => WBAN,
-    "nearby_ICAO" => isd_nearest[:ICAO],
-    "nearby_USAF" => isd_nearest[:USAF],
-    "nearby_WBAN" => isd_nearest[:WBAN],
-    "GPmodel" => GPmodel
-   )
-
-savemodel_dir = joinpath(save_dir, "fitted_kernel", GPmodel)
+if crossval
+    savemodel_dir = joinpath(save_dir, "fitted_kernel", "crossval", GPmodel)
+else
+    savemodel_dir = joinpath(save_dir, "fitted_kernel", "mll", GPmodel)
+end
 if !isdir(savemodel_dir)
-    mkdir(savemodel_dir)
+    mkpath(savemodel_dir)
 end
 fname = @sprintf("hyperparams_%s_%s.json", GPmodel, ICAO) 
 filepath = joinpath(savemodel_dir, fname)
