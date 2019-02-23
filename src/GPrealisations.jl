@@ -1,3 +1,5 @@
+import GaussianProcesses: logp_CVfold, dlogpdθ_CVfold
+using GaussianProcesses: Folds
 
 mutable struct GPRealisations
     reals::Vector{GPE}
@@ -187,4 +189,141 @@ function optimize_NLopt(gpr::GPRealisations; noise::Bool=true, domean::Bool=true
     set_params!(gpr, minx, noise=noise,domean=domean,kern=kern)
     update_mll!(gpr)
     return minf,minx,ret,count
+end
+
+#=========================
+#   Cross-validation   
+=========================#
+
+function logp_CVfold(gpr::GPRealisations, folds_reals::Vector{<:Folds})
+    return sum(
+            logp_CVfold(gp, folds)
+            for (gp, folds) in zip(gpr.reals, folds_reals)
+        )
+end
+function dlogpdθ_CVfold(gpr::GPRealisations, folds_reals::Vector{<:Folds}; kwargs...)
+    return sum(
+            dlogpdθ_CVfold(gp, folds; kwargs...)
+            for (gp, folds) in zip(gpr.reals, folds_reals)
+        )
+end
+function get_optimCV_target(gpr::GPRealisations, folds_reals::Vector{Folds};
+                            whichparams...)
+    ααinvcKIs = Dict{Int,Matrix}()
+    for gp in gpr.reals
+        if haskey(ααinvcKIs, gp.nobs)
+            continue
+        end
+        ααinvcKIs[gp.nobs] = Array{Float64}(undef, gp.nobs, gp.nobs)
+    end
+    function logpCV(hyp::Vector{Float64})
+        try
+            set_params!(gpr, hyp; whichparams...)
+            update_mll!(gpr)
+            CV = logp_CVfold(gpr, folds_reals)
+            if !isfinite(CV)
+                return Inf
+            end
+            return -CV
+        catch err
+             if !all(isfinite.(hyp))
+                println(err)
+                return Inf
+            elseif isa(err, ArgumentError)
+                println(err)
+                return Inf
+            elseif isa(err, LinearAlgebra.PosDefException)
+                println(err)
+                return Inf
+            else
+                throw(err)
+            end
+        end        
+    end
+
+    function CV_and_dlogpCV!(grad::Vector{Float64}, hyp::Vector{Float64})
+        try
+            set_params!(gpr, hyp; whichparams...)
+            update_mll!(gpr)
+            CV = logp_CVfold(gpr, folds_reals)
+            dlogp = dlogpdθ_CVfold(gpr, folds_reals; whichparams...)
+            grad[:] = -dlogp
+            if !isfinite(CV)
+                return Inf
+            end
+            return -CV
+        catch err
+             if !all(isfinite.(hyp))
+                println(err)
+                return Inf
+            elseif isa(err, ArgumentError)
+                println(err)
+                return Inf
+            elseif isa(err, LinearAlgebra.PosDefException)
+                println(err)
+                return Inf
+            else
+                throw(err)
+            end
+        end 
+    end
+    function dlogpCV!(grad::Vector{Float64}, hyp::Vector{Float64})
+        CV_and_dlogpCV!(grad::Vector{Float64}, hyp::Vector{Float64})
+    end
+
+    func = OnceDifferentiable(logpCV, dlogpCV!, CV_and_dlogpCV!,
+        get_params(gpr; whichparams...))
+    return func
+end
+
+function optimize_NLopt_CV(gpr::GPRealisations, folds_reals::Vector{<:Folds}; 
+                           method=:LD_LBFGS, x_tol=1e-10, f_tol=1e-10,
+                           whichparams...)
+    target = get_optimCV_target(gpr, folds_reals; whichparams...)
+    init_x = get_params(gpr;  whichparams...)  # Initial hyperparameter values
+    count = 0
+    best_x = copy(init_x)
+    best_y = Inf
+    function myfunc(x::Vector, grad::Vector)
+        if length(grad) > 0
+            target.df(grad, x)
+        end
+
+        count += 1
+        y = target.f(x)
+        if isfinite(y) & (y < best_y)
+            best_y = y
+            best_x[:] = x
+        end
+        return y
+    end
+
+    nparams = length(init_x)
+    opt = NLopt.Opt(method, nparams)
+
+    lower = Array{Float64}(undef, nparams)
+    upper = Array{Float64}(undef, nparams)
+    lower = init_x .- 3.0
+    upper = init_x .+ 3.0
+    NLopt.lower_bounds!(opt, lower)
+    NLopt.upper_bounds!(opt, upper)
+    NLopt.xtol_rel!(opt, x_tol)
+    NLopt.ftol_rel!(opt, f_tol)
+    NLopt.min_objective!(opt, myfunc)
+    (minf,minx,ret) = NLopt.optimize(opt, init_x)
+
+    set_params!(gpr, minx; whichparams...)
+    update_mll!(gpr)
+    return minf,minx,ret,count
+end
+function optimize_CV!(gpr::GPRealisations, folds_reals::Vector{<:Folds};
+                      noise::Bool, domean::Bool, kern::Bool,
+                      method=ConjugateGradient(), options=Optim.Options())
+    func = get_optimCV_target(gpr, folds_reals; 
+                              noise=noise, domean=domean, kern=kern)
+    init = get_params(gpr;  noise=noise, domean=domean, kern=kern)  # Initial hyperparameter values
+    results=optimize(func,init,method, options)  # Run optimizer
+    set_params!(gpr, minimizer(results), noise=noise,domean=domean,kern=kern)
+    update_mll!(gpr)
+    return results
 end
