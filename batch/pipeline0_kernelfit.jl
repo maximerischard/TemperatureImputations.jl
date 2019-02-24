@@ -85,13 +85,16 @@ if !crossval
 else
     @time opt_out = TempModel.optim_kernel(k_spatiotemporal, logNoise, isd_nearest, hourly_data, :Optim; window=Day(8), x_tol=1e-5, f_tol=1e-5);
     hyp = opt_out[:hyp]
-    opt_out_CV = TempModel.optim_kernel_CV(k_spatiotemporal, hyp[1], 
+    @show hyp
+    @show opt_out[:mll]
+    @time opt_out_CV = TempModel.optim_kernel_CV(k_spatiotemporal, hyp[1], 
                                            isd_nearest, hourly_data,
                                            :Optim;
                                            window=Day(8), # shorter window is faster
                                            x_tol=1e-4, f_tol=1e-6,
                                            )
     hypCV = opt_out_CV[:hyp]
+    @show opt_out_CV[:opt_out]
     @show hypCV
     reals, folds = TempModel.make_chunks_and_folds(k_spatiotemporal, hypCV[1], isd_nearest, 
             hourly_data; window=Day(10));
