@@ -89,9 +89,11 @@ else
                                            isd_nearest, hourly_data,
                                            :Optim;
                                            window=Day(8), # shorter window is faster
+                                           x_tol=1e-4, f_tol=1e-6,
                                            )
     hypCV = opt_out_CV[:hyp]
-    reals, folds = make_chunks_and_folds(k_spatiotemporal, hypCV[1], isd_nearest, 
+    @show hypCV
+    reals, folds = TempModel.make_chunks_and_folds(k_spatiotemporal, hypCV[1], isd_nearest, 
             hourly_data; window=Day(10));
     mll = reals.mll
     output_dictionary = Dict{String,Any}(
