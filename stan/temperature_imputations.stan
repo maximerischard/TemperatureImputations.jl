@@ -12,30 +12,32 @@ data {
     vector[N_TxTn] Tx;
     vector[N_TxTn] Tn;
 
-    // imputation points
+    // imputation points (for which we have )
     int<lower=1> Nimpt;
     int<lower=1,upper=N_TxTn> day_impute[Nimpt];
     // number of hours recorded within each day
     int<lower=1> impt_times_p_day[N_TxTn];
 
-    // prior (informed by nearby hourly temperatures)
-    // Prior mean:
+    // prior 
     vector[Nimpt] predicted_mean;
-    // Cholesky decomposition of the prior covariance matrix:
+    matrix[Nimpt,Nimpt] predicted_cov;
     matrix[Nimpt,Nimpt] predicted_cov_chol;
 
     // control smooth max hardness
     real<lower=0> k_smoothmax;
+    // real<lower=0> sigma_mu;
+    real<lower=0> epsilon;
 }
 parameters {
     vector[Nimpt] w_uncorr;
-    real mu;
+    // real mu;
 }
 transformed parameters {
     vector[Nimpt] temp_impt;
     real Tsmoothmax[N_TxTn];
     real Tsmoothmin[N_TxTn];  
-    temp_impt = mu + predicted_mean + predicted_cov_chol*w_uncorr;
+    // temp_impt = mu + predicted_mean + predicted_cov_chol*w_uncorr;
+    temp_impt = predicted_mean + predicted_cov_chol*w_uncorr;
     {
         int istart;
         istart = 1;
@@ -54,7 +56,7 @@ transformed parameters {
 }
 model {
     w_uncorr ~ normal(0,1);
-    mu ~ normal(0, 100.0);
-    Tn ~ normal(Tsmoothmin, 0.1);
-    Tx ~ normal(Tsmoothmax, 0.1);
+    // mu ~ normal(0, sigma_mu);
+    Tn ~ normal(Tsmoothmin, epsilon);
+    Tx ~ normal(Tsmoothmax, epsilon);
 }
