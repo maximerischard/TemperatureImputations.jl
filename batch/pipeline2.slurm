@@ -21,4 +21,15 @@ echo "GPmodel" $GPmodel
 ICAO=$2
 echo ICAO $ICAO
 cd /n/home04/mrischard/TempModel/batch/
-julia pipeline2.jl $ICAO $GPmodel ${SLURM_ARRAY_TASK_ID} /n/home04/mrischard/TempModel/data /n/regal/pillai_lab/mrischard/saved --seed=${SLURM_ARRAY_TASK_ID} --ksmoothmax=50.0 --epsilon=0.1 --crossval
+ksmoothmax=50
+epsilon=0.1
+julia pipeline2.jl \
+    $ICAO \
+    $GPmodel \
+    ${SLURM_ARRAY_TASK_ID} \
+    /n/home04/mrischard/TempModel/data \
+    /n/regal/pillai_lab/mrischard/saved \
+    --seed=${SLURM_ARRAY_TASK_ID} \
+    --ksmoothmax=$ksmoothmax \
+    --epsilon=$epsilon \
+    --crossval
