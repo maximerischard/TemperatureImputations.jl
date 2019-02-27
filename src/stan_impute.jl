@@ -34,7 +34,7 @@ function prep_data(nearby_pred::NearbyPrediction, TnTx::DataFrame,
     return imputation_data, ts_window
 end
 
-function get_imputation_model(; pdir=pwd())
+function get_imputation_model(; pdir=pwd(), seed::Int)
     imputation_model = """
         functions {
             real smoothmax(vector x, real k, real maxkx){
@@ -102,6 +102,10 @@ function get_imputation_model(; pdir=pwd())
     stanmodel = Stanmodel(;
             name="imputation", 
             model=imputation_model, 
+            random=CmdStan.Random(seed),
+            nchains=4,
+            num_warmup=1000,
+            num_samples=1000,
             pdir=pdir, 
         )
     return stanmodel
