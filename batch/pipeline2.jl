@@ -14,19 +14,25 @@ arguments = docopt(doc)
 save_dir = arguments["<save_dir>"]
 save_dir = joinpath(save_dir)
 println("directory for saved files: ", save_dir)
+@assert isdir(save_dir)
 data_dir = arguments["<data_dir>"]
 data_dir = joinpath(data_dir)
 windownum = parse(Int, arguments["<windownum>"])
+@show windownum
 ICAO = arguments["<ICAO>"]
 @show ICAO
 GPmodel = arguments["<model>"]
 @show GPmodel
 cheat = arguments["--cheat"]
 @show cheat
-ksmoothmax = parse(Float64, arguments["<ksmoothmax>"])
-epsilon = parse(Float64, arguments["<epsilon>"])
+seed = parse(Int, arguments["--seed"])
+@show seed
+ksmoothmax = parse(Float64, arguments["--ksmoothmax"])
+epsilon = parse(Float64, arguments["--epsilon"])
 @show ksmoothmax
 @show cheat
+crossval = arguments["--crossval"]::Bool
+@show crossval
 
 using CmdStan
 using Dates
@@ -40,10 +46,10 @@ using DataFrames
 using Printf
 using Statistics
 
-stan_days = Day(9)
-stan_increment = Day(3)
+stan_days = Day(12)
+stan_increment = Day(4)
 
-isdList = dropmissing(TempModel.read_isdList(; data_dir=data_dir))
+isdList = dropmissing(TempModel.read_isdList(; data_dir=data_dir); disallowmissing=true)
 test_station = isdList[isdList[:ICAO].==ICAO, :]
 @assert nrow(test_station) == 1
 USAF = test_station[1, :USAF]
@@ -76,15 +82,15 @@ maxtime = DateTime(2016,1,1,0,0,0)
 increm=(maxtime-mintime) / 15
 dt_start = mintime
 window=3*increm
-while true
+while dt_start < maxtime
 	global dt_start
     dt_end=dt_start+window
     fwindow = FittingWindow(dt_start,dt_end)
     push!(nearby_windows, fwindow)
+    dt_start+=increm
     if dt_end >= maxtime
         break
     end
-    dt_start+=increm
 end
 
 """ 
@@ -129,8 +135,8 @@ println("STAN fitting window: ", stan_window)
 best_window = find_best_window(stan_window, nearby_windows)
 println("using nearby-predictions from: ", best_window)
 
-nearby_path = joinpath(save_dir, "predictions_from_nearby", GPmodel,
-                       ICAO, predictions_fname(USAF, WBAN, ICAO, best_window))
+nearby_dir = joinpath(save_dir, "predictions_from_nearby", crossval ? "crossval" : "mll", GPmodel, ICAO)
+nearby_path =  joinpath(nearby_dir, predictions_fname(USAF, WBAN, ICAO, best_window))
 @show nearby_path
 nearby_pred=load(nearby_path)["nearby_pred"];
 """
@@ -180,14 +186,16 @@ function stan_dirname(usaf::Int, wban::Int, icao::String, fw::FittingWindow)
                     icao, usaf, wban, icao, Date(fw.start_date), Date(fw.end_date))
 end
 
-stan_dir = joinpath(save_dir,"stan_fit", GPmodel, stan_dirname(USAF, WBAN, ICAO, stan_window))
+stan_dir = joinpath(save_dir, "stan_fit", 
+                    crossval ? "crossval" : "mll",
+                    GPmodel, stan_dirname(USAF, WBAN, ICAO, stan_window))
 if cheat
     stan_dir = joinpath(save_dir,"stan_fit", GPmodel, "cheat", stan_dirname(USAF, WBAN, ICAO, stan_window))
 end
 if !isdir(stan_dir)
     mkpath(stan_dir)
 end
-imputation_model = TempModel.get_imputation_model(; pdir=stan_dir)
+imputation_model = TempModel.get_imputation_model(; pdir=stan_dir, seed=seed)
 for fname in readdir(joinpath(stan_dir, "tmp"))
     mv(joinpath(stan_dir, "tmp", fname), joinpath(stan_dir, fname); force=true)
 end

@@ -34,17 +34,17 @@ crossval = arguments["--crossval"]::Bool
 global k_spatiotemporal
 global logNoise
 if GPmodel=="fixed_var"
-    k_spatiotemporal,logNoise = TempModel.fitted_sptemp_fixedvar()
+    k_spatiotemporal,logNoise = TempModel.fitted_sptemp_fixedvar(;kmean=true)
 elseif GPmodel=="free_var"
-    k_spatiotemporal,logNoise = TempModel.fitted_sptemp_freevar()
+    k_spatiotemporal,logNoise = TempModel.fitted_sptemp_freevar(;kmean=true)
 elseif GPmodel=="sumprod"
-    k_spatiotemporal,logNoise = TempModel.fitted_sptemp_sumprod()
+    k_spatiotemporal,logNoise = TempModel.fitted_sptemp_sumprod(;kmean=true)
 elseif GPmodel=="SExSE"
-    k_spatiotemporal,logNoise = TempModel.fitted_sptemp_SExSE()
+    k_spatiotemporal,logNoise = TempModel.fitted_sptemp_SExSE(;kmean=true)
 elseif GPmodel=="diurnal"
-    k_spatiotemporal,logNoise = TempModel.fitted_sptemp_diurnal()
+    k_spatiotemporal,logNoise = TempModel.fitted_sptemp_diurnal(;kmean=true)
 elseif GPmodel=="simpler"
-    k_spatiotemporal,logNoise = TempModel.fitted_sptemp_simpler()
+    k_spatiotemporal,logNoise = TempModel.fitted_sptemp_simpler(;kmean=true)
 elseif GPmodel=="matern"
     kdict = TempModel.kernel_sptemp_matern(;kmean=true)
     k_spatiotemporal = kdict[:spatiotemporal]

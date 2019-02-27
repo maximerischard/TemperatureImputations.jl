@@ -2,7 +2,7 @@ doc = """
     * Extract the posterior mean and covariance from the imputations.
 
     Usage:
-        extract_posterior_means.jl <ICAO> <model> <data_dir> <save_dir> [--hr_measure=<hr>]
+        extract_posterior_means.jl <ICAO> <model> <data_dir> <save_dir> [--hr_measure=<hr>] [--cheat]
 
     Options:
         -h --help     Show this screen.

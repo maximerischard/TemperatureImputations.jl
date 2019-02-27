@@ -9,10 +9,10 @@
 #SBATCH --mail-user=mrischard@g.harvard.edu
 #SBATCH --array 1-119        # identifies job within batch 
 
-#test_ICAOs=(KWRB KMXF KJAN KESF KSJT KPHX KPOB KCAE KBNA KLRF KTIK KABQ KFAT 
-            #KDCA KBWI KDOV KWRI KLYH KEKN KFTK KCMH KIND KSPI KCOU KICT KHVE 
-            #KTPH KPVD KBDL KAOO KSYR KDSM KLBF KCPR KCON KMPV KMLT KMKG KVOK
-            #KHON KAXN KLWT KMUO KBNO KBIS KYKM KCEF KAFF)
+#test_ICAOs=(KABE KABQ KABR KATL KAUG KBDL KBHM KBIS KBNA KBWI KCAE KCEF KCMH
+            #KCOS KCRW KDLH KDSM KEUG KFAT KFYV KGTF KICT KIND KINW KJAN KJAX
+            #KLBF KLEX KLSE KMPV KMWL KOKC KPIH KPLN KPVD KRDU KROA KSEA KSGF
+            #KSHV KSLC KSPI KSYR KTPH)
 export JULIA_DEPOT_PATH="${HOME}/julia_depots/climate"
 source ~/julia_modules.sh
 echo "command line arguments"
@@ -21,5 +21,4 @@ echo "GPmodel" $GPmodel
 ICAO=$2
 echo ICAO $ICAO
 cd /n/home04/mrischard/TempModel/batch/
-julia pipeline2.jl $ICAO $GPmodel ${SLURM_ARRAY_TASK_ID} /n/home04/mrischard/TempModel/data /n/regal/pillai_lab/mrischard/saved 
-
+julia pipeline2.jl $ICAO $GPmodel ${SLURM_ARRAY_TASK_ID} /n/home04/mrischard/TempModel/data /n/regal/pillai_lab/mrischard/saved --seed=${SLURM_ARRAY_TASK_ID} --ksmoothmax=50.0 --epsilon=0.1 --crossval
