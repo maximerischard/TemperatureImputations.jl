@@ -1,13 +1,13 @@
 #!/bin/bash
 #SBATCH -J stan_pipeline2    # name for job array
 #SBATCH -p shared            # Partition
-#SBATCH -t 0-4:00:00         # Running time of 1 hour
-#SBATCH --mem 3000           # request 4GB memory
-#SBATCH -n 4                 # 4 cores
+#SBATCH -t 0-7:00:00         # Running time of 1 hour
+#SBATCH --mem 4000           # request 4GB memory
+#SBATCH -n 2                 # 4 cores
 #SBATCH -N 1                 # All cores on one machine
 #SBATCH --mail-type=ALL      # Type of email notification- BEGIN,END,FAIL,ALL
 #SBATCH --mail-user=mrischard@g.harvard.edu
-#SBATCH --array 1-119        # identifies job within batch 
+#SBATCH --array 1-90         # identifies job within batch 
 
 #test_ICAOs=(KABE KABQ KABR KATL KAUG KBDL KBHM KBIS KBNA KBWI KCAE KCEF KCMH
             #KCOS KCRW KDLH KDSM KEUG KFAT KFYV KGTF KICT KIND KINW KJAN KJAX

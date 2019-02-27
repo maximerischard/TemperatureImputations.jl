@@ -58,11 +58,7 @@ end
 
 # load kernel hyperparameters from JSON file
 json_fname = @sprintf("hyperparams_%s_%s.json", GPmodel, ICAO) 
-if crossval
-	json_filepath = joinpath(save_dir, "fitted_kernel", "crossval", GPmodel, json_fname)
-else
-	json_filepath = joinpath(save_dir, "fitted_kernel", "mll", GPmodel, json_fname)
-end
+json_filepath = json_filepath = joinpath(save_dir, "fitted_kernel", crossval ? "crossval" : "mll", GPmodel, json_fname)
 open(json_filepath, "r") do io
     global output_dictionary = JSON.parse(io)
 end

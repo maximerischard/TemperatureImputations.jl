@@ -6,7 +6,7 @@ doc = """
     This script constrains those posteriors to be within the measured Tn&Tx.
 
     Usage:
-        pipeline2.jl <ICAO> <model> <windownum> <data_dir> <save_dir> --ksmoothmax=<ksmoothmax> --epsilon=<epsilon> [--cheat]
+        pipeline2.jl <ICAO> <model> <windownum> <data_dir> <save_dir> --seed=<seed> --ksmoothmax=<ksmoothmax> --epsilon=<epsilon> [--cheat] [--crossval]
 """
 using DocOpt
 arguments = docopt(doc)

@@ -21,4 +21,4 @@ cd /n/home04/mrischard/TempModel/batch/
 echo "command line arguments"
 echo "GPmodel" $GPmodel
 echo "ICAO" $ICAO
-julia extract_posterior_means.jl $ICAO $GPmodel /n/home04/mrischard/TempModel/data /n/regal/pillai_lab/mrischard/saved --hr_measure=17
+julia extract_posterior_means.jl $ICAO $GPmodel /n/home04/mrischard/TempModel/data /n/regal/pillai_lab/mrischard/saved --hr_measure=17 --crossval

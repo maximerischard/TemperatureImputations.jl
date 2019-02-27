@@ -2,7 +2,7 @@ doc = """
     * Extract the posterior mean and covariance from the imputations.
 
     Usage:
-        extract_posterior_means.jl <ICAO> <model> <data_dir> <save_dir> [--hr_measure=<hr>] [--cheat]
+        extract_posterior_means.jl <ICAO> <model> <data_dir> <save_dir> [--hr_measure=<hr>] [--crossval] [--cheat]
 
     Options:
         -h --help     Show this screen.
@@ -15,6 +15,7 @@ import JSON
 using Dates
 using DataFrames
 using Statistics
+using Printf
 
 
 arguments = docopt(doc)
@@ -26,13 +27,18 @@ data_dir= joinpath(arguments["<data_dir>"])
 @show data_dir
 save_dir= joinpath(arguments["<save_dir>"])
 @show save_dir
+@assert isdir(save_dir)
 hr_measure_str = arguments["--hr_measure"]
+cheat = arguments["--cheat"]
+@show cheat
 if hr_measure_str === nothing
     hr_measure = Hour(17)
 else
     hr_measure = Hour(parse(Int, hr_measure_str))
 end
 @show hr_measure
+crossval = arguments["--crossval"]::Bool
+@show crossval
 
 module Batch
     using ..TempModel
@@ -58,10 +64,14 @@ USAF = test_station[1, :USAF]
 WBAN = test_station[1, :WBAN]
 
 all_posteriors = Dict{Symbol}[]
-for wnum in 1:119
-    print(".$(wnum)")
-    stan_fw = Batch.get_window(wnum)
-    chains, _ts = Batch.get_chains_and_ts(stan_fw, GPmodel, USAF, WBAN, ICAO, save_dir)
+stan_ICAO_dir = joinpath(save_dir, "stan_fit", crossval ? "crossval" : "mll", GPmodel, ICAO)
+stan_fw_dirs   = [joinpath(stan_ICAO_dir, dir) for 
+    dir in readdir(stan_ICAO_dir) if 
+    startswith(dir, string(USAF))]
+@assert length(stan_fw_dirs) > 0
+
+for stan_fw in stan_fw_dirs
+    chains, _ts = Batch.get_chains_and_ts(stan_fw)
     
     days, means_by_day = Batch.get_means_by_day(chains, _ts, hr_measure)
 
@@ -72,7 +82,11 @@ for wnum in 1:119
     push!(all_posteriors, Dict(:days=>days, :mean=>post_mean, :cov=>post_cov))
 end
 
-out_save_dir = joinpath(save_dir, "daily_mean", GPmodel)
+out_save_dir = joinpath(save_dir, "daily_mean", crossval ? "crossval" : "mll", GPmodel)
+
+if cheat
+	out_save_dir = joinpath(out_save_dir, "cheat")
+end
 mkpath(out_save_dir)
 filepath = joinpath(out_save_dir, "daily_means_$(ICAO).json")
 open(filepath, "w") do io

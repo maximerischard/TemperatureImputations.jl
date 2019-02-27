@@ -4,7 +4,7 @@ doc = """
     * Save the predictive mean and covariance.
 
     Usage:
-        batch_infermean.jl <model> <data_dir> <save_dir> [<ICAO>]
+        batch_infermean.jl <model> <data_dir> <save_dir> [<ICAO>] [--crossval]
 
     Options:
         -h --help     Show this screen.
@@ -39,6 +39,9 @@ data_dir= joinpath(arguments["<data_dir>"])
 @show data_dir
 save_dir= joinpath(arguments["<save_dir>"])
 @show save_dir
+@assert isdir(save_dir)
+crossval = arguments["--crossval"]::Bool
+@show crossval
 
 
 module Batch
@@ -112,15 +115,14 @@ for ICAO in ICAO_list
         Tx=maximum(df[:temp])))
     # add column to test data for TnTx (useful for plotting)
     test_trimmed=join(hourly_test, TnTx, on=:ts_day)
-    head(test_trimmed)
 
-    days, means_by_day, total_duration = true_mean_day(hourly_test, hr_measure)
+    days, true_means_by_day, total_duration = true_mean_day(hourly_test, hr_measure)
     @show ICAO
-    @show mean(means_by_day, Weights(total_duration))
+    @show mean(true_means_by_day, Weights(total_duration))
     ;
 
     GPmodel = "matern"
-    out_save_dir = joinpath(save_dir, "daily_mean", GPmodel)
+    out_save_dir = joinpath(save_dir, "daily_mean", crossval ? "crossval" : "mll", GPmodel)
     mkpath(out_save_dir)
     filepath = joinpath(out_save_dir, "daily_means_$(ICAO).json")
     try
@@ -133,15 +135,18 @@ for ICAO in ICAO_list
     end
         
     days_vec, day_means, day_cov, day_buffer, buffer_cov = Batch.daily_best(all_posteriors);
+    @show days[1:10]
+    @show days_vec[1:10]
+    @assert days[1:length(days_vec)] == days_vec
 
-    total_duration_overlap = total_duration[1:end-3]
+    total_duration_overlap = total_duration[1:length(day_means)]
     yearly_mean = sum(day_means .* total_duration_overlap) / sum(total_duration_overlap)
     @printf("yearly posterior mean: %6.3f\n", yearly_mean)
     yearly_var = (total_duration_overlap'*day_cov*total_duration_overlap) / sum(total_duration_overlap)^2
     yearly_std = √(yearly_var)
     @printf("yearly posterior std:  %6.3f\n", √yearly_var)
 
-    yearly_true_mean = mean(means_by_day[1:end-3], Weights(total_duration_overlap))
+    yearly_true_mean = mean(true_means_by_day[1:length(day_means)], Weights(total_duration_overlap))
     @show yearly_true_mean
 
     sigma = (yearly_mean - yearly_true_mean) / yearly_std
