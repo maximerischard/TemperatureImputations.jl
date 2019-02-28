@@ -9,7 +9,6 @@ struct PredictTemperatures <: LogDensityProblems.AbstractLogDensityProblem
     Tx::Vector{Float64}
     μ::Vector{Float64}
     chol::LowerTriangular{Float64,Array{Float64,2}}
-    cholmat::Matrix{Float64}
     Nimpt::Int
     day_impute::Vector{Int}
     k_smoothmax::Float64
@@ -50,37 +49,6 @@ function loglik(pt::PredictTemperatures, θ)
     Tsmoothmin = [smoothmin(temp_impt[daystart[i]:dayend[i]], k)
                   for i in 1:pt.N_TnTx]
     Tsmoothmax = [smoothmax(temp_impt[daystart[i]:dayend[i]], k)
-                          for i in 1:pt.N_TnTx]
-    Tn_loglik = -sum(i -> (Tsmoothmin[i] - pt.Tn[i])^2, 1:pt.N_TnTx)  / (2*pt.epsilon^2)
-    Tx_loglik = -sum(i -> (Tsmoothmax[i] - pt.Tx[i])^2 , 1:pt.N_TnTx) / (2*pt.epsilon^2)
-    return Tn_loglik + Tx_loglik # + constant
-end
-function loglik_mat(pt::PredictTemperatures, θ)
-    w_uncorr = θ
-    temp_impt = pt.μ + pt.cholmat*w_uncorr
-    
-    dayend = cumsum(pt.impt_times_p_day)
-    daystart = [1; dayend[1:end-1].-1]
-    k = pt.k_smoothmax
-    Tsmoothmin = [smoothmin(temp_impt[daystart[i]:dayend[i]], k)
-                  for i in 1:pt.N_TnTx]
-    Tsmoothmax = [smoothmax(temp_impt[daystart[i]:dayend[i]], k)
-                          for i in 1:pt.N_TnTx]
-    Tn_loglik = -sum(i -> (Tsmoothmin[i] - pt.Tn[i])^2, 1:pt.N_TnTx)  / (2*pt.epsilon^2)
-    Tx_loglik = -sum(i -> (Tsmoothmax[i] - pt.Tx[i])^2 , 1:pt.N_TnTx) / (2*pt.epsilon^2)
-    return Tn_loglik + Tx_loglik # + constant
-end
-function loglik_mat(pt::PredictTemperatures, θ::Vector)
-    w_uncorr = θ
-    temp_impt = pt.μ + pt.cholmat*w_uncorr
-    
-    dayend = cumsum(pt.impt_times_p_day)
-    @assert dayend[end] == length(θ)
-    daystart = [1; dayend[1:end-1].+1]
-    k = pt.k_smoothmax
-    Tsmoothmin = [smoothmin(@view(temp_impt[daystart[i]:dayend[i]]), k)
-                  for i in 1:pt.N_TnTx]
-    Tsmoothmax = [smoothmax(@view(temp_impt[daystart[i]:dayend[i]]), k)
                           for i in 1:pt.N_TnTx]
     Tn_loglik = -sum(i -> (Tsmoothmin[i] - pt.Tn[i])^2, 1:pt.N_TnTx)  / (2*pt.epsilon^2)
     Tx_loglik = -sum(i -> (Tsmoothmax[i] - pt.Tx[i])^2 , 1:pt.N_TnTx) / (2*pt.epsilon^2)
