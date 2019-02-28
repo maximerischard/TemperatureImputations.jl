@@ -121,7 +121,6 @@ for ICAO in ICAO_list
     @show mean(true_means_by_day, Weights(total_duration))
     ;
 
-    GPmodel = "matern"
     out_save_dir = joinpath(save_dir, "daily_mean", crossval ? "crossval" : "mll", GPmodel)
     mkpath(out_save_dir)
     filepath = joinpath(out_save_dir, "daily_means_$(ICAO).json")

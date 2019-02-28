@@ -52,6 +52,9 @@ elseif GPmodel=="simpler"
 elseif GPmodel=="matern"
     kdict = TempModel.kernel_sptemp_matern(;kmean=true)
     k_spatiotemporal = kdict[:spatiotemporal]
+elseif GPmodel=="maternlocal"
+    kdict = TempModel.kernel_sptemp_maternlocal(;kmean=true)
+    k_spatiotemporal = kdict[:spatiotemporal]
 else
     error(@sprintf("unknown model: %s", GPmodel))
 end

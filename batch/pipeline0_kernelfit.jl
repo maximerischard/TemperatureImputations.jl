@@ -49,6 +49,10 @@ elseif GPmodel=="matern"
     kdict = TempModel.kernel_sptemp_matern(;kmean=true)
     k_spatiotemporal = kdict[:spatiotemporal]
     logNoise = -1.0
+elseif GPmodel=="maternlocal"
+    kdict = TempModel.kernel_sptemp_maternlocal(;kmean=true)
+    k_spatiotemporal = kdict[:spatiotemporal]
+    logNoise = -1.0
 else
     error(@sprintf("unknown model: %s", GPmodel))
 end
