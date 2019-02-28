@@ -71,8 +71,8 @@ function predictions_fname(usaf::Int, wban::Int, icao::String, fw::FittingWindow
         Date(fw.start_date), Date(fw.end_date))
 end
 
-function get_nearby(fw::FittingWindow, GPmodel::AbstractString, usaf::Int, wban::Int, icao::String, saved_dir::String)
-    pred_dir = joinpath(saved_dir, "predictions_from_nearby", GPmodel, icao)
+function get_nearby(fw::FittingWindow, GPmodel::AbstractString, usaf::Int, wban::Int, icao::String, saved_dir::String; crossval::Bool)
+    pred_dir = joinpath(saved_dir, "predictions_from_nearby", crossval ? "crossval" : "mll", GPmodel, icao)
     pred_fname = predictions_fname(usaf, wban, icao, fw)
     pred_fpath = joinpath(pred_dir, pred_fname)
     nearby_pred = load(pred_fpath)["nearby_pred"]
@@ -205,10 +205,10 @@ function get_chains_and_ts(stan_fw_dir::String)
     ts = read_ts(stan_fw_dir)
     return chains, ts
 end
-function get_chains_and_ts(fw::FittingWindow, GPmodel::AbstractString, usaf::Int, wban::Int, icao::String, saved_dir::String)
-    stan_model_dir = joinpath(saved_dir,  "stan_fit", GPmodel)
+function get_chains_and_ts(fw::FittingWindow, GPmodel::AbstractString, usaf::Int, wban::Int, icao::String, saved_dir::String; crossval::Bool)
+    stan_model_dir = joinpath(saved_dir,  "stan_fit", crossval ? "crossval" : "mll", GPmodel)
     stan_fw_dir = joinpath(stan_model_dir, stan_dirname(usaf, wban, icao, fw))
-    return get_chains_and_ts(usaf, wban, icao, stan_fw_dir)
+    return get_chains_and_ts(stan_fw_dir)
 end
 
 str_hour(hr::Hour) = string(hr.value)

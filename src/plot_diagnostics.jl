@@ -84,6 +84,8 @@ function plot_predictive(
         imputations::Int=0,
         markersize=5,
         intvl_width = 0.8,
+        subtractmean::Bool,
+        cheat_mean::Bool
         )
 
     test_subset = subset(test_data, xlim[1], xlim[2])
@@ -92,35 +94,48 @@ function plot_predictive(
     Σ = nearby_pred.Σ
     nobsv = length(μ)
     
-    centering = Matrix(1.0I, nobsv, nobsv) .- (1.0/nobsv)
-    Σ_centered = centering * Σ.mat * centering
     distr = MultivariateNormal(μ, Σ)
     ts=nearby_pred.ts
+    centering = Matrix(1.0I, nobsv, nobsv) .- (1.0/nobsv)
+    Σ_centered = centering * Σ.mat * centering
     in_window = (xlim[1] .<= ts) .& (ts .<= xlim[2])
-    mean_μ = mean(μ[in_window])
+    temp_true = test_subset[:temp]
+    mean_true = mean(temp_true)
     for i in 1:imputations
         temp_sim = rand(distr)
+        y = temp_sim[in_window]
+        if subtractmean
+            y .-= mean(y)
+        elseif cheat_mean
+            y .+= mean_true - mean(y)
+        end
         mean_sim = mean(temp_sim[in_window])
         label = ""
         # if i==1
             # label = "example imputation"
         # end
-        plt.plot(local_time.(ts), 
-                 temp_sim.-mean_sim, 
+        plt.plot(local_time.(ts[in_window]), 
+                 y, 
                  color=colour_impt_nearby, linewidth=1,
                  label=label,
                  zorder=20)
     end
     if mean_impt
-        plt.plot(local_time.(ts[in_window]), μ[in_window].-mean_μ, color=colour_pred_nearby, linewidth=2, 
+        y = μ[in_window]
+        if subtractmean
+            y .-= mean(y)
+        elseif cheat_mean
+            y .+= mean_true - mean(y)
+        end
+        plt.plot(local_time.(ts[in_window]), y, color=colour_pred_nearby, linewidth=2, 
                  zorder=30,
                  label=L"$\mathrm{T}_\mathrm{miss} \mid \mathrm{T}_\mathrm{nearby}$")
 
         intvl_stds = -quantile(Normal(0,1), (1-intvl_width)/2)
 
         plt.fill_between(local_time.(ts[in_window]), 
-                         μ[in_window].-mean_μ.-intvl_stds.*sqrt.(diag(Σ_centered)[in_window]),
-                         μ[in_window].-mean_μ.+intvl_stds.*sqrt.(diag(Σ_centered)[in_window]),
+                         y.-intvl_stds.*sqrt.(diag(Σ_centered)[in_window]),
+                         y.+intvl_stds.*sqrt.(diag(Σ_centered)[in_window]),
                          zorder = 0,
                          edgecolor="none",
                          linewidth=0,
@@ -130,8 +145,11 @@ function plot_predictive(
     ts_true = test_subset[:ts]
     temp_true = test_subset[:temp]
     if truth
-        mean_true = mean(temp_true)
-        plt.plot(local_time.(ts_true), temp_true.-mean_true,
+        y = temp_true
+        if subtractmean
+            y .-= mean(y)
+        end
+        plt.plot(local_time.(ts_true), y,
                  zorder=15,
                  marker="o",
                  markersize=markersize,
