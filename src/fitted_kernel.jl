@@ -196,7 +196,42 @@ function kernel_sptemp_matern(;kmean::Bool)
         :spatiotemporal => k_spatiotemporal
         )
 end
+function kernel_sptemp_maternlocal(;kmean::Bool)
+    kt1 = Periodic(log(1.0),log(3.0),log(24.0))
+    kt2 = RQIso(log(0.5),0.0,0.0)  # half an hour
+    kt3 = RQIso(log(2.0),0.0,0.0)  # two hours
+    kt4 = RQIso(log(12.0),0.0,0.0) # twelve hours
 
+    ksp1 = Mat32Iso(log(5e4), log(1.0))
+    ksp2 = Mat32Iso(log(5e4), log(1.0))
+    ksp3 = Mat32Iso(log(5e4), log(1.0))
+    ksp4 = Mat32Iso(log(5e4), log(1.0))
+    
+    kn1 = Noise(0.0)
+    kn2 = Noise(0.0)
+    kn3 = Noise(0.0)
+    kn4 = Noise(0.0)
+    
+    k_means = Noise(log(40.0))
+    
+    kprod(ktime, kspace, knoise) = Masked(fix(ktime, :lσ), [1]) * 
+                  (Masked(kspace, [2,3]) + Masked(knoise, [2,3]))
+
+    k_spatiotemporal = kprod(fix(kt1, :lp), ksp1, kn1) +
+                       kprod(kt2, ksp2, kn2) +
+                       kprod(kt3, ksp3, kn3) +
+                       kprod(kt4, ksp4, kn4)
+    if kmean
+        k_spatiotemporal += fix(Masked(k_means, [2,3]))
+    end
+    return Dict(
+        :time1=>kt1, :time2=>kt2, :time3=>kt3, :time4=>kt4,
+        :space1=>ksp1, :space2=>ksp2, :space3=>ksp3, :space4=>ksp4,
+        :noise1=>kn1, :noise2=>kn2, :noise3=>kn3, :noise4=>kn4,
+        :mean=>k_means,
+        :spatiotemporal => k_spatiotemporal
+        )
+end
 function fitted_sptemp_matern(;kmean::Bool)
     kdict = kernel_sptemp_matern(kmean=kmean)
     k_spatiotemporal = kdict[:spatiotemporal]
