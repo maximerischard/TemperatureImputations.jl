@@ -87,15 +87,14 @@ if !crossval
         "GPmodel" => GPmodel
        )
 else
-    @time opt_out = TempModel.optim_kernel(k_spatiotemporal, logNoise, isd_nearest, hourly_data, :Optim; window=Day(8), x_tol=1e-5, f_tol=1e-5);
-    hyp = opt_out[:hyp]
-    @show hyp
-    @show opt_out[:mll]
-    @time opt_out_CV = TempModel.optim_kernel_CV(k_spatiotemporal, hyp[1], 
+    @time opt_out_CV = TempModel.optim_kernel_CV(k_spatiotemporal, -2.0, 
                                            isd_nearest, hourly_data,
                                            :Optim;
                                            window=Day(8), # shorter window is faster
                                            x_tol=1e-4, f_tol=1e-6,
+                                           time_limit=20.0*3600,
+                                           show_trace=true,
+                                           show_every=5,
                                            )
     hypCV = opt_out_CV[:hyp]
     @show opt_out_CV[:opt_out]
@@ -132,57 +131,3 @@ open(filepath, "w") do io
     indent = 4
     JSON.print(io, output_dictionary, indent)
 end
-
-# the code below is just to nicely print the results
-# all the required output information is already
-# saved in the json file above
-
-ksum, k_st = k_spatiotemporal.kleft, k_spatiotemporal.kright
-ksum, k_st = ksum.kleft, ksum.kright
-k4, ksp4 = k_st.kleft, k_st.kright
-k4 = k4.kernel
-ksp4 = ksp4.kernel.kernel
-
-ksum, k_st = ksum.kleft, ksum.kright
-k3, ksp3 = k_st.kleft, k_st.kright
-k3 = k3.kernel
-ksp3 = ksp3.kernel.kernel
-
-ksum, k_st = ksum.kleft, ksum.kright
-k2, ksp2 = k_st.kleft, k_st.kright
-k2 = k2.kernel
-ksp2 = ksp2.kernel.kernel
-
-k_st = ksum
-k1, ksp1 = k_st.kleft, k_st.kright
-k1 = k1.kernel.kernel
-ksp1 = ksp1.kernel.kernel
-
-print("k₁: Periodic \n=================\n")
-@printf("σ: %5.3f\n", √k1.σ2)
-@printf("l: %5.3f\n", √k1.ℓ2)
-@printf("p: %5.0f hours\n", k1.p)
-print("> spatial decay:\n")
-@printf("l: %5.3f km\n", ksp1.ℓ / 1000)
-print("\nk₂: RQIso \n=================\n")
-@printf("σ: %5.3f\n", √k2.σ2)
-@printf("l: %5.3f hours\n", √ k2.ℓ2)
-@printf("α: %5.3f\n", k2.α)
-print("> spatial decay:\n")
-# @printf("σ: %5.3f\n", √ksp2.σ2)
-@printf("l: %5.3f km\n", ksp2.ℓ / 1000)
-print("\nk₃: SEIso \n=================\n")
-@printf("σ: %5.3f\n", √k3.σ2)
-@printf("l: %5.3f hours\n", √k3.ℓ2)
-print("> spatial decay:\n")
-# @printf("σ: %5.3f\n", √ksp3.σ2)
-@printf("l: %5.3f km\n", ksp3.ℓ / 1000)
-print("\nk₄: RQIso \n=================\n")
-@printf("σ: %5.3f\n", √k4.σ2)
-@printf("l: %5.3f days\n", √k4.ℓ2 / 24)
-@printf("α: %5.3f\n",  k4.α)
-print("> spatial decay:\n")
-# @printf("σ: %5.3f\n", √ksp4.σ2)
-@printf("l: %5.3f km\n", ksp4.ℓ / 1000)
-print("\n=================\n")
-@printf("σy: %5.3f\n", exp(opt_out[:hyp][1]))
