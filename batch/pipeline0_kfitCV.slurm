@@ -19,12 +19,14 @@ test_ICAOs=(KABE KABQ KABR KATL KAUG KBDL KBHM KBIS KBNA KBWI KCAE KCEF KCMH
 ICAO=${test_ICAOs[$SLURM_ARRAY_TASK_ID-1]}
 cd /n/home04/mrischard/TempModel/batch/
 echo "command line arguments"
-echo "GPmodel" $1
+GPmodel=$1
+echo "GPmodel" $GPmodel
 echo "ICAO" $ICAO
 julia pipeline0_kernelfit.jl \
 	$ICAO \
-	$1 \
+	$GPmodel \
 	/n/home04/mrischard/TempModel/data \
 	/n/regal/pillai_lab/mrischard/saved \
+	--timelimit=79200 \
 	--knearest=5 \
 	--crossval

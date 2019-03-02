@@ -26,4 +26,5 @@ julia pipeline0_kernelfit.jl \
 	$1 \
 	/n/home04/mrischard/TempModel/data \
 	/n/regal/pillai_lab/mrischard/saved \
+	--timelimit=79200 \
 	--knearest=5

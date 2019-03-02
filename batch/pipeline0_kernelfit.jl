@@ -2,7 +2,7 @@ doc = """
     * Fit the hyperparameters of the spatiotemporal GP model to nearby hourly data.
 
     Usage:
-        pipeline0_kernelfit.jl <ICAO> <model> <data_dir> <save_dir> [--knearest=<kn>] [--crossval]
+        pipeline0_kernelfit.jl <ICAO> <model> <data_dir> <save_dir> --timelimit=<timelimit> [--knearest=<kn>] [--crossval]
 
     Options:
         -h --help        Show this screen.
@@ -30,6 +30,8 @@ k_nearest = parse(Int, arguments["--knearest"])
 @show k_nearest
 crossval = arguments["--crossval"]::Bool
 @show crossval
+timelimit = parse(Float64, arguments["--timelimit"])
+@show timelimit
 
 global k_spatiotemporal
 global logNoise
@@ -72,10 +74,15 @@ isd_nearest = isd_nearest_and_test[2:end,:]
 hourly_data = TempModel.read_Stations(isd_nearest; data_dir=data_dir)
 
 if !crossval
-    @time opt_out = TempModel.optim_kernel(k_spatiotemporal, logNoise, isd_nearest, hourly_data, :Optim; window=Day(10));
+    @time opt_out = TempModel.optim_kernel(k_spatiotemporal, logNoise, isd_nearest, hourly_data, :Optim; 
+                                           x_tol=1e-4, f_tol=1e-8,
+                                           time_limit=timelimit,
+                                           show_trace=true,
+                                           show_every=5,
+                                           window=Day(10));
     hyp = opt_out[:hyp]
     output_dictionary = Dict{String,Any}(
-        "mll" => opt_out[:mll],
+        "mll" => -opt_out[:minimum],
         "hyp" => opt_out[:hyp],
         "logNoise" => opt_out[:logNoise],
         "test_ICAO" => ICAO,
@@ -92,19 +99,19 @@ else
                                            :Optim;
                                            window=Day(8), # shorter window is faster
                                            x_tol=1e-4, f_tol=1e-6,
-                                           time_limit=20.0*3600,
+                                           time_limit=timelimit,
                                            show_trace=true,
                                            show_every=5,
                                            )
     hypCV = opt_out_CV[:hyp]
     @show opt_out_CV[:opt_out]
     @show hypCV
-    reals, folds = TempModel.make_chunks_and_folds(k_spatiotemporal, hypCV[1], isd_nearest, 
-            hourly_data; window=Day(10));
-    mll = reals.mll
+    # reals, folds = TempModel.make_chunks_and_folds(k_spatiotemporal, hypCV[1], isd_nearest, 
+            # hourly_data; window=Day(10));
+    # update_mll!(reals)
+    # mll = reals.mll
     output_dictionary = Dict{String,Any}(
-        "mll" => mll,
-        "CV" => opt_out_CV[:mll],
+        "CV" => -opt_out_CV[:minimum],
         "hyp" => opt_out_CV[:hyp],
         "logNoise" => opt_out_CV[:logNoise],
         "test_ICAO" => ICAO,
