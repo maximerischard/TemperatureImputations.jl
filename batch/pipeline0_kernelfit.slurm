@@ -21,4 +21,9 @@ cd /n/home04/mrischard/TempModel/batch/
 echo "command line arguments"
 echo "GPmodel" $1
 echo "ICAO" $ICAO
-julia pipeline0_kernelfit.jl $ICAO $1 /n/home04/mrischard/TempModel/data /n/regal/pillai_lab/mrischard/saved --knearest=5
+julia pipeline0_kernelfit.jl \
+	$ICAO \
+	$1 \
+	/n/home04/mrischard/TempModel/data \
+	/n/regal/pillai_lab/mrischard/saved \
+	--knearest=5
