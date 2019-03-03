@@ -51,14 +51,14 @@ function optim_kernel(k_spatiotemporal::Kernel, logNoise_init::Float64,
     if method == :NLopt
         min_neg_ll, min_hyp, ret, count = TempModel.optimize_NLopt(reals, domean=false, kern=true, noise=true, x_tol=x_tol, f_tol=f_tol)
         opt_out = (min_neg_ll, min_hyp, ret, count)
-        @assert ret ∈ (:SUCCESS, :FTOL_REACHED, :XTOL_REACHED)
+        converged = ret ∈ (:SUCCESS, :FTOL_REACHED, :XTOL_REACHED)
     elseif method == :Optim
         opt_out = TempModel.optimize!(reals; domean=false, kern=true, noise=true,
                                       options=Optim.Options(x_tol=x_tol, f_tol=f_tol)
                                      )
         min_hyp = Optim.minimizer(opt_out)
         min_neg_ll = Optim.minimum(opt_out)
-        @assert Optim.converged(opt_out)
+        converged = Optim.converged(opt_out)
     else
         throw(MethodError())
     end
@@ -66,8 +66,9 @@ function optim_kernel(k_spatiotemporal::Kernel, logNoise_init::Float64,
     return Dict(
         :hyp => min_hyp,
         :logNoise => reals.logNoise,
-        :mll => -min_neg_ll,
+        :minimum => -min_neg_ll,
         :opt_out => opt_out,
+        :converged => converged,
        )
 end
 
@@ -75,7 +76,7 @@ function optim_kernel_CV(k_spatiotemporal::Kernel, logNoise_init::Float64,
                       stations_data::DataFrame, hourly_data::DataFrame, 
                       method::Symbol=:NLopt; 
                       window::Day,
-                      x_tol=1e-5, f_tol=1e-10)
+                      x_tol=1e-5, f_tol=1e-10, kwargs...)
     reals, folds_reals = make_chunks_and_folds(k_spatiotemporal, logNoise_init, 
             stations_data, hourly_data; window=window)
     local min_neg_ll
@@ -88,22 +89,23 @@ function optim_kernel_CV(k_spatiotemporal::Kernel, logNoise_init::Float64,
                 domean=false, kern=true, noise=true,
                 x_tol=x_tol, f_tol=f_tol)
         opt_out = (min_neg_ll, min_hyp, ret, count)
-        @assert ret ∈ (:SUCCESS, :FTOL_REACHED, :XTOL_REACHED)
+        converged = ret ∈ (:SUCCESS, :FTOL_REACHED, :XTOL_REACHED)
     elseif method == :Optim
         opt_out = TempModel.optimize_CV!(reals, folds_reals;
                 domean=false, kern=true, noise=true,
-                options=Optim.Options(x_tol=x_tol, f_tol=f_tol)
+                options=Optim.Options(;x_tol=x_tol, f_tol=f_tol, kwargs...)
                                      )
         min_hyp = Optim.minimizer(opt_out)
         min_neg_ll = Optim.minimum(opt_out)
-        @assert Optim.converged(opt_out)
+        converged = Optim.converged(opt_out)
     else
         throw(MethodError())
     end
     return Dict(
         :hyp => min_hyp,
         :logNoise => reals.logNoise,
-        :mll => -min_neg_ll,
+        :minimum => -min_neg_ll,
         :opt_out => opt_out,
+        :converged => converged,
        )
 end

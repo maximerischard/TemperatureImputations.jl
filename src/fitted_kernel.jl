@@ -1,5 +1,8 @@
 using GaussianProcesses: Periodic, RQIso, SEIso, set_params!, Masked, fix
 
+const SPACEDIM = [2,3]
+const TIMEDIM  = [1]
+
 function fitted_temporal()
     # Temporal
     k1 = fix(Periodic(0.0,0.0,log(24.0)), :lp)
@@ -37,15 +40,15 @@ function fitted_sptemp_fixedvar(;kmean::Bool)
     ksp5 = SEIso(log(2*10^5), log(1.0))
     ksp6 = SEIso(log(2*10^5), log(1.0))
 
-    k_spatiotemporal = fix(Masked(k1, [1])) * fix(Masked(ksp1, [2,3]), :lσ) +
-                         fix(Masked(k2, [1])) * fix(Masked(ksp2, [2,3]), :lσ) +
-                         fix(Masked(k3, [1])) * fix(Masked(ksp3, [2,3]), :lσ) +
-                         fix(Masked(k4, [1])) * fix(Masked(ksp4, [2,3]), :lσ) +
-                         fix(Masked(k5, [1])) * fix(Masked(ksp5, [2,3]), :lσ) +
-                         fix(Masked(k6, [1])) * fix(Masked(ksp6, [2,3]), :lσ)
+    k_spatiotemporal = fix(Masked(k1, TIMEDIM)) * fix(Masked(ksp1, SPACEDIM), :lσ) +
+                         fix(Masked(k2, TIMEDIM)) * fix(Masked(ksp2, SPACEDIM), :lσ) +
+                         fix(Masked(k3, TIMEDIM)) * fix(Masked(ksp3, SPACEDIM), :lσ) +
+                         fix(Masked(k4, TIMEDIM)) * fix(Masked(ksp4, SPACEDIM), :lσ) +
+                         fix(Masked(k5, TIMEDIM)) * fix(Masked(ksp5, SPACEDIM), :lσ) +
+                         fix(Masked(k6, TIMEDIM)) * fix(Masked(ksp6, SPACEDIM), :lσ)
     if kmean
         k_means = SEIso(log(1.0), log(10.0))
-        k_spatiotemporal = k_spatiotemporal + fix(Masked(k_means, [2,3]))
+        k_spatiotemporal = k_spatiotemporal + fix(Masked(k_means, SPACEDIM))
     end
     # parameters fitted in JuliaGP_spatial4.ipynb (I think)
     hyp = [-1.60354,15.4259,9.86874,9.12749,16.4496,15.0163,12.2061]
@@ -63,15 +66,15 @@ function fitted_sptemp_freevar(;kmean::Bool)
     ksp4 = SEIso(log(2*10^5), log(1.0))
     ksp5 = SEIso(log(2*10^5), log(1.0))
     ksp6 = SEIso(log(2*10^5), log(1.0))
-    k_spatiotemporal = fix(Masked(k1, [1])) * Masked(ksp1, [2,3]) +
-                          fix(Masked(k2, [1])) * Masked(ksp2, [2,3]) +
-                          fix(Masked(k3, [1])) * Masked(ksp3, [2,3]) +
-                          fix(Masked(k4, [1])) * Masked(ksp4, [2,3]) +
-                          fix(Masked(k5, [1])) * Masked(ksp5, [2,3]) +
-                          fix(Masked(k6, [1])) * Masked(ksp6, [2,3])
+    k_spatiotemporal = fix(Masked(k1, TIMEDIM)) * Masked(ksp1, SPACEDIM) +
+                          fix(Masked(k2, TIMEDIM)) * Masked(ksp2, SPACEDIM) +
+                          fix(Masked(k3, TIMEDIM)) * Masked(ksp3, SPACEDIM) +
+                          fix(Masked(k4, TIMEDIM)) * Masked(ksp4, SPACEDIM) +
+                          fix(Masked(k5, TIMEDIM)) * Masked(ksp5, SPACEDIM) +
+                          fix(Masked(k6, TIMEDIM)) * Masked(ksp6, SPACEDIM)
     if kmean
         k_means = SEIso(log(1.0), log(10.0))
-        k_spatiotemporal = k_spatiotemporal + fix(Masked(k_means, [2,3]))
+        k_spatiotemporal = k_spatiotemporal + fix(Masked(k_means, SPACEDIM))
     end
     hyp = [-1.65029,14.2398,0.111707,11.5002,-0.0791469,8.76624,0.126258,14.4041,0.147028,13.0326,-0.635492,12.2061,-8.08864e-7]
     set_params!(k_spatiotemporal, hyp[2:end])
@@ -94,15 +97,15 @@ function fitted_sptemp_sumprod(;kmean::Bool)
     ksp5 = SEIso(log(2*10^5), log(1.0))
     ksp6 = SEIso(log(2*10^5), log(1.0))
 
-    k_spatiotemporal = Masked(k1, [1]) * Masked(ksp1, [2,3]) +
-                     Masked(k2, [1]) * Masked(ksp2, [2,3]) +
-                     Masked(k3, [1]) * Masked(ksp3, [2,3]) +
-                     Masked(k4, [1]) * Masked(ksp4, [2,3]) +
-                     Masked(k5, [1]) * Masked(ksp5, [2,3]) +
-                     Masked(k6, [1]) * Masked(ksp6, [2,3])
+    k_spatiotemporal = Masked(k1, TIMEDIM) * Masked(ksp1, SPACEDIM) +
+                     Masked(k2, TIMEDIM) * Masked(ksp2, SPACEDIM) +
+                     Masked(k3, TIMEDIM) * Masked(ksp3, SPACEDIM) +
+                     Masked(k4, TIMEDIM) * Masked(ksp4, SPACEDIM) +
+                     Masked(k5, TIMEDIM) * Masked(ksp5, SPACEDIM) +
+                     Masked(k6, TIMEDIM) * Masked(ksp6, SPACEDIM)
     if kmean
         k_means = SEIso(log(1.0), log(10.0))
-        k_spatiotemporal = k_spatiotemporal + fix(Masked(k_means, [2,3]))
+        k_spatiotemporal = k_spatiotemporal + fix(Masked(k_means, SPACEDIM))
     end
     hyp = [-1.68206,-0.179317,0.945821,13.5116,0.0501475,0.866468,0.758593,-0.984024,11.0867,-0.38583,-1.44126,-1.13345,9.20607,0.0421904,2.12626,1.24119,-0.15271,15.081,0.129167,3.68457,0.701431,3.00982,14.0459,-1.5127,7.70676,-5.30466,12.2061,-6.18869e-6]
     set_params!(k_spatiotemporal, hyp[2:end])
@@ -113,10 +116,10 @@ end
 function fitted_sptemp_SExSE(;kmean::Bool)
     k_time = SEIso(0.0,0.0)
     k_spatial = fix(SEIso(log(2*10^5), log(1.0)), :lσ)
-    k_spatiotemporal = Masked(k_time, [1]) * Masked(k_spatial, [2,3])
+    k_spatiotemporal = Masked(k_time, TIMEDIM) * Masked(k_spatial, SPACEDIM)
     if kmean
         k_means = SEIso(log(1.0), log(10.0))
-        k_spatiotemporal = k_spatiotemporal + fix(Masked(k_means, [2,3]))
+        k_spatiotemporal = k_spatiotemporal + fix(Masked(k_means, SPACEDIM))
     end
     hyp = [-0.822261,0.996834,1.3172,12.0805]
     set_params!(k_spatiotemporal, hyp[2:end])
@@ -129,11 +132,11 @@ function fitted_sptemp_diurnal(;kmean::Bool)
     k_spatial = fix(SEIso(log(2*10^5), log(1.0)), :lσ)
     k_periodic = fix(Periodic(log(1.0), -1.0, log(24.0)), :lp)
     k_diurndecay = fix(SEIso(log(10^5), 0.0), :lσ)
-    k_spatiotemporal = Masked(k_time, [1]) * Masked(k_spatial, [2,3]) + 
-        Masked(k_periodic, [1]) * Masked(k_diurndecay, [2,3])
+    k_spatiotemporal = Masked(k_time, TIMEDIM) * Masked(k_spatial, SPACEDIM) + 
+        Masked(k_periodic, TIMEDIM) * Masked(k_diurndecay, SPACEDIM)
     if kmean
         k_means = SEIso(log(1.0), log(10.0))
-        k_spatiotemporal = k_spatiotemporal + fix(Masked(k_means, [2,3]))
+        k_spatiotemporal = k_spatiotemporal + fix(Masked(k_means, SPACEDIM))
     end
     hyp = [-0.82337,1.02776,1.14186,11.9454,-0.383965,0.858384,14.1618]
     set_params!(k_spatiotemporal, hyp[2:end])
@@ -152,13 +155,13 @@ function fitted_sptemp_simpler(;kmean::Bool)
     ksp3 = SEIso(log(2*10^5), log(1.0))
     ksp4 = SEIso(log(2*10^5), log(1.0))
 
-    k_spatiotemporal = Masked(k1, [1])  * Masked(ksp1, [2,3]) +
-                       Masked(k2, [1])  * Masked(ksp2, [2,3]) +
-                       Masked(k3b, [1]) * Masked(ksp3, [2,3]) +
-                       Masked(k4, [1])  * Masked(ksp4, [2,3])
+    k_spatiotemporal = Masked(k1, TIMEDIM)  * Masked(ksp1, SPACEDIM) +
+                       Masked(k2, TIMEDIM)  * Masked(ksp2, SPACEDIM) +
+                       Masked(k3b, TIMEDIM) * Masked(ksp3, SPACEDIM) +
+                       Masked(k4, TIMEDIM)  * Masked(ksp4, SPACEDIM)
     if kmean
         k_means = SEIso(log(1.0), log(10.0))
-        k_spatiotemporal = k_spatiotemporal + fix(Masked(k_means, [2,3]))
+        k_spatiotemporal = k_spatiotemporal + fix(Masked(k_means, SPACEDIM))
     end
     hyp = [-1.72527,-0.210656,0.950124,13.574,0.0544504,0.653978,0.538881,0.125985,10.9932,-0.605542,-1.2208,-0.946048,-1.0721,9.20607,0.229593,2.18355,1.29463,-1.14171,12.8224,0.182608]
     set_params!(k_spatiotemporal, hyp[2:end])
@@ -179,15 +182,15 @@ function kernel_sptemp_matern(;kmean::Bool)
     
     k_means = SEIso(log(1), log(40.0))
     
-    kprod(ktime, kspace) = Masked(ktime, [1]) * 
-                           Masked(fix(kspace, :lσ), [2,3])
+    kprod(ktime, kspace) = Masked(ktime, TIMEDIM) * 
+                           Masked(fix(kspace, :lσ), SPACEDIM)
 
     k_spatiotemporal = kprod(fix(kt1, :lp), ksp1) +
                        kprod(kt2, ksp2) +
                        kprod(kt3, ksp3) +
                        kprod(kt4, ksp4)
     if kmean
-        k_spatiotemporal += fix(Masked(k_means, [2,3]))
+        k_spatiotemporal += fix(Masked(k_means, SPACEDIM))
     end
     return Dict(
         :time1=>kt1, :time2=>kt2, :time3=>kt3, :time4=>kt4,
@@ -198,31 +201,32 @@ function kernel_sptemp_matern(;kmean::Bool)
 end
 function kernel_sptemp_maternlocal(;kmean::Bool)
     kt1 = Periodic(log(1.0),log(3.0),log(24.0))
-    kt2 = RQIso(log(0.5),0.0,0.0)  # half an hour
-    kt3 = RQIso(log(2.0),0.0,0.0)  # two hours
-    kt4 = RQIso(log(12.0),0.0,0.0) # twelve hours
+    # start with a fairly high α
+    kt2 = RQIso(log(0.5),  log(1.0), log(5.0))  # half an hour
+    kt3 = RQIso(log(2.0),  log(1.0), log(5.0))  # two hours
+    kt4 = RQIso(log(12.0), log(1.0), log(5.0)) # twelve hours
 
     ksp1 = Mat32Iso(log(5e4), log(1.0))
     ksp2 = Mat32Iso(log(5e4), log(1.0))
     ksp3 = Mat32Iso(log(5e4), log(1.0))
     ksp4 = Mat32Iso(log(5e4), log(1.0))
-    
-    kn1 = Noise(0.0)
-    kn2 = Noise(0.0)
-    kn3 = Noise(0.0)
-    kn4 = Noise(0.0)
+
+    kn1 = Noise(log(1.0))
+    kn2 = Noise(log(1.0))
+    kn3 = Noise(log(1.0))
+    kn4 = Noise(log(1.0))
     
     k_means = Noise(log(40.0))
     
-    kprod(ktime, kspace, knoise) = Masked(fix(ktime, :lσ), [1]) * 
-                  (Masked(kspace, [2,3]) + Masked(knoise, [2,3]))
+    kprod(ktime, kspace, knoise) = Masked(fix(ktime, :lσ), TIMEDIM) * 
+                  (Masked(kspace, SPACEDIM) + Masked(knoise, SPACEDIM))
 
     k_spatiotemporal = kprod(fix(kt1, :lp), ksp1, kn1) +
                        kprod(kt2, ksp2, kn2) +
                        kprod(kt3, ksp3, kn3) +
                        kprod(kt4, ksp4, kn4)
     if kmean
-        k_spatiotemporal += fix(Masked(k_means, [2,3]))
+        k_spatiotemporal += fix(Masked(k_means, SPACEDIM))
     end
     return Dict(
         :time1=>kt1, :time2=>kt2, :time3=>kt3, :time4=>kt4,
