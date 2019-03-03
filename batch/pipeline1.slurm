@@ -10,8 +10,10 @@
 
 export JULIA_DEPOT_PATH="${HOME}/julia_depots/climate"
 source ~/julia_modules.sh
-cd /n/regal/pillai_lab/mrischard/TempModel/batch/
+cd /n/home04/mrischard/TempModel/batch/
 echo "command line arguments"
 echo "GPmodel" $1
-julia pipeline1.jl $1 /n/regal/pillai_lab/mrischard/TempModel /n/regal/pillai_lab/mrischard/saved
-
+julia pipeline1.jl \
+    $1 \
+    /n/home04/mrischard/TempModel/data \
+    /n/scratchlfs/pillai_lab/mrischard/saved

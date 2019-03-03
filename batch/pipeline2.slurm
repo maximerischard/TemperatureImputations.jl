@@ -28,7 +28,7 @@ julia pipeline2.jl \
     $GPmodel \
     ${SLURM_ARRAY_TASK_ID} \
     /n/home04/mrischard/TempModel/data \
-    /n/regal/pillai_lab/mrischard/saved \
+    /n/scratchlfs/pillai_lab/mrischard/saved \
     --seed=${SLURM_ARRAY_TASK_ID} \
     --ksmoothmax=$ksmoothmax \
     --epsilon=$epsilon \
