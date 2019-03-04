@@ -121,6 +121,7 @@ for ICAO in ICAO_list
     @show mean(true_means_by_day, Weights(total_duration))
     ;
 
+
     out_save_dir = joinpath(save_dir, "daily_mean", crossval ? "crossval" : "mll", GPmodel)
     mkpath(out_save_dir)
     filepath = joinpath(out_save_dir, "daily_means_$(ICAO).json")
@@ -134,18 +135,21 @@ for ICAO in ICAO_list
     end
         
     days_vec, day_means, day_cov, day_buffer, buffer_cov = Batch.daily_best(all_posteriors);
-    @show days[1:10]
-    @show days_vec[1:10]
-    @assert days[1:length(days_vec)] == days_vec
+    withimputations = 1:length(days_vec)
+    @assert days[withimputations] == days_vec
 
-    total_duration_overlap = total_duration[1:length(day_means)]
+    meanTnTx = (sum((TnTx[:Tn] .* total_duration)[withimputations]) +
+               sum((TnTx[:Tx] .* total_duration)[withimputations])) / (2*sum(total_duration[withimputations]))
+    @show meanTnTx
+
+    total_duration_overlap = total_duration[withimputations]
     yearly_mean = sum(day_means .* total_duration_overlap) / sum(total_duration_overlap)
     @printf("yearly posterior mean: %6.3f\n", yearly_mean)
     yearly_var = (total_duration_overlap'*day_cov*total_duration_overlap) / sum(total_duration_overlap)^2
     yearly_std = √(yearly_var)
     @printf("yearly posterior std:  %6.3f\n", √yearly_var)
 
-    yearly_true_mean = mean(true_means_by_day[1:length(day_means)], Weights(total_duration_overlap))
+    yearly_true_mean = mean(true_means_by_day[withimputations], Weights(total_duration_overlap))
     @show yearly_true_mean
 
     sigma = (yearly_mean - yearly_true_mean) / yearly_std
