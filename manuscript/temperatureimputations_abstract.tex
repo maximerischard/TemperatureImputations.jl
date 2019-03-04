@@ -1,0 +1,9 @@
+It is long known that climatological summary statistics based on daily temperature minima and maxima will not be accurate, if the bias due to the time at which the observations were collected is not accounted for.
+In this paper, we detail the problem and develop a novel approach to address it.
+Our idea is to impute the hourly temperatures at the location of the measurements by borrowing information from the nearby stations that record hourly temperatures, which then can be used to create accurate summaries of temperature extremes.
+The key difficulty is that these imputed temperature curves must agree with the observed daily extrema.
+We develop a spatiotemporal Gaussian process model to pool information from the nearby stations, and then develop a novel and easy to implement Markov Chain Monte Carlo technique to sample the imputations conditionally on the observed daily extrema. 
+We validate our imputation model using hourly temperature data from four meteorological stations in Iowa,
+of which one is hidden and its data replaced with daily extrema,
+and show that the imputed temperatures recover the hidden temperatures well.
+We also demonstrate that our model can exploit information contained in the data to infer the time of daily measurements. 

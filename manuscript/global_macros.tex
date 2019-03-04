@@ -1,0 +1,83 @@
+% Macros %
+\newcommand{\mathbold}[1]{\bm{#1}} % if not using mathpazo
+\DeclarePairedDelimiter{\parenthesis}{\lparen}{\rparen}
+\DeclarePairedDelimiter{\squarebracket}{\lbrack}{\rbrack}
+\DeclarePairedDelimiter{\curlybracket}{\lbrace}{\rbrace}
+\DeclarePairedDelimiter{\absolutevalue}{\lvert}{\rvert}
+\DeclarePairedDelimiter{\doublebar}{\lVert}{\rVert}
+\newcommand{\del}[1]{\parenthesis*{#1}}
+\newcommand{\sbr}[1]{\squarebracket*{#1}}
+\newcommand{\cbr}[1]{\curlybracket*{#1}}
+\newcommand{\abs}[1]{\absolutevalue*{#1}}
+\newcommand{\norm}[1]{\doublebar*{#1}}
+\newcommand*{\diffdchar}{d}
+\newcommand*{\dif}[1]{\mathop{\diffdchar #1}}
+\newcommand*{\pdif}[1]{\mathop{\partial #1}}
+
+\DeclareMathOperator*{\argmin}{arg\,min}
+\DeclareMathOperator*{\argmax}{arg\,max}
+\newcommand{\reals}{\mathbb{R}}
+\DeclareMathOperator*{\sgn}{sgn}
+
+%%%%%%%%%%%%%%%%%%%%%%%%
+% Probability          %
+%%%%%%%%%%%%%%%%%%%%%%%%
+\let\Pr\relax
+\DeclareMathOperator{\Pr}{\mathbb{P}}
+\DeclareMathOperator{\E}{\mathbb{E}}
+\DeclareMathOperator{\V}{\mathbb{V}}
+\DeclareMathOperator{\cov}{{cov}}
+\DeclareMathOperator{\var}{{var}}
+\DeclareMathOperator{\mse}{{MSE}}
+\DeclareMathOperator{\Ind}{\mathbb{I}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Probability Distributions %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\DeclareMathOperator{\normal}{\mathcal{N}}
+\DeclareMathOperator{\unif}{Uniform}
+\DeclareMathOperator{\invchi}{\mathrm{Inv-\chi}^2}
+\DeclareMathOperator{\expo}{Exp}
+\DeclareMathOperator{\poisson}{Poisson}
+\DeclareMathOperator{\invgamma}{\mathcal{IG}}
+
+%%%%%%%%%%%%%%%%%%%%%%
+% Gaussian processes %
+%%%%%%%%%%%%%%%%%%%%%%
+\DeclareMathOperator{\GP}{\mathcal{GP}}
+\newcommand{\sigmaf}{\sigma_{\mathrm{GP}}}
+\newcommand{\sigman}{\sigma_{\epsilon}}
+
+%%%%%%%%%%%%%%%%%%%%
+% Bold vectors     %
+%%%%%%%%%%%%%%%%%%%%
+\newcommand{\xvec}{\mathbold{x}}
+\newcommand{\svec}{\mathbold{s}}
+\newcommand{\hvec}{\mathbold{h}}
+%
+
+% % \newunicodechar{°}{\textdegree}
+\DeclareMathOperator{\prob}{\mathit{p}}
+
+
+\newcommand*{\indep}{\protect\mathpalette{\protect\independenT}{\perp}}
+\def\independenT#1#2{\mathrel{\rlap{$#1#2$}\mkern2mu{#1#2}}}
+\makeatletter
+\newcommand*{\iid}{%
+    \@ifnextchar{.}%
+        {i.\,i.\,d}%
+        {i.\,i.\,d.\@}%
+}
+\makeatother
+\newcommand{\mathiid}{\text{\iid}}
+\newcommand{\simiid}{\overset{\mathiid}{\sim}}
+
+%%%%%%%%%%%%%%%%%%
+% Linear Algebra %
+%%%%%%%%%%%%%%%%%%
+\DeclareMathOperator{\ones}{\mathbf{1}}
+\newcommand*{\eye}{\mathbf{I}}
+\newcommand{\trans}{^{\intercal}}
+% % \newcommand*{\trans}{^{\top}}
+% % \newcommand*{\trans}{^{\prime}}
+\DeclareMathOperator{\trace}{trace}

@@ -1,0 +1,35 @@
+\section{Derivation of the analytic posterior for toy example}
+\label{sec:analytical_posterior}
+
+In this appendix we derive and compute the conditional distribution \(\Fcond\) for the toy example of \autoref{sec:toy_example}.
+We denote by \(f_i(\cdot)\) and \(F_i(\cdot)\) the prior probability distribution function and cumulative distribution function of \(X_i\), i.e. the normal PDF and CDF with means and variances given by \autoref{eq:toyspec}.
+Let \(\pij\) be the probability that \(X_i\) is the minimum of \(X\) and \(X_j\) is its maximum.
+We also define \(\pisum = \sum_{j=1}^{100} \pij\), the probability that \(X_i\) is the minimum,
+and \(\psumj = \sum_{i=1}^{100} \pij\), the probability that \(X_j\) is the maximum.
+The cumulative distribution function of \(X_i\) is then given by:
+\begin{equation}
+\Pr\del{X_i \leq x \mid \Xmax, \Xmin} =
+    \begin{cases}
+        0 &\text{if } x < \Xmin \,, \\
+        1 &\text{if } x \geq \Xmax \,, \\
+        \pxx{i}{\bullet} 
+            + \del{1 \!-\! \pxx{i}{\bullet} \!-\! \pxx{\bullet}{i}}
+            \sbr{\frac{F_i(x) - F_i(\Xmin) }
+                 {F_i(\Xmax) - F_i(\Xmin) }
+                } 
+            &\text{otherwise.}\\
+    \end{cases}
+\end{equation}
+Meanwhile, \(\pij\) is proportional to:
+\begin{equation}
+    f_i(\Xmin)
+    f_j(\Xmax)
+    \prod_{k \neq i,j}^{100}
+    \del{F_k(\Xmax) - F_k(\Xmin)} \,,
+\end{equation}
+which we compute for all \(i,j\) and normalize
+to obtain the \(100 \times 100\) matrix \(\Pr\) of probabilities of each pair of element occupying the extremes.
+We sum over its rows and columns to obtain \(\psumj\) and \(\pisum\).
+While this algorithm has cubic complexity in the dimensionality \(p\) of \(X\),
+for \(p=100\), it only take seconds to compute the entries of \(\Pr\) and evaluate \(\Pr\del{X_i \leq x \mid \Xmax, \Xmin}\) over a range of \(x\).
+\autoref{fig:toy_quantiles}(b) shows the analytical quantiles of \(\Fcond\) marginally for each \(X_i\).
