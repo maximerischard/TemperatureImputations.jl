@@ -679,6 +679,7 @@ Gaussian processes allow for periodic components of the covariance, for example 
     k_{24}(t,t') = \sigma_{24}^2 \exp\sbr{ - \frac{2}{\ell_{24}^2} \sin^2\del{
         \pi \frac{t-t'}{\text{24 hrs}} 
         }}\,.
+    \label{eq:kperiodic}
 \end{equation}
 We modify the spatiotemporal model by adding this diurnal component to it, with its own spatial decay component \(k_{\subspace{}24}\) (with the same form as \(k_{\subspace}\) in \autoref{eq:kspace}, and again with variance parameter fixed to 1):
 \begin{equation}
@@ -686,6 +687,7 @@ We modify the spatiotemporal model by adding this diurnal component to it, with 
         + k_{24}(t,t') \cdot k_{\subspace{}24}(\xvec, \xvec')
         + k_\mu(\xvec, \xvec') 
         \,.
+    \label{eq:kdiurn}
 \end{equation}
 We also propose a more complex model, which breaks up \(k_{\subtime}\) into short-term, medium-term and long-term correlation components:
 \begin{equation}
