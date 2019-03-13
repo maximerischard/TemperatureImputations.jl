@@ -1,13 +1,13 @@
 #!/bin/bash
-#SBATCH -J pipeline_CV   # name for job array
+#SBATCH -J nearby_CV   # name for job array
 #SBATCH -p shared            # Partition
 #SBATCH -t 0-2:00:00         # Running time of 2 hours
-#SBATCH --mem 6000           # request 6GB memory
+#SBATCH --mem 8000           # request 6GB memory
 #SBATCH -n 2                 # 2 cores
 #SBATCH -N 1                 # All cores on one machine
 #SBATCH --mail-type=ALL      # Type of email notification- BEGIN,END,FAIL,ALL
 #SBATCH --mail-user=mrischard@g.harvard.edu
-#SBATCH --array 6,14,19
+#SBATCH --array 1-44
 
 export JULIA_DEPOT_PATH="${HOME}/julia_depots/climate"
 source ~/julia_modules.sh

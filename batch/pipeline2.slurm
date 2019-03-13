@@ -1,8 +1,8 @@
 #!/bin/bash
 #SBATCH -J stan_pipeline2    # name for job array
 #SBATCH -p shared            # Partition
-#SBATCH -t 0-7:00:00         # Running time of 1 hour
-#SBATCH --mem 4000           # request 4GB memory
+#SBATCH -t 0-12:00:00         # Running time of 1 hour
+#SBATCH --mem 5000           # request 4GB memory
 #SBATCH -n 2                 # 4 cores
 #SBATCH -N 1                 # All cores on one machine
 #SBATCH --mail-type=ALL      # Type of email notification- BEGIN,END,FAIL,ALL
@@ -22,7 +22,7 @@ ICAO=$2
 echo ICAO $ICAO
 cd /n/home04/mrischard/TempModel/batch/
 ksmoothmax=50
-epsilon=0.1
+epsilon=0.01
 julia pipeline2.jl \
     $ICAO \
     $GPmodel \

@@ -2,12 +2,12 @@
 #SBATCH -J pipeline_kernelfit # name for job array
 #SBATCH -p shared             # Partition
 #SBATCH -t 0-24:00:00         # Running time of 24 hours
-#SBATCH --mem 16000           # request 16GB memory
+#SBATCH --mem 14000           # request 16GB memory
 #SBATCH -n 2                  # 2 cores
 #SBATCH -N 1                  # All cores on one machine
 #SBATCH --mail-type=ALL       # Type of email notification- BEGIN,END,FAIL,ALL
 #SBATCH --mail-user=mrischard@g.harvard.edu
-#SBATCH --array 1,3,4,5,7,14,15,16,18,20,21,24,26,28,29,31,32,33,34,36,37,38,39,40,41
+#SBATCH --array 6
 
 export JULIA_DEPOT_PATH="${HOME}/julia_depots/climate"
 source ~/julia_modules.sh

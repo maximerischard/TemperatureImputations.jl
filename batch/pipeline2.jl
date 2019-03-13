@@ -30,6 +30,7 @@ seed = parse(Int, arguments["--seed"])
 ksmoothmax = parse(Float64, arguments["--ksmoothmax"])
 epsilon = parse(Float64, arguments["--epsilon"])
 @show ksmoothmax
+@show epsilon
 @show cheat
 crossval = arguments["--crossval"]::Bool
 @show crossval
@@ -46,8 +47,8 @@ using DataFrames
 using Printf
 using Statistics
 
-stan_days = Day(12)
-stan_increment = Day(4)
+stan_days = Day(24)
+stan_increment = Day(14) # (24-14)/2 = 5 days of buffer
 
 isdList = dropmissing(TempModel.read_isdList(; data_dir=data_dir); disallowmissing=true)
 test_station = isdList[isdList[:ICAO].==ICAO, :]
@@ -93,15 +94,8 @@ while dt_start < maxtime
     end
 end
 
-""" 
-    Is window A inside of window B?
-"""
-function a_isinside_b(a::FittingWindow, b::FittingWindow)
-    start_after = a.start_date >= b.start_date
-    end_before = a.end_date <= b.end_date
-    return start_after & end_before
-end
 function overlap(a::FittingWindow, b::FittingWindow)
+	# conditions that imply the windows don't overlap at all:
 	a_after_b = a.start_date >= b.end_date
 	b_after_a = b.start_date >= a.end_date
 	return !(a_after_b || b_after_a)
@@ -110,9 +104,9 @@ end
     How much buffer time is there on either side of the window?
 """
 function buffer(a::FittingWindow, b::FittingWindow)
-    start_diff = abs(a.start_date - b.start_date)
-    end_diff = abs(a.end_date - b.end_date)
-    return min(start_diff, end_diff)
+    start_diff = a.start_date - b.start_date
+    end_diff = b.end_date - a.end_date
+    return min(start_diff, end_diff) # worst of the two
 end
 """ 
     Amongst a list of candidate windows `cand`, find the window that includes `wind`
@@ -121,7 +115,7 @@ end
 function find_best_window(wind::FittingWindow, cands::Vector{FittingWindow})
     incl_wdows = [fw for fw in cands if overlap(wind, fw)]
     buffers = [buffer(wind, fw) for fw in incl_wdows]
-    imax = argmax(buffers)
+    imax = argmax(buffers) # maximum of minimum
     best_window = incl_wdows[imax]
     return best_window
 end
@@ -129,7 +123,7 @@ end
 janfirst = DateTime(2014,12,31,hr_measure.value,0,0)
 stan_start = janfirst + (windownum-1)*stan_increment
 stan_end = stan_start + stan_days
-stan_window = FittingWindow(stan_start, stan_end)
+stan_window = FittingWindow(max(stan_start,mintime), min(stan_end,maxtime))
 println("STAN fitting window: ", stan_window)
 
 best_window = find_best_window(stan_window, nearby_windows)
@@ -183,7 +177,7 @@ imputation_data, ts_window = TempModel.prep_data(nearby_pred, TnTx, start_date, 
 
 function stan_dirname(usaf::Int, wban::Int, icao::String, fw::FittingWindow)
     return @sprintf("%s/%d_%d_%s_%s_to_%s/", 
-                    icao, usaf, wban, icao, Date(fw.start_date), Date(fw.end_date))
+                    icao, usaf, wban, icao, Date(fw.start_date)+Day(1), Date(fw.end_date))
 end
 
 stan_dir = joinpath(save_dir, "stan_fit", 
