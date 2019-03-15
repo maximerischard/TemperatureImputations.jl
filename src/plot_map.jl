@@ -3,7 +3,7 @@ using Printf
 @pyimport mpl_toolkits.basemap as basemap
 cbbPalette = ["#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7"]
 
-function plot_map(isdSubset, epsg::Int; first_test::Bool=false, arcgis::Bool=false, resolution="i")
+function plot_map(isdSubset, epsg::Int; first_test::Bool=false, arcgis::Bool=false, resolution="l", horizontalalignment="auto")
     minlon = minimum(isdSubset[:LON])
     maxlon = maximum(isdSubset[:LON])
     minlat = minimum(isdSubset[:LAT])
@@ -54,18 +54,18 @@ function plot_map(isdSubset, epsg::Int; first_test::Bool=false, arcgis::Bool=fal
         if lon > (llcrnrlon+urcrnrlon)/2
             # align right
             plt.annotate(label, xy=(x, y),  xycoords="data",
-                            xytext=(-5, 5), textcoords="offset points",
+                            xytext=(0, 5), textcoords="offset points",
                             fontsize=8,
                             color="black",
-                            horizontalalignment="right",
+                            horizontalalignment = horizontalalignment == "auto" ? "right" : horizontalalignment,
                             zorder=3
                             )
         else
             plt.annotate(label, xy=(x, y),  xycoords="data",
-                            xytext=(5, 5), textcoords="offset points",
+                            xytext=(0, 5), textcoords="offset points",
                             fontsize=8,
                             color="black",
-                            horizontalalignment="left",
+                            horizontalalignment = horizontalalignment == "auto" ? "left" : horizontalalignment,
                             zorder=3
                             )
         end

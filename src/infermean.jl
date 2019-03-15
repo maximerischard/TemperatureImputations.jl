@@ -71,6 +71,8 @@ function get_means_by_day(chains, ts, hr_measure)
     nsamples, _, nchains = size(chains)
     temp_impute = get_temperatures_reparam(chains)
     ts_mid, ts_diff = midpoints(ts), diff(ts)
+    # For each time interval t_i,t_{i+1}, we work out which day
+    # the midpoint belongs to:
     ts_mid_day = TempModel.measurement_date.(ts_mid, hr_measure)
     nsamples, ntimes, nchains = size(chains)
     days = sort(unique(ts_mid_day))

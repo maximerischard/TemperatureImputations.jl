@@ -20,7 +20,6 @@ using LinearAlgebra
 using Random
 using Printf
 
-const janfirst = Date(2015, 1, 1)
 
 function subset(df, from, to; closed_start=true, closed_end=true)
     ts = df[:ts]
@@ -107,7 +106,7 @@ end
 function stan_dirname(usaf::Int, wban::Int, icao::String, fw::FittingWindow)
     return @sprintf("%s/%d_%d_%s_%s_to_%s/", 
                     icao, usaf, wban, icao,
-                    Date(fw.start_date)-Day(1), Date(fw.end_date)-Day(1))
+                    Date(fw.start_date), Date(fw.end_date))
                     # Date(fw.start_date)-Day(0), Date(fw.end_date)-Day(0))
 end
 
@@ -129,16 +128,19 @@ function get_test_fw(test::DataFrame, fw::FittingWindow, hr_measure::Hour)
     in_window = arg_test_fw(test, fw, hr_measure)
     return test[in_window,:]
 end
-function get_window(windownum::Int, stan_increment::Day, stan_days::Day)
-    stan_start = janfirst + (windownum-1)*stan_increment
+function get_window(windownum::Int, stan_increment::Day, stan_days::Day, hr_measure::Hour)
+    janfirst = DateTime(2015, 1, 1, 0, 0, 0)
+    mintime = DateTime(2015,1,1,0,0,0)
+    maxtime = DateTime(2016,1,1,0,0,0)
+    stan_start = janfirst + hr_measure - Day(1) + (windownum-1)*stan_increment
     stan_end = stan_start + stan_days
-    stan_fw = FittingWindow(stan_start, stan_end)
+    stan_fw = FittingWindow(max(stan_start, mintime), min(stan_end, maxtime))
     return stan_fw
 end
-function window_center(fw::FittingWindow, increment::Day)
-    # this doesn't generalize
-    return FittingWindow(fw.start_date+increment,fw.end_date-increment)
-end
+# function window_center(fw::FittingWindow, increment::Day)
+    # # this doesn't generalize
+    # return FittingWindow(fw.start_date+increment,fw.end_date-increment)
+# end
 
 function Chains(samples::AbstractArray{Float64, 3}, names::AbstractVector{S}) where {S<:AbstractString}
     nsamples, ncol, nchains = size(samples)
