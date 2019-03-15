@@ -158,7 +158,7 @@ function kernel_sptemp_diurnal(;kmean::Bool)
     k_spatial = SEIso(log(DEFAULT_LENGTHSCALE), log(1.0))
     k_periodic = Periodic(log(1.0), -1.0, log(24.0))
     k_diurndecay = SEIso(log(DEFAULT_LENGTHSCALE), 0.0)
-    k_spatiotemporal = kprod(k_time * k_spatial) + 
+    k_spatiotemporal = kprod(k_time, k_spatial) + 
                        kprod(fix(k_periodic, :lp), k_diurndecay)
     k_means = Noise(log(40.0))
     if kmean
@@ -168,7 +168,7 @@ function kernel_sptemp_diurnal(;kmean::Bool)
         :time=>k_time,
         :space=>k_spatial,
         :diurnal=>k_periodic,
-        :diurndecay=>k_diurndecay
+        :diurndecay=>k_diurndecay,
         :mean=>k_means,
         :spatiotemporal => k_spatiotemporal
         )
