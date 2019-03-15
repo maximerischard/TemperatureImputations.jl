@@ -1,4 +1,5 @@
 using GaussianProcesses: Periodic, RQIso, SEIso, set_params!, Masked, fix
+using Printf
 
 const SPACEDIM = [2,3]
 const TIMEDIM  = [1]
@@ -24,7 +25,7 @@ end
 kprod(ktime::Kernel, kspace::Kernel) = Masked(ktime, TIMEDIM) * Masked(fix(kspace, :lσ), SPACEDIM)
 kprod(ktime::Kernel, kspace::Kernel, knoise::Noise) = Masked(fix(ktime, :lσ), TIMEDIM) * 
                                                       (Masked(kspace, SPACEDIM) + Masked(knoise, SPACEDIM))
-add_kmean(kspatiotemporal::Kernel, k_means::Noise) = k_spatiotemporal + fix(Masked(k_means, SPACEDIM))
+add_kmean(kspatiotemporal::Kernel, k_means::Noise) = kspatiotemporal + fix(Masked(k_means, SPACEDIM))
 function fitted_sptemp_fixedvar(;kmean::Bool)
     k1 = fix(Periodic(0.0,0.0,log(24.0)), :lp)
     k2 = RQIso(0.0,0.0,0.0)
@@ -117,10 +118,9 @@ function fitted_sptemp_sumprod(;kmean::Bool)
     logNoise=hyp[1]
     return k_spatiotemporal, logNoise
 end
-
 function kernel_sptemp_SExSE(;kmean::Bool)
-    k_time = SEIso(0.0,0.0)
-    k_spatial = SEIso(log(DEFAULT_LENGTHSCALE))
+    k_time = SEIso(0.0, 0.0)
+    k_spatial = SEIso(log(DEFAULT_LENGTHSCALE), log(1.0))
     k_spatiotemporal = kprod(k_time, k_spatial)
     k_means = Noise(log(40.0))
     if kmean
@@ -133,9 +133,20 @@ function kernel_sptemp_SExSE(;kmean::Bool)
         :spatiotemporal => k_spatiotemporal
         )
 end
+function showkernel_SExSE(kdict::Dict, logNoise)
+    k_time, k_spatial = kdict[:time], kdict[:space]
+    print("\nk: Temporal kernel \n=================\n")
+    @printf("σ: %5.3f\n", √k_time.σ2)
+    @printf("l: %5.3f hours\n", √k_time.ℓ2)
+    print("\nk: Spatial kernel \n=================\n")
+    @printf("σ: %5.3f\n", √k_spatial.σ2)
+    @printf("l: %5.3f km\n", √k_spatial.ℓ2 / 1000)
+    print("\n=================\n")
+    @printf("σy: %5.3f\n", exp(logNoise))
+end
 function fitted_sptemp_SExSE(;kmean::Bool)
-	k_dict = kernel_sptemp_SExSE(;kmean=kmean)
-	k_spatiotemporal = k_dict[:spatiotemporal]
+	kdict = kernel_sptemp_SExSE(;kmean=kmean)
+	k_spatiotemporal = kdict[:spatiotemporal]
     hyp = [-0.822261,0.996834,1.3172,12.0805]
     set_params!(k_spatiotemporal, hyp[2:end])
     logNoise=hyp[1] 
@@ -163,8 +174,8 @@ function kernel_sptemp_diurnal(;kmean::Bool)
         )
 end
 function fitted_sptemp_diurnal(;kmean::Bool)
-	k_dict = kernel_sptemp_diurnal(;kmean=kmean)
-	k_spatiotemporal = k_dict[:spatiotemporal]
+	kdict = kernel_sptemp_diurnal(;kmean=kmean)
+	k_spatiotemporal = kdict[:spatiotemporal]
     hyp = [-0.82337,1.02776,1.14186,11.9454,-0.383965,0.858384,14.1618]
     set_params!(k_spatiotemporal, hyp[2:end])
     logNoise=hyp[1]
