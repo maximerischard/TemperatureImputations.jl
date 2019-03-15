@@ -182,25 +182,35 @@ function fitted_sptemp_diurnal(;kmean::Bool)
     return k_spatiotemporal, logNoise
 end
 
-function fitted_sptemp_simpler(;kmean::Bool)
-    k1 = fix(Periodic(0.0,0.0,log(24.0)), :lp)
-    k2 = RQIso(0.0,0.0,0.0)
-    k3b = RQIso(0.0,0.0,0.0)
-    k4 = RQIso(0.0,0.0,0.0)
+function kernel_sptemp_simpler(;kmean::Bool)
+    kt1 = Periodic(log(1.0),log(3.0),log(24.0))
+    kt2 = RQIso(log(0.5),0.0,0.0)  # half an hour
+    kt3 = RQIso(log(2.0),0.0,0.0)  # two hours
+    kt4 = RQIso(log(12.0),0.0,0.0) # twelve hours
 
     ksp1 = SEIso(log(DEFAULT_LENGTHSCALE), log(1.0))
     ksp2 = SEIso(log(DEFAULT_LENGTHSCALE), log(1.0))
     ksp3 = SEIso(log(DEFAULT_LENGTHSCALE), log(1.0))
     ksp4 = SEIso(log(DEFAULT_LENGTHSCALE), log(1.0))
 
-    k_spatiotemporal = Masked(k1, TIMEDIM)  * Masked(ksp1, SPACEDIM) +
-                       Masked(k2, TIMEDIM)  * Masked(ksp2, SPACEDIM) +
-                       Masked(k3b, TIMEDIM) * Masked(ksp3, SPACEDIM) +
-                       Masked(k4, TIMEDIM)  * Masked(ksp4, SPACEDIM)
+    k_spatiotemporal = kprod(fix(kt1, :lp), ksp1) +
+                       kprod(kt2, ksp2) +
+                       kprod(kt3, ksp3) +
+                       kprod(kt4, ksp4)
     k_means = Noise(log(40.0))
     if kmean
         k_spatiotemporal = add_kmean(k_spatiotemporal, k_means)
     end
+    return Dict(
+        :time1=>kt1, :time2=>kt2, :time3=>kt3, :time4=>kt4,
+        :space1=>ksp1, :space2=>ksp2, :space3=>ksp3, :space4=>ksp4,
+        :mean=>k_means,
+        :spatiotemporal => k_spatiotemporal
+        )
+end
+function fitted_sptemp_simpler(;kmean::Bool)
+    kdict = kernel_sptemp_simpler(;kmean=kmean)
+    k_spatiotemporal = kdict[:spatiotemporal]
     hyp = [-1.72527,-0.210656,0.950124,13.574,0.0544504,0.653978,0.538881,0.125985,10.9932,-0.605542,-1.2208,-0.946048,-1.0721,9.20607,0.229593,2.18355,1.29463,-1.14171,12.8224,0.182608]
     set_params!(k_spatiotemporal, hyp[2:end])
     logNoise=hyp[1]
@@ -213,10 +223,10 @@ function kernel_sptemp_matern(;kmean::Bool)
     kt3 = RQIso(log(2.0),0.0,0.0)  # two hours
     kt4 = RQIso(log(12.0),0.0,0.0) # twelve hours
 
-    ksp1 = Mat32Iso(log(5e4), log(1.0))
-    ksp2 = Mat32Iso(log(5e4), log(1.0))
-    ksp3 = Mat32Iso(log(5e4), log(1.0))
-    ksp4 = Mat32Iso(log(5e4), log(1.0))
+    ksp1 = Mat32Iso(log(DEFAULT_LENGTHSCALE), log(1.0))
+    ksp2 = Mat32Iso(log(DEFAULT_LENGTHSCALE), log(1.0))
+    ksp3 = Mat32Iso(log(DEFAULT_LENGTHSCALE), log(1.0))
+    ksp4 = Mat32Iso(log(DEFAULT_LENGTHSCALE), log(1.0))
     
     k_means = Noise(log(40.0))
     
