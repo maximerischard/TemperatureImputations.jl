@@ -138,7 +138,7 @@ Our path is encapsulated concisely in \autoref{fig:paper_in_one_figure}.
 \includegraphics[width=0.99\textwidth]{paper_in_one_figure.pdf}
 \caption{\label{fig:paper_in_one_figure}
 Summary of our imputation methodology and validation strategy.
-The map shows five weather stations labeled by the ICAO airport code.
+The map shows six weather stations labeled by the ICAO airport code.
 At KBDL, only the daily minima and maxima are made available (a), though in reality
 we have the full time series.
 We obtain imputations by (b) fitting a spatiotemporal GP model to the nearby hourly data,
@@ -155,7 +155,7 @@ that underpins our imputation framework;
 \autoref{sec:hyperparameters} explains how the model hyperparameters are tuned;
 \autoref{sec:predict_nearby} shows how the model is used to predict the hourly temperatures 
 at one station using the hourly temperatures recorded at neighboring stations;
-\autoref{sec:smoothHMC} introduces SmoothHMC, a algorithm that enables
+\autoref{sec:smoothHMC} introduces SmoothHMC, an algorithm that enables
 sampling from a multivariate distribution conditionally on its minimum and maximum,
 which we apply in \autoref{sec:constrained_imputations} to the problem
 of obtaining hourly temperature imputations conditionally on the recorded daily extrema.
@@ -165,7 +165,7 @@ This motivates improvements to the spatiotemporal model in \autoref{sec:improvin
 In \autoref{sec:results} we demonstrate how the imputed time series can then be used 
 to address and correct bias in summary statistics.
 In \autoref{sec:inferhour} we show some preliminary work demonstrating the possibility of inferring the hour of measurement
-at a station using the imputations of the hourly temperatures.
+at a station.
 We conclude in \autoref{sec:conclusion} and discuss limitations and possible improvements for 
 our imputation framework.
 
@@ -222,7 +222,7 @@ with \(\Temp_{ij}\) modeled as in \autoref{eq:gpmodel}.
 \subsection{Fitting the spatiotemporal model}
 \label{sec:hyperparameters}
 
-Software is readily available in many programming languages for fitting Gaussian process models, including inference on the covariance parameters. We chose to use the julia \texttt{GaussianProcesses.jl} package to apply the above spatiotemporal model to the hourly temperatures at four Iowa weather stations.
+Software is readily available in many programming languages for fitting Gaussian process models, including inference on the covariance parameters. We chose to use the julia \texttt{GaussianProcesses.jl} package \citep{fairbrother2018gaussianprocesses} to apply the above spatiotemporal model to the hourly temperatures at four Iowa weather stations.
 The Iowa data set includes 47,864 measurements, which is computationally challenging to fit directly with a single Gaussian process.
 There are many methods to handle large data sets with Gaussian processes: for example \citet{quinonero2007approximation} review sparse approximations to Gaussian processes from a machine learning perspective, while \citet{banerjee2008gaussian} develop a method specifically for large spatial data sets.
 For simplicity, we chose instead to divide the data into 10-day batches, modeled as independent Gaussian processes with shared hyperparameters (see \autoref{appendix:batch_details} for details).
@@ -802,7 +802,7 @@ It can be seen that the imputed summary statistics track within about 0.1~\(\deg
 The product covariance \(\kSESE\) and the sum of products covariance \(\ksumprod\) seem to perform equally well imputing the summary statistics for different times, but the \(\ksumprod\) gives more honest, wider credible intervals.
 
 
-However, the yearly mean of the daily minimum and maximum temperatures is perhaps of limited inherent scientific interest.
+The yearly mean of the daily minimum and maximum temperatures is perhaps of limited inherent scientific interest.
 There is however significant interest in the yearly mean temperature $\mean(\Temp_\miss)$,
 which is often approximated as the mean $(\overline{\Tn} + \overline{\Tx})/2$ of all $\Tn$ and $\Tx$.
 This can be a poor estimator, as shown in \autoref{fig:mean_TnTx}, and is susceptible to the time of measurement bias
@@ -839,6 +839,22 @@ We further extend the validation procedure to 44 weather stations in the contigu
         measurement time.
     }
 \end{figure}
+
+We start with a single station, at KBDL (Bradley, Colorado), where the mean temperature
+extracted from the hourly time series for 2015 was $10.81\degreeC$, 
+while averaging the daily extrema yields an estimate of $11.38\degreeC$.
+We then withhold the hourly data, and replace it with daily extrema measured (artificially)
+at 17:00~UTC every day.
+We use the spatiotemporal model \autoref{eq:sumprod_kernel}
+and hourly data from the five nearest stations, combined with the local daily extrema extracted artificially
+at 17:00~UTC every day, 
+in order to generate multiple imputations of the wittheld hourly temperatures.
+These imputations are then used to estimate the mean temperature for 2015
+(see \autoref{appendix:infermean_details} for details),
+yielding an estimate of $10.97\degreeC$ with a posterior standard deviation of $0.03\degreeC$.
+While the estimate is an improvement over the average of the daily extrema, the true temperature
+is more than six standard deviations away from the posterior mean,
+which is concerning.
 
 The poor coverage of the credible interval at KBDL prompted several improvements to our model, which we now discuss.
 Firstly, we changed the optimization of the hyperparameters to target a site-wise cross-validation metric
@@ -941,6 +957,7 @@ Incorporating a rough estimate of the long-range covariance between
 temperatures on days which are not part of the same imputation batch
 allows us to better estimate the uncertainty, which significantly
 improves the coverage of the credible intervals.
+At KBDL, the estimated mean temperature for 2015 is now just 0.81 standard deviations above its true value.
 KJAX (Jacksonville, Florida) is the only station where the 2~SD interval substantially misses the true temperature.
 As there are no stations further South than Jacksonville in our dataset, and the Atlantic Ocean is to the East,
 this station requires spatial extrapolation, which may explain the poor coverage.
