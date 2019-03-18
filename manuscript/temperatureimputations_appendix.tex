@@ -140,3 +140,143 @@ The combination of a periodic mean function and periodic kernel does not lead to
 As an additional benefit of modeling periodic components in the kernel rather than the mean function is that drifts in the cycle (for example due to seasonal changes)
 can be captured by multipling the periodic kernel with a stationary temporal kernel.
 Equally, slight differences in the diurnal cycle between sites can be captured by multiplying it with a stationary spatial kernel.
+
+\section{Technical details of batch computations}
+\label{appendix:batch_details}
+
+Because of the high computational cost of fitting GPs with many observations,
+there is a large literature on sparse approximations to speed up
+covariance computations \citep{quinonero2007approximation, banerjee2008gaussian, banerjee2014hierarchical},
+as well as Bayesian approximation techniques such as variational Bayes \citep{beal2003variational,jordan1999introduction,ren2011variational} and the integrated nested Laplace approximation \citep{rue2009approximate}.
+Each approximation makes different compromises which need careful consideration.
+In particular, some techniques yield poor approximations of the posterior uncertainty,
+which is crucial for our application.
+For this reason, we opted for the more primitive method of processing the data
+in batches: cutting the time series and fitting the full GP
+model to each batch separately.
+The tradeoff is explicit: we fit the full GP locally, but discard information between
+measurements that are distant in time.
+
+We argue that this is a good approximation for the present application, except at the boundaries
+between batches.
+For this reason, we allow some overlap between batches when obtaining predictions,
+so that every prediction is made far away from these boundaries.
+The duration of each batch compromises computational efficiency and the amount of information made
+available to each window.
+In our implementation, we used the following batch durations at each stage of the imputation strategy, referring to \autoref{fig:paper_in_one_figure}:
+\begin{enumerate}[label=(\alph*),start=2]
+    \item To fit the hyperparameters, we use non-overlapping 10-day windows to maximize the marginal likelihood,
+          and 8-day windows to maximize the cross-validation critertion \autoref{eq:cv_criterion}, which
+          is more expensive to compute.
+          Within the optimization routine, we sum the objective and its gradient across batches.
+          \label{step:hyperparameters}
+    \item When generating predictions from the Gaussian process, only a single Cholesky decomposition
+          is required, so we divide the year of data into 5 equal batches (73 days), with each
+          subsequent batch starting a third of the batch duration after the start of the last one.
+          \label{step:nearby}
+    \item When constraining imputations with SmoothHMC, we use 9-day (\autoref{sec:constrained_imputations}) or 12-day windows starting and ending
+          at the hour of measurement, so as to avoid partial measurement windows.
+          Each subsequent batch starts a third of the batch duration after the start of the last one.
+          The prior mean and covariance from step \ref{step:nearby} is 
+          obtained from the \emph{prediction} window that maximizes the buffer on both sides
+          of the \emph{imputation} window.
+          \label{step:smoothhmc}
+    \setcounter{enumi}{5}
+    \item When extracting a summary statistic from imputations, we apply the summary
+          statistic within each day for each imputation.
+          We then obtain the mean for each day and the sample covariance between days
+          for of the same batch.
+          When a day is imputed within multiple batches in \ref{step:smoothhmc}, we use the
+          batch for which the day is the furthest away from the boundaries of the batch.
+          See \autoref{appendix:infermean_details} for more details in the context of inferring the 
+          yearly mean temperature.
+\end{enumerate}
+
+\section{Technical details of defining and imputing the yearly mean temperature for hourly measurements}
+\label{appendix:infermean_details}
+
+In our validation framework (\autoref{fig:paper_in_one_figure}), we compute the true summary statistic
+on the hourly time series, which we then aim to recover using missing data imputations.
+For the yearly mean temperature, the estimand is the mean temperature $\mean(\Temp_\miss)=Y^{-1} \int_0^Y \Temp_\miss(t) \dif t$,
+from the start $(t=0)$ to the end $(t=Y)$ of the year.
+For our purposes, we approximate the time series as piecewise linear,
+so it can be computed from the hourly time series \(\Temp_{\miss,i}\), \(i=1,\dotsc,N\) made at times \(t_i\):
+\begin{equation}
+    \mean(\Temp_\miss) \approx \frac{1}{t_N - t_1} \sum_{i=1}^{N-1} \sbr{(t_{i+1}-t_i) \frac{\Temp_{\miss,i}+\Temp_{\miss,i+1}}{2}}
+    \label{eq:meantemp}
+\end{equation}
+This is the function that we apply to the withheld time series.
+
+To calculate the posterior mean temperature from the imputations,
+times which are included in multiple imputation batches must be handled.
+We do this by assigning each time interval $[t_{i},t_{i+1}]]$ to a measurement day
+according to which 24 hour batch the midpoint $(t_i+t_{i+1}/2)$ falls into.
+For each imputation and for each measurement day covered by the imputation, 
+we then obtain a mean of all the elements of the summation in \autoref{eq:meantemp}
+that belong to this day.
+We then summarize this information by obtaining the mean and covariance matrix
+over all imputations within the batch.
+If an imputation batch has $d$ days, this yields a $d$-vector of daily imputed means,
+and a $d \times d$ matrix of covariances.
+
+\begin{figure}[t]
+% \begin{minipage}[c]{0.5\textwidth}
+    \centering
+    \begin{subfigure}[t]{0.45\textwidth}
+    \includegraphics[width=\textwidth]{infermean_covariance.pdf}
+    \caption{
+             \label{fig:infermean_subcov}
+            }
+    \end{subfigure}
+    \begin{subfigure}[t]{0.35\textwidth}
+    \includegraphics[width=\textwidth]{infermean_cov_lag.pdf}
+    \caption{
+             \label{fig:infermean_cov_lag}
+            }
+    \end{subfigure}
+    \caption{
+        \label{fig:infermean_covariance}
+        Covariance of posterior imputations of the daily minimum temperatures:
+            \subref{fig:infermean_subcov}
+        extract from the posterior covariance matrix for imputing the yearly
+            mean temperature at KBDL; and
+            \subref{fig:infermean_cov_lag}
+        mean estimated covariance for non-zero entries of the covariance matrix
+            as a function of lag.
+    }
+\end{figure}
+
+To average over the entire year, we sum the posterior mean from the best imputation batch
+for each day of year, that is we use the mean imputation from the batch
+in which a day is furthest from the edges of the batch.
+Similarly, we construct a $366 \times 366$ covariance matrix for the whole year,
+where each entry is taken from the batch where the corresponding pair of days
+are furthest from the edges of the batch.
+Pairs of days that are not simulataneously imputed in any imputation batch are
+given a zero covariance.
+For illustration, we show a submatrix of the resulting covariance at KBDL in
+\autoref{fig:infermean_subcov}, which shows the resulting block tridiagonal
+structure of the estimated covariance.
+The estimate of the yearly mean temperature is a weighted sum of the daily posterior means,
+where the weight is proportional to the total duration of time intervals assigned to each day.
+The posterior variance of the estimated is then obtained by $w\trans \Sigma w$,
+where $w$ is the vector of weights (normalized to sum to 1), and $\Sigma$ is the matrix of
+estimated covariances.
+
+\autoref{fig:infermean_covariance} shows that the covariance drops rapidly
+for days separated by higher lags.
+However, it can also be seen that it does not drop to zero even for entries 11 days apart
+(the maximum lag estimable with 12-day batches).
+\autoref{fig:infermean_cov_lag} shows the mean posterior covariance as a function of lag,
+estimated using non-zero entries of $\Sigma$.
+After a steep drop, a covariance floor remains, which we interpret
+as the remaining uncertainty in the mean and local diurnal component of the
+covariance in \autoref{eq:maternlocal}.
+While the covariance is small, it can have a large effect on the posterior variance
+of the yearly mean temperature.
+We show this by replacing every off-diagonal zero entry with an estimate of the
+long-lag effect, obtained as the mean of all non-zero entries for lags greater than four days
+(or zero if the estimate is negative).
+The resulting augmented posterior standard deviations are shown as the paler and wider error bars
+in \autoref{fig:infermean_errors}, which result in improved coverage of the credible interval.
+

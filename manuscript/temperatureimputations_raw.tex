@@ -20,7 +20,7 @@ Most applications of these methods, however, focus on adjusting the mean state o
 While this may be sufficient for monthly data, it is known that changes in measurement practices may affect different quantiles of the daily temperature distribution unequally.
 To address this issue, some homogenization methods have also employed frequency distribution matching techniques, so that each temperature recorded after a breakpoint is adjusted according to its percentile within the time series \citep{della2006method, trewin2013daily}. 
 
-\subsection{The Problem} 
+\subsection{The problem} 
 \label{sec:theproblem}
 \label{sec:illustrate_bias}
 
@@ -101,10 +101,8 @@ Such spurious trends also compromise the study of weather variability, through s
 % extracted from hourly measurements at four Iowa weather stations in 2015
 % under varying measurement times.}
 % \end{figure}
-    
 
-
-\subsection{Our Approach}\label{sec:approach}
+\subsection{Our approach}\label{sec:approach}
     
 One of our goals is to be able to infer the ``true'' \(\Tx\) and \(\Tn\) peaks and troughs of the diurnal cycle throughout the data records, so as to correct both the variance biases and the spurious trends.
 This stands in constrast to previous work, which has focused directly on addressing spurious trends.
@@ -122,20 +120,68 @@ They often cannot be used directly for climatology, as the weather stations that
 For instance, weather stations at locations experiencing a lot of human activity, like airports, may record higher temperatures on average.
 However, even if mis-calibrated or systematically biased, the time series data from these nearby stations do contain valuable information about the hourly changes in temperatures on any given day.
 
-In this paper, we develop a spatiotemporal Gaussian process model pooling the information from nearby stations with hourly data and simulate multiple realizations of hourly temperature time series at each station of interest.
+In this paper, we develop a spatiotemporal Gaussian process (GP) model pooling the information from nearby stations with hourly data and simulate multiple realizations of hourly temperature time series at each station of interest.
 The key technical difficulty is that these imputations of the temperature curves must satisfy the constraint of falling between the observed daily minima and maxima, and attaining those values at least once in a twenty-four hour period.
 We develop SmoothHMC, a novel and easy to implement Markov Chain Monte Carlo (MCMC) algorithm to sample from the posterior distribution satisfying the above constraints.
 Our constrained imputations are implemented in the Stan programming language \citep{stancite}; our code is publicly available on the first author's GitHub account.
 Compared to a custom implementation, the Stan model code is short and Stan's MCMC samplers are well-optimized, which makes our imputation strategy efficient and easy to reproduce.
 
-\section{A First Spatiotemporal Model}\label{a-spatiotemporal-model}
+The methodology relies on models and approximations that may garner some scepticism.
+We therefore place emphasis on validating the imputation strategy.
+This is done by wittholding the hourly temperature time series at an airport location,
+and attempting to reconstruct it using hourly data from neighboring stations 
+and the daily minima and maxima extracted locally.
+Our path is encapsulated concisely in \autoref{fig:paper_in_one_figure}.
+
+\begin{figure}[tb]
+\centering
+\includegraphics[width=0.99\textwidth]{paper_in_one_figure.pdf}
+\caption{\label{fig:paper_in_one_figure}
+Summary of our imputation methodology and validation strategy.
+The map shows five weather stations labeled by the ICAO airport code.
+At KBDL, only the daily minima and maxima are made available (a), though in reality
+we have the full time series.
+We obtain imputations by (b) fitting a spatiotemporal GP model to the nearby hourly data,
+(c) obtaining predictions at KBDL, and (d) using SmoothHMC to constrain the imputations to the observed daily $\Tn$ and $\Tx$.
+We validate the methodology by comparing a summary statistic of the withheld time series at KBDL (e) to
+its distribution extracted from the imputations (f).
+}
+\end{figure}
+
+The rest of the paper proceeds as follows.
+Our imputation methods are presented in \autoref{sec:methods} in five parts:
+\autoref{sec:spatiotemporal_model} presents a basic spatiotemporal Gaussian process model 
+that underpins our imputation framework;
+\autoref{sec:hyperparameters} explains how the model hyperparameters are tuned;
+\autoref{sec:predict_nearby} shows how the model is used to predict the hourly temperatures 
+at one station using the hourly temperatures recorded at neighboring stations;
+\autoref{sec:smoothHMC} introduces SmoothHMC, a algorithm that enables
+sampling from a multivariate distribution conditionally on its minimum and maximum,
+which we apply in \autoref{sec:constrained_imputations} to the problem
+of obtaining hourly temperature imputations conditionally on the recorded daily extrema.
+In \autoref{sec:diagnostics}, we evaluate the performance of this model and imputations
+using variograms and predictive diagnostics on validation data.
+This motivates improvements to the spatiotemporal model in \autoref{sec:improving_model}.
+In \autoref{sec:results} we demonstrate how the imputed time series can then be used 
+to address and correct bias in summary statistics.
+In \autoref{sec:inferhour} we show some preliminary work demonstrating the possibility of inferring the hour of measurement
+at a station using the imputations of the hourly temperatures.
+We conclude in \autoref{sec:conclusion} and discuss limitations and possible improvements for 
+our imputation framework.
+
+\section{Methods: missing data imputation framework}\label{sec:methods}
+
+\subsection{Spatiotemporal model}
+\label{sec:spatiotemporal_model}
 
 In order to pool the information from temperatures measured at various locations and times, we develop a spatio-temporal Gaussian process model.
+The model presented is basic and makes strong assumptions,
+which will be relaxed and improved upon in \autoref{sec:improving_model} and \autoref{sec:results}.
 In its simplest form, we posit that temperatures from stations that are near each other are more correlated than distant stations, and that those correlations also decay in time.
 We model the simultaneous temperatures throughout a region as a Gaussian process, with covariance between two locations \(\xvec\) and \(\xvec'\) given by the squared exponential (SE) covariance with characteristic lengthscale \(\ell_{\subspace}\) and variance \(\sigma_{\subspace}^2\):
 \begin{equation}
     \cov\del{T(\xvec), T(\xvec') \mid t} = k_{\subspace}(\xvec, \xvec') =  \sigma_{\subspace}^2 \exp\del{-\frac{\del{\xvec-\xvec'}\trans\del{\xvec-\xvec'}}{2\ell_{\subspace}^2}}\,.
-    \label{eq:kspace}
+    \label{eq:squaredexpo}
 \end{equation}
 Similarly, the time series of temperatures at a single location can be modeled as a Gaussian process with characteristic timescale \(\ell_{\subtime}\) and variance \(\sigma_{\subtime}^2\):
 \begin{equation}
@@ -173,13 +219,14 @@ and approximate the \(\Tx\) and \(\Tn\) observation respectively as the maximum 
 \end{equation}
 with \(\Temp_{ij}\) modeled as in \autoref{eq:gpmodel}.
 
-\subsection{Fitting the Spatiotemporal Model}\label{fitting-the-spatiotemporal-model}
+\subsection{Fitting the spatiotemporal model}
+\label{sec:hyperparameters}
 
 Software is readily available in many programming languages for fitting Gaussian process models, including inference on the covariance parameters. We chose to use the julia \texttt{GaussianProcesses.jl} package to apply the above spatiotemporal model to the hourly temperatures at four Iowa weather stations.
 The Iowa data set includes 47,864 measurements, which is computationally challenging to fit directly with a single Gaussian process.
 There are many methods to handle large data sets with Gaussian processes: for example \citet{quinonero2007approximation} review sparse approximations to Gaussian processes from a machine learning perspective, while \citet{banerjee2008gaussian} develop a method specifically for large spatial data sets.
-For simplicity, we chose instead to divide the data into 10-day chunks, modeled as independent Gaussian processes with shared hyperparameters.
-We put weak normal priors on \(\mu_{\station{i}}\) with large standard deviation \(\sigma_{\mu}=10\,\degreeC\), which can be incorporated into the Gaussian process with an additional term
+For simplicity, we chose instead to divide the data into 10-day batches, modeled as independent Gaussian processes with shared hyperparameters (see \autoref{appendix:batch_details} for details).
+We put weak normal priors on \(\mu_{\station{i}}\) with large standard deviation \(\sigma_{\mu}=20\,\degreeC\), which can be incorporated into the Gaussian process with an additional term
 \begin{equation}
     k_{\mu}(\xvec, \xvec') = \begin{cases}
 \sigma_\mu^2 &\text{if } \xvec = \xvec'\,, \\
@@ -201,8 +248,7 @@ which we denote \(\kSESE\) to distinguish it from the covariance functions devel
 % 0 &\text{otherwise}\,.
 % \end{cases}
 % \end{equation}
-\label{sec:hyperparameters}
-Our model thus has four free parameters, \(\sigma_{\subtime}\), \(\ell_{\subtime}\), \(\ell_{\subspace}\) and \(\sigman\), which we fit by maximizing the marginal likelihood \( \Pr\del{ \Temp \mid {\sigma_{\subtime},\ell_{\subtime},\ell_{\subspace},\sigman} }\) of \(\Temp\), the complete 2015 temperature time series provided at the four Iowa weather stations.
+Our model thus has four free parameters, \(\sigma_{\subtime}\), \(\ell_{\subtime}\), \(\ell_{\subspace}\) and \(\sigman\), which we fit by maximizing the marginal likelihood \( \prob\del{ \Temp \mid {\sigma_{\subtime},\ell_{\subtime},\ell_{\subspace},\sigman} }\) of \(\Temp\), the complete 2015 temperature time series provided at the four Iowa weather stations.
 We values of the resulting maximum likelihood estimates (MLE) 
 \(\widehat\sigma_{\subtime}\), \(\widehat\ell_{\subtime}\), \(\widehat\ell_{\subspace}\), and \(\widehat\sigman\)
 can be found in \autoref{table:fitted_params}.
@@ -216,7 +262,7 @@ can be found in \autoref{table:fitted_params}.
 % \hline
 % & \multicolumn{19}{c}{Covariance Function Parameters} \\
 % % CHANGE BELOW
- % & \rotcolhead{$\sigman$} & \rotcolhead{$\sigma_\subtime$} & \rotcolhead{$\ell_\subtime$} & \rotcolhead{$\ell_\subspace$} & \rotcolhead{$\sigma_{24}$} & \rotcolhead{$\ell_{24}$} & \rotcolhead{$\ell_{\subspace{}24}$} & \rotcolhead{$\sigma_{\subtime 1}$} & \rotcolhead{$\ell_{\subtime 1}$} & \rotcolhead{$\ell_{\subspace 1}$} & \rotcolhead{$\alpha_{\subtime 1}$} & \rotcolhead{$\sigma_{\subtime 2}$} & \rotcolhead{$\ell_{\subtime 2}$} & \rotcolhead{$\ell_{\subspace 2}$} & \rotcolhead{$\alpha_{\subtime 2}$} & \rotcolhead{$\sigma_{\subtime 3}$} & \rotcolhead{$\ell_{\subtime 3}$} & \rotcolhead{$\ell_{\subspace 3}$} & \rotcolhead{$\alpha_{\subtime 3}$}\\ 
+ % & \rotcolhead{$\sigman$} & \rotcolhead{$\sigma_\subtime$} & \rotcolhead{$\ell_\subtime$} & \rotcolhead{$\ell_\subspace$} & \rotcolhead{$\sigma_{\subdiurn}$} & \rotcolhead{$\ell_{\subdiurn}$} & \rotcolhead{$\ell_{\subspace{}\subdiurn}$} & \rotcolhead{$\sigma_{\subtime 1}$} & \rotcolhead{$\ell_{\subtime 1}$} & \rotcolhead{$\ell_{\subspace 1}$} & \rotcolhead{$\alpha_{\subtime 1}$} & \rotcolhead{$\sigma_{\subtime 2}$} & \rotcolhead{$\ell_{\subtime 2}$} & \rotcolhead{$\ell_{\subspace 2}$} & \rotcolhead{$\alpha_{\subtime 2}$} & \rotcolhead{$\sigma_{\subtime 3}$} & \rotcolhead{$\ell_{\subtime 3}$} & \rotcolhead{$\ell_{\subspace 3}$} & \rotcolhead{$\alpha_{\subtime 3}$}\\ 
 % \hline
 % $\kSESE$ & 0.4 & 3.7 & 2.7 & 176 &  &  &  &  &  &  &  &  &  &  &  &  &  &  & \\ 
 % $\kdiurn$ & 0.4 & 3.1 & 2.8 & 154 & 2.4 & 0.7 & 1414 &  &  &  &  &  &  &  &  &  &  &  & \\ 
@@ -249,9 +295,9 @@ can be found in \autoref{table:fitted_params}.
 % $\ell_\subtime$ &	($\mathrm{hr}$) &	2.7 &	2.8 &	\\ 
 % $\ell_\subspace$ &	($\mathrm{km}$) &	176 &	154 &	\\ 
 % \hline
-% $\sigma_{24}$ &	($\degreeC$) &	 &	2.4 &	2.7\\ 
-% $\ell_{24}$ &	($\mathrm{hr}$) &	 &	0.7 &	0.8\\ 
-% $\ell_{\subspace{}24}$ &	($\mathrm{km}$) &	 &	1414 &	785\\ 
+% $\sigma_{\subdiurn}$ &	($\degreeC$) &	 &	2.4 &	2.7\\ 
+% $\ell_{\subdiurn}$ &	($\mathrm{hr}$) &	 &	0.7 &	0.8\\ 
+% $\ell_{\subspace{}\subdiurn}$ &	($\mathrm{km}$) &	 &	1414 &	785\\ 
 % \hline
 % $\sigma_{\subtime 1}$ &	($\degreeC$) &	 &	 &	0.5\\ 
 % $\ell_{\subtime 1}$ &	($\mathrm{hr}$) &	 &	 &	0.3\\ 
@@ -297,9 +343,9 @@ $\ell_\subtime$ &	($\mathrm{hr}$) &	2.7 &	2.8 &	0.3,\,1.9,\,8.9\\
 $\ell_\subspace$ &	($\mathrm{km}$) &	176 &	154 &	10,\,59,\,370\\ 
 $\alpha_{\subtime}$ &	 &		 &		 &	0.3,\,1.1,\,0.3\\ 
 \hline
-$\sigma_{24}$ &	($\degreeC$) &		 &	2.4 &	2.7\\ 
-$\ell_{24}$ &	($\mathrm{hr}$) &		 &	0.7 &	0.8\\ 
-$\ell_{\subspace{}24}$ &	($\mathrm{km}$) &		 &	1414 &	785\\ 
+$\sigma_{\subdiurn}$ &	($\degreeC$) &		 &	2.4 &	2.7\\ 
+$\ell_{\subdiurn}$ &	($\mathrm{hr}$) &		 &	0.7 &	0.8\\ 
+$\ell_{\subspace{},\subdiurn}$ &	($\mathrm{km}$) &		 &	1414 &	785\\ 
 \hline
 \end{tabular}
 \addtolength{\tabcolsep}{-3pt}  
@@ -313,10 +359,10 @@ $\ell_{\subspace{}24}$ &	($\mathrm{km}$) &		 &	1414 &	785\\
 \end{center}
 \end{table}
     
-\section{Predictions Using Nearby Data}\label{predictions-using-nearby-data}
+\subsection{Predictions using nearby data}
+\label{sec:predict_nearby}
     
 
-\label{sec:predict_nearby}
 \begin{figure}[tb]
 \centering
 \includegraphics[width=0.99\textwidth]{imputations_2x2.pdf}
@@ -345,12 +391,12 @@ The two \(\mathbold{\Sigma}\) matrices have an additional \(\sigman^2\) diagonal
 
 In \autoref{fig:imputations_2x2}(a), we show an example of predictions obtained from this spatio-temporal model. 
 We withheld temperature measurements from KALO (shown in black), and then used data from the three remaining stations (KCID, KDSM and KMCW, shown in orange) to predict the 2015 temperature time series At KALO.
-To speed up computations, we process 73 days of data at a time, with 48 days overlapping between adjacent prediction windows so that predictions can always be made away from the edge of the prediction window (except at the start and end of the year).
+To speed up computations, we process 73 days of data at a time (see \autoref{appendix:batch_details} for details).
 The predictions can be seen to combine information from the three other stations, giving less weight to KDSM, which is furthest away from KALO.
 We will discuss the quality of these predictions in more detail in \autoref{sec:diagnostics}, after completing the exposition of our imputation strategy.
 
-\section{Imputing by Conditioning on Extrema}
-\label{imputations}
+\subsection{Imputing by conditioning on extrema with SmoothHMC}
+\label{sec:smoothHMC}
     
 Our aim is not simply to predict temperatures at a location with no measurements, but rather to impute hourly temperatures at a location with accurate measurements of the daily temperature extrema.
 This is an instance of a more general statistical problem: if a random \(p\)-vector \(\cbr{X_i:~i=1,\dotsc,p}\) has a known distribution \(F_X\), and its maximum \(\Xmax = \max_i\cbr{X_i}\) and minimum \(\Xmin = \min_i\cbr{X_i}\) are measured, how does one draw samples from \(\Fcond\), the distribution of \(X\) conditional on \(\Xmax\) and \(\Xmin\)?
@@ -364,17 +410,17 @@ Ultimately, this rejection sampling strategy is therefore bound to fail.
 
 Markov Chain Monte Carlo (MCMC) techniques can also be used to draw samples from arbitrary distributions with densities known up to a constant. The density of \(\Fcond\) is obtained up to a constant multiplier through a simple application of Bayes' theorem. It is proportional to the prior density of \(F_X\) multiplied by indicators ensuring that the extrema are respected:
 \begin{equation}
-    \Pr\del{X \mid \Xmax,\Xmin} 
-        % \propto \Pr\del{X} \Pr\del{\Xmax,\Xmin \mid X} 
-        \propto \Pr\del{X} \Ind\cbr{ \max_i\cbr{X_i} = \Xmax }\Ind\cbr{ \min_i\cbr{X_i} = \Xmin } \,.
+    \prob\del{X \mid \Xmax,\Xmin} 
+        % \propto \prob\del{X} \prob\del{\Xmax,\Xmin \mid X} 
+        \propto \prob\del{X} \Ind\cbr{ \max_i\cbr{X_i} = \Xmax }\Ind\cbr{ \min_i\cbr{X_i} = \Xmin } \,.
 \label{eq:bayes_exact}
 \end{equation}
 However, once again, this distribution is zero everywhere in \(\mathbb{R}^p\), except in a (p-2) dimensional subspace where the \(\min\) and \(\max\) constraints are met.
 Consequently, out-of-the-box generic MCMC algorithms targeting \autoref{eq:bayes_exact} will not successfully converge to \(\Fcond\).
-We therefore loosen the constraint by replacing the likelihood term \(\Pr\del{\Xmax,\Xmin \mid X}\) with two narrow independent normal distributions around the minimum and maximum of \(X\):
+We therefore loosen the constraint by replacing the likelihood term \(\prob\del{\Xmax,\Xmin \mid X}\) with two narrow independent normal distributions around the minimum and maximum of \(X\):
 \begin{equation}
 \begin{split}
-    \Pr\del{X \mid \Xmax,\Xmin} &\propto \Pr\del{X} 
+    \prob\del{X \mid \Xmax,\Xmin} &\propto \prob\del{X} 
                                          \normal\del{\Xmax \mid \max_i\cbr{X_i}, \epsilon^2}
                                          \normal\del{\Xmin \mid \min_i\cbr{X_i}, \epsilon^2}\,,
 \end{split}
@@ -431,7 +477,7 @@ we found \(k=10\) and \(\epsilon=0.1\,\degreeC\) to perform well for our applica
 Henceforth, we refer to this use of HMC and a smoothmax approximation to the target distribution as SmoothHMC.
 SmoothHMC provides a generally applicable algorithm to draw from any multivariate distribution conditionally on the observed minimum and maximum of its components.
 
-\subsection{Demonstration of SmoothHMC}
+\subsubsection{Demonstration of SmoothHMC}
 \label{sec:toy_example}
 
 \begin{figure}[!tb]
@@ -506,17 +552,18 @@ This visual comparison of the sample and analytical distributions shows that Smo
 We did not examine the behavior of the sampling algorithm for the joint distribution of more than two variables due to the difficulty of visualizing such a distribution,
 but we see no reason to suspect that the algorithm suffers from pathological behaviors that do not appear in these univariate and bivariate inspections.
 
-\subsection{Smoothmax Temperature Model}
+\subsection{Imputations constrained to the daily extrema}
+\label{sec:constrained_imputations}
 
 Armed with the SmoothHMC algorithm implemented in Stan, we now return to the problem of imputing hourly temperature measurements.
 To impute the missing temperatures, we need to draw from the posterior distribution \(\Temp_\miss \mid \Temp_\obs, \Tn, \Tx\).
 Bayes' theorem conditional on \(\Temp_\obs\) gives
 \begin{equation}
-    \Pr\del{\Temp_\miss \mid \Temp_\obs, \Tn, \Tx} = \frac{
-        \Pr\del{\Tn, \Tx \mid \Temp_\obs, \Temp_\miss } 
-        \Pr\del{\Temp_\miss \mid \Temp_\obs}
+    \prob\del{\Temp_\miss \mid \Temp_\obs, \Tn, \Tx} = \frac{
+        \prob\del{\Tn, \Tx \mid \Temp_\obs, \Temp_\miss } 
+        \prob\del{\Temp_\miss \mid \Temp_\obs}
         }{
-        \Pr\del{\Tn, \Tx \mid \Temp_\obs}
+        \prob\del{\Tn, \Tx \mid \Temp_\obs}
         }\,.
 \end{equation}
 The second term in the numerator is the posterior obtained in \autoref{sec:predict_nearby} now acting as a prior.
@@ -554,13 +601,13 @@ To sample from this model with SmoothHMC, we modify it with the \(\softmax\) app
 \end{equation}
 A few samples from this imputation procedure are shown in \autoref{fig:imputations_2x2}(c).
 From May 28, 2015 to June 1, 2015, hourly temperatures are imputed at KALO, using the hourly temperature measurements from nearby stations to inform the course of the temperatures, and constraining the imputations within the \(\Tx\) and \(\Tn\) extracted from the withheld time series at 11:00 each day.
-Imputations are obtained in nine day windows for computational reasons, with three days of overlap between adjacent windows so each imputation can be made at least three days away from the window's edges.
+Imputations are obtained in nine day batches for computational reasons, with three days of overlap between adjacent batches so each imputation can be made at least three days away from the batch's edges (see \autoref{appendix:batch_details} for details).
 One can verify visually that the imputations respect the \(\Tn\) and \(\Tx\) constraints, reaching but not exceeding each extreme on each day.
 Since we actually have hourly data for KALO, yet fed our algorithm only the daily extremes, we can also plot the hidden temperatures (in black), and see how faithfully the imputations reproduce them.
 We see that the imputations indeed track the true measurements closely.
 This success demonstrates that SmoothHMC is capable of imputing temperature time series from the constrained posterior distribution \(\Temp_\miss \mid \Temp_\obs, \Tn, \Tx\).
 
-\section{Model Diagnostics}
+\section{Model diagnostics and improvements}
 \label{sec:diagnostics}
 
 \subsection{Semivariogram}
@@ -602,7 +649,7 @@ Correspondingly, we subtract the mean of each observed time series before obtain
 
 We notice that the semivariogram of the model with product covariance \autoref{eq:ksese} tracks the empirical semivariogram well at short lags, but fails to capture the periodicity in the empirical semivariogram, and the fit degrades at long lag. We improve the model in \autoref{sec:improving_model}.
 
-\subsection{Error and Expected Error}
+\subsection{Error and expected error}
 
 The semivariogram gives us a visual diagnostic of the overall model fit. 
 To quantify the model's predictive ability in the Iowa example, we compare the posterior mean temperature to the withheld truth, and obtain the empirical mean squared error (MSE) for $N$ predictions as:
@@ -649,7 +696,7 @@ Model & \multicolumn{1}{l}{log-} & \(\var(\error)\) & \(\widehat{\var}(\error)\)
 \end{center}
 \end{table}
 
-For our purposes, it is not sufficient for the spatio-temporal model to yield good predictions; we also require a good estimate of its own accuracy.
+For our purposes, it is not sufficient for the spatio-temporal model to yield good point predictions; we also require a good estimate of its own accuracy.
 We estimate the error variance expected by the model by sampling random draws \(\Temp^{(k)}_\miss\), \(k=1,\dotsc,K\) from the multivariate normal posterior distribution \(\Temp_{\miss,i} \mid \Temp_\obs\), and computing the variance between the samples and the posterior expectation:
 \begin{equation}
 \widehat{\var}\del{\error} = \frac{1}{K} \sum_{k=1}^K \var_i \cbr{\Temp^{(k)}_{\miss,i} - \E\del{\Temp_{\miss,i} \mid \Temp_\obs}}
@@ -666,46 +713,48 @@ A well-calibrated model should also have the estimated error variance \autoref{e
 These diagnostics for our first spatio-temporal model, the product of squared exponentials, are found in the first row of \autoref{table:diagnostics}. The error variance using only nearby measurements is already fairly low, with typical errors of order \(\sqrt{1.59}=1.26\,\degreeC\). Incorporating \(\Tn\) and \(\Tx\) using SmoothHMC reduces it further to \(\sqrt{1.12}=1.06\,\degreeC\). 
 However, the model is overly optimistic, and the expected errors underestimate the empirical errors.
 
-\section{Improving the Basic Model}
+\subsection{Improving the basic model}
 \label{sec:improving_model}
 
 In this section, we develop more sophisticated Gaussian process covariances than the simple product of squared exponential kernels \(\kSESE\) \autoref{eq:ksese}. 
-We then assess whether these models improve the semivariogram and the predictive diagnostics that we presented in \autoref{sec:diagnostics}.
+We then assess whether these models improve the semivariogram and the predictive diagnostics that were presented above.
 
 The most salient feature of the empirical semivariogram that is not captured by the \(\kSESE\) covariance is the oscillation with a 24-hour period.
 It is intuitively clear that the diurnal cycle induces this periodic covariance, and that our model should be improved by incorporating this feature.
 Gaussian processes allow for periodic components of the covariance, for example the periodic squared exponential covariance function, which we use with a 24-hour period
 \begin{equation}
-    k_{24}(t,t') = \sigma_{24}^2 \exp\sbr{ - \frac{2}{\ell_{24}^2} \sin^2\del{
+    k_{\subdiurn}(t,t') = \sigma_{\subdiurn}^2 \exp\sbr{ - \frac{2}{\ell_{\subdiurn}^2} \sin^2\del{
         \pi \frac{t-t'}{\text{24 hrs}} 
         }}\,.
     \label{eq:kperiodic}
 \end{equation}
-We modify the spatiotemporal model by adding this diurnal component to it, with its own spatial decay component \(k_{\subspace{}24}\) (with the same form as \(k_{\subspace}\) in \autoref{eq:kspace}, and again with variance parameter fixed to 1):
+We modify the spatiotemporal model by adding this diurnal component to the covariance, with its own spatial decay component \(k_{\subspace{}-\subdiurn}\) (with the same form as \(k_{\subspace}\) in \autoref{eq:squaredexpo}, and again with variance parameter fixed to 1):
 \begin{equation}
     \kdiurn(\xvec,\xvec',t,t') = k_{\subtime}(t,t') \cdot k_{\subspace}(\xvec, \xvec') 
-        + k_{24}(t,t') \cdot k_{\subspace{}24}(\xvec, \xvec')
+        + k_{\subdiurn}(t,t') \cdot k_{\subspace{}-\subdiurn}(\xvec, \xvec')
         + k_\mu(\xvec, \xvec') 
         \,.
     \label{eq:kdiurn}
 \end{equation}
-We also propose a more complex model, which breaks up \(k_{\subtime}\) into short-term, medium-term and long-term correlation components:
+We discuss in more depth our choice of capturing the diurnal cycle in the covariance rather than the mean function in \autoref{appendix:diurnal_kernel}.
+We also propose a more complex model which further relaxes the separability assumption made in our first model.
+We break up \(k_{\subtime}\) into short-term, medium-term and long-term components:
 \begin{equation}
 \begin{aligned}
     \ksumprod(\xvec,\xvec',t,t') &= 
-           k_{\subtime{}1}(t,t') \cdot k_{\subspace{}1}(\xvec, \xvec')  &\text{(short-term variation)} \\
-        &+ k_{\subtime{}2}(t,t') \cdot k_{\subspace{}2}(\xvec, \xvec')  &\text{(medium-term variation)} \\
-        &+ k_{\subtime{}3}(t,t') \cdot k_{\subspace{}3}(\xvec, \xvec')  &\text{(long-term variation)} \\
-        &+ k_{24}(t,t') \cdot k_{\subspace{}24}(\xvec, \xvec') &\text{(diurnal cycle)} \\
+           k_{\subtime{},1}(t,t') \cdot k_{\subspace{},1}(\xvec, \xvec')  &\text{(short-term variation)} \\
+        &+ k_{\subtime{},2}(t,t') \cdot k_{\subspace{},2}(\xvec, \xvec')  &\text{(medium-term variation)} \\
+        &+ k_{\subtime{},3}(t,t') \cdot k_{\subspace{},3}(\xvec, \xvec')  &\text{(long-term variation)} \\
+        &+ k_{\subdiurn}(t,t') \cdot k_{\subspace{}-\subdiurn}(\xvec, \xvec') &\text{(diurnal cycle)} \\
         &+ k_\mu(\xvec, \xvec') &\text{(station mean)}
 \end{aligned}
 \label{eq:sumprod_kernel}
 \end{equation}
-Each of \(k_{\subtime{}1}\), \(k_{\subtime{}2}\), and \(k_{\subtime{}3}\), is a rational quadratic kernel:
+Each of \(k_{\subtime{},1}\), \(k_{\subtime{},2}\), and \(k_{\subtime{},3}\), is a rational quadratic kernel:
 \begin{equation}
     k_{RQ}(t,t') = \sigma^2 \del{1 + \frac{\del{t-t'}^2}{2\alpha\ell^2} }^{-\alpha}
 \end{equation}
-and is multiplied by a spatial decay component, specified as a squared exponential \autoref{eq:kspace} with variance fixed at 1.
+and is multiplied by a spatial decay component, specified as a squared exponential \autoref{eq:squaredexpo} with variance fixed at 1.
 Fitted covariance parameters for \(\kdiurn\) and \(\ksumprod\) are found in \autoref{table:fitted_params}.
 
 We now have three competing Gaussian process models, with covariance functions \(\kSESE\), \(\kdiurn\), and \(\ksumprod\) respectively. 
@@ -724,7 +773,8 @@ We interpret these results as a reminder that prediction accuracy using Gaussian
 Our imputations interpolate the temperatures from nearby stations, further aided by the constraints imposed by the daily \(\Tn\) and \(\Tx\) measurements, which could explain why the choice of model does not seem to have a large impact on the performance of our imputation procedure.
 This insensitivity can be seen as reassuring, as it shows robustness against model misspecification.
 
-\section{Imputed Summary Statistics}
+\section{Results: imputing summary statistics}
+\label{sec:results}
 
 \autoref{fig:imputations_2x2}(d) shows the imputations produced under the \(\ksumprod\) covariance \autoref{eq:sumprod_kernel}.
 This is the primary output of our imputation method, and the results are promising.
@@ -742,21 +792,166 @@ We view as a particular strength of our approach that the imputations are able t
 \caption{\label{fig:imputed_summary_stats}
 Average minimum (left) and maximum (right) daily temperature obtained under varying hour of measurement from KALO data (shown in blue), and from imputations of the withheld data (shown in orange with 2~SD envelope) obtained under the \(\kSESE\) covariance function (top) and the \(\ksumprod\) covariance function (bottom).}
 \end{figure}
-    
+
+
 These imputations however are not the final aim of our analysis.
 Rather, our stated goal is to undo, or at least account for, the sensitivity of summary statistics to measurement time, for example the average \(\Tx\) in \autoref{fig:waterloo_avgTnTx}.
-Equipped with these imputations, is it possible to infer what the value of the summary statistic would have been for different measurement hours?
 This possibility is demonstrated in \autoref{fig:imputed_summary_stats},
 which shows the same summary statistic as in \autoref{fig:waterloo_avgTnTx} applied to the imputations as well as the (withheld) hourly data at KALO.
 It can be seen that the imputed summary statistics track within about 0.1~\(\degreeC\) of the true values.
 The product covariance \(\kSESE\) and the sum of products covariance \(\ksumprod\) seem to perform equally well imputing the summary statistics for different times, but the \(\ksumprod\) gives more honest, wider credible intervals.
 
-\section{Inference on Measurement Hour}\label{inference-on-measurement-hour}
+
+However, the yearly mean of the daily minimum and maximum temperatures is perhaps of limited inherent scientific interest.
+There is however significant interest in the yearly mean temperature $\mean(\Temp_\miss)$,
+which is often approximated as the mean $(\overline{\Tn} + \overline{\Tx})/2$ of all $\Tn$ and $\Tx$.
+This can be a poor estimator, as shown in \autoref{fig:mean_TnTx}, and is susceptible to the time of measurement bias
+which could introduce spurious trends in studies of the mean temperature.
+We will follow the same procedure illustrated in \autoref{fig:paper_in_one_figure}
+using the yearly mean temperature as the summary statistic of interest.
+We further extend the validation procedure to 44 weather stations in the contiguous United States.
+
+\begin{figure}[t]
+    \centering
+    \begin{subfigure}[t]{0.37\textwidth}
+    \includegraphics[width=\textwidth]{mean_TnTx/725080-14740_mean_temp_by_hour.pdf}
+    \caption{
+        \label{fig:mean_TnTx/KBDL} KBDL
+    }
+    \end{subfigure}
+    ~
+    \begin{subfigure}[t]{0.37\textwidth}
+    \includegraphics[width=\textwidth]{mean_TnTx/722350-3940_mean_temp_by_hour.pdf}
+    \caption{
+        \label{fig:mean_TnTx/KJAN} KJAN
+    }
+    \end{subfigure}
+    \caption{
+        \label{fig:mean_TnTx}
+        Estimating the yearly mean temperature by averaging the daily minima and maxima.
+        For each station, the solid line shows the estimate thus obtained as a function of the time at which the daily
+        measurements are made.
+        The dotted horizontal line shows the mean temperature extracted directly from the withheld
+        time series.
+        The range of estimates as a function of measurement time is about $1\degreeC$,
+        which includes the true mean temperature at KBDL (if measurements are made at 5:00~UTC
+        or 12:00~UTC), but not at KJAN, where the true temperature is overestimated irrespective of the
+        measurement time.
+    }
+\end{figure}
+
+The poor coverage of the credible interval at KBDL prompted several improvements to our model, which we now discuss.
+Firstly, we changed the optimization of the hyperparameters to target a site-wise cross-validation metric
+instead of the marginal likelihood.
+Give $J$ stations, let us denote the hourly data at station $J$ by $\Tobs^j$,
+and the hourly data at all other stations in the training set as $\Tobs^{-j}$.
+With this notation, the marginal log likelihood of \autoref{sec:hyperparameters}
+can be written as $\log \prob(\Tobs^1, \dotsc, \Tobs^J \mid \theta)$,
+where $\theta$ is the set of GP hyperparameters to be fitted.
+The cross-validation criterion we propose to optimize is
+\begin{equation}
+    \sum_{j=1}^J \log \prob(\Tobs^j \mid \Tobs^{-j}, \theta)\,,
+    \label{eq:cv_criterion}
+\end{equation}
+which specifically targets the model's ability to predict one station's temperature time series
+based on its neighbors.
+Secondly, we increased the $k$ parameter of the smoothmax approximation to 50,
+which we found has a low computational cost, and yields a significantly more
+accurate approximation of the daily temperature extremes.
+We also extended the duration of each imputation batch to twelve days (see \autoref{appendix:batch_details}).
+Thirdly, we used a Mat\'ern $\nu=3/2$ kernel for the spatial components of the covariance:
+\begin{equation}
+    k_{\subspace{},i}(\xvec, \xvec') = \sigma^2_{\subspace{},i} \del{1 + \frac{\sqrt{3}|\xvec-\xvec'|}{\ell_{\subspace,i}}}\exp\del{-\frac{\sqrt{3}|\xvec-\xvec'|}{\ell_{\subspace,i}}}
+    \,.
+    \label{eq:kmatern}
+\end{equation}
+The squared exponential kernel \autoref{eq:squaredexpo} implies smoothness assumptions
+on the spatial processes that are often considered unrealistic in geophysical applications
+\citep{stein2012interpolation}, and the Mat\'ern family of covariance functions ---
+which approaches the squared exponential when $\nu \to \infty$ ---
+is a popular alternative.
+Fourthly, we introduced a local element to each product of kernels in the covariance \autoref{eq:sumprod_kernel}:
+\begin{equation}
+\begin{aligned}
+    \ksumprod(\xvec,\xvec',t,t') &= 
+           k_{\subprod{},1}(\xvec,\xvec',t,t') + k_{\subprod{},1}(\xvec,\xvec',t,t') + k_{\subprod{},3}(\xvec,\xvec',t,t') \\
+        &+ k_{\subprod{},\subdiurn}(\xvec,\xvec',t,t') + k_\mu(\xvec, \xvec') \\
+    k_{\subprod{},i} &= k_{\subtime{},i}(t,t') \sbr{\sigma_{\sublocal{},i} \delta_{\xvec,\xvec'} +  k_{\subspace{},i}(\xvec,\xvec')}
+    \,,
+\end{aligned}
+\label{eq:maternlocal}
+\end{equation}
+where $\delta_{\xvec,\xvec'}$ is one if two observations are from the same weather station,
+and zero otherwise.
+This explicitly carves out a component of the covariance
+that is strictly local, for example to capture the effect of human activity,
+or of the immediate physical environment of the station.
+
+
+\begin{figure}[tb]
+\centering
+\includegraphics[width=0.99\textwidth]{stations_map_44.pdf}
+\caption{\label{fig:stations_map_44}
+Map of the 44 weather stations used to validate our imputations of the yearly mean temperature.
+Each station is labeled by its ICAO code, and state lines are drawn in orange.}
+\end{figure}
+
+With this improved spatiotemporal model, we obtained imputations at 44 test locations,
+shown in \autoref{fig:stations_map_44}, which were chosen so as to have roughly one location 
+near the center of each state, after removing stations with gaps in the data of more than four hours.
+This is not a requirement to obtain imputations, but it is helpful for validation purposes
+to unambiguously establish the true mean temperature for the year.
+Comparisons of the imputed and true mean temperature are shown in \autoref{fig:infermean_errors}.
+For each station, the orange line and diamond compress the information from \autoref{fig:mean_TnTx},
+indicating the range of possible estimates obtained by averaging $\Tn$ and $\Tx$, and the estimate
+obtained at 17:00~UTC, from which the true value is subtracted (extracted directly from the withheld hourly data).
+We compare this estimate to the mean of all imputations obtained using 
+hourly data from the five nearest station and the $\Tn$ and $\Tx$ data obtained at 17:00~UTC.
+The darker errors bars span $\pm 2$ posterior standard deviations,
+while the lighter errors bars additionally incorporate the estimated for days
+which are not in the same imputation batch.
+See \autoref{appendix:infermean_details} for details of how the posterior standard deviation is implemented.
+
+\begin{figure}[p]
+    \centering
+    \includegraphics[width=0.6\textwidth]{infermean_errors.pdf}
+    \caption{
+        \label{fig:infermean_errors}
+        Estimating the yearly mean temperature by averaging the daily minima and maxima (orange diamond)
+        and by averaging the imputed time series (green, with error bar indicating $\pm$ 2SD),
+        with all measurements made daily at 17:00\ UTC.
+        In lighter shade, we show the error with the augmented covariance matrix
+        which seeks to reflect covariances between days that are in
+        separate imputation batches (see \autoref{appendix:infermean_details}).
+        Each row corresponds to one weather station labeled by its ICAO code.
+        The oranges lines show the range of mean temperatures that can be estimated by averaging the
+        daily minima and maxima measured at different hours (from 1:00 to 24:00).
+    }
+\end{figure}
+
+The results show a clear improvement: averaging $\Tn$ and $\Tx$ is significantly biased upwards, as is expected
+from making the measurements at a warm time of day.
+The imputations allows us to correct this bias, yielding more accurate estimates at all stations
+except KPLN at KPIH.
+The mean absolute error drops from 0.45$\degreeC$ to 0.11$\degreeC$.
+Additionally, the imputation method allows us to quantify the uncertainty in the estimates,
+although the direct implementation of the standard deviation results in poor coverage
+of the credible intervals.
+Incorporating a rough estimate of the long-range covariance between
+temperatures on days which are not part of the same imputation batch
+allows us to better estimate the uncertainty, which significantly
+improves the coverage of the credible intervals.
+KJAX (Jacksonville, Florida) is the only station where the 2~SD interval substantially misses the true temperature.
+As there are no stations further South than Jacksonville in our dataset, and the Atlantic Ocean is to the East,
+this station requires spatial extrapolation, which may explain the poor coverage.
+
+\section{Inference on measurement hour}
+\label{sec:inferhour}
 
 \begin{figure}[tbp]
 \centering
 \includegraphics[width=0.9\textwidth,height=0.4\textheight,keepaspectratio]{measure_hour_example.pdf}
-\caption{\label{fig:measure_hour_example} Constrained and unconstrained imputations in an eight-day window, assuming (top) the correct measurement hour (11:00 UTC-6), and (bottom) a wrong measurement hour (23:00 UTC-6). Assuming the wrong measurement time drives the constrained mean imputation away from the unconstrained mean imputation.}
+\caption{\label{fig:measure_hour_example} Constrained and unconstrained imputations in an eight-day window, assuming (top) the correct measurement hour (11:00 UTC-6), and (bottom) a wrong measurement hour (23:00 UTC-6). Assuming the wrong measurement time drives the constrained mean imputation away from the unconstrained mean prediction.}
 \end{figure}
 
 Our analysis thus far has focused on the case where the hour of measurement \(\hour\) is known in advance.
@@ -788,7 +983,7 @@ This can be interpreted as an indication of an incompatibility between \(\Temp_\
 We therefore propose to calculate the log probability \(\concordance_\hour\) of the mean constrained imputation under the unconstrained posterior given by \(\autoref{eq:unconstrained_post}\), which we interpret as a measure of concordance between \(\Temp_\obs\) and \(\Tn\)/\(\Tx\):
 \begin{equation}
 % \begin{split}
-    \concordance_\hour = \log \Pr\del{ \Temp_\miss \! = \! \mu\del{\hour} \mid \Temp_\obs }
+    \concordance_\hour = \log \prob\del{ \Temp_\miss \! = \! \mu\del{\hour} \mid \Temp_\obs }
     \,\text{, where}\ \,
     \mu\del{\hour} = \E\del{ \Temp_\miss \mid \Temp_\obs, \Tn, \Tx, \hour }\,,
 % \end{split}
@@ -800,7 +995,7 @@ In \autoref{fig:hr_inference}, we demonstrate this method on the withheld KALO t
 has been replaced by \(\Tx\)/\(\Tn\) observations made at \(\hour=11\).
 We use SmoothHMC to impute the withheld data for all of 2015 under each possible measurement hour \(\hour=0,1,\cdots,23\).
 For each set of imputations, we compute the posterior mean \(\mu\del{\hour}\) from the SmoothHMC samples, 
-and the concordance \(\concordance_\hour\) \autoref{eq:concordance} (by necessity, modified to treat the center of each 73-day prediction window as an independent prediction).
+and the concordance \(\concordance_\hour\) \autoref{eq:concordance} (by necessity, modified to treat the center of each 73-day prediction batch as an independent prediction).
 The concordance is highest for the true hour of measurement so that, in this example at least, the correct hour of measurement would be inferred.
 
 \section{Conclusion}\label{sec:conclusion}
@@ -832,15 +1027,23 @@ Future improvements to the imputation strategy would include the inclusion of ro
 Gaussian process modeling allows for much flexibility in the choice of covariance kernels, and improved modeling should lead to more accurate imputations.
 
 The imputed time series are the primary output of this work, but they are intended as a starting point for further analyses motivated by different scientific goals.
-In particular, summary statistics can be applied to the imputations, such as the average \(\Tx\), under different choices of daily measurement hours.
+In particular, summary statistics can be applied to the imputations, such as the mean yearly \(\Tx\) and \(\Tn\), under different choices of daily measurement hours.
 Using imputations obtained for the withheld time series at KALO, we have demonstrated a good ability to recover this information (\autoref{fig:imputed_summary_stats}).
-The average \(\Tx\) or \(\Tn\) is an example of a possible follow-up analysis, chosen mostly as an illustrative proof of concept.
-We plan to use this method to compare the average temperature to the average of the measured \(\Tn\) and \(\Tx\) for a given location and year, with the former estimated using imputed time series.
+We also show that the imputations can be used to recover estimates of the yearly mean temperature (\autoref{fig:infermean_errors})
+more accurate than the mean of the daily \(\Tx\) and \(\Tn\).
+However, we note that the posterior credible intervals of the summary statistic frequently fail to cover the true mean temperature,
+which is an indication that the posterior variance is underestimated.
+We propose that this could be due to the way in which we obtain imputations in 12-day batches, a computational necessity
+that may lead to underestimating the systematic errors common across batches.
+We further demonstrate that incorporating an ad-hoc estimate of the covariance across batches results in good coverage of the credible intervals.
+We also note that the coverage is particulary poor at one station in Florida, which is positioned such that the imputations require extrapolation
+rather than interpolation using the spatiotemporal process, which is expected to be an issue.
+These problems need further investigation in order for the uncertainties derived from the imputations to be robust and reliable.
 
 Lastly, we discussed the possibility of inferring the hour of measurement \(\hour\).
 We gave some intuition for maximizing the concordance \autoref{eq:concordance} in order to infer \(\hour\), and a single example where this strategy is successful.
 While promising, we lack a theoretical justification for this approach.
 It remains to be seen whether our approach is generalizable and successful in other examples, and whether it can be placed on sound theoretical bases.
-Ideally we would wish to estimate the posterior probability \(\Pr\del{\hour \mid \Temp_\obs,\Tn,\Tx}\), for example by sampling from the joint posterior of \(\Temp_\miss, \hour \mid \Temp_\obs,\)\(\Tn\),\(\Tx\), but this is computationally difficult.
+Ideally we would wish to estimate the posterior probability \(\prob\del{\hour \mid \Temp_\obs,\Tn,\Tx}\), for example by sampling from the joint posterior of \(\Temp_\miss, \hour \mid \Temp_\obs,\)\(\Tn\),\(\Tx\), but this is computationally difficult.
 Furthermore, it would be desirable not merely to infer the hour of measurement for an entire year, but to detect changepoints: days on which the measurement practice changed from one hour of measurement to another.
 We leave these improvements to inference of the measurement hour to future work.
