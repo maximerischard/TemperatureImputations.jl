@@ -161,7 +161,7 @@ We argue that this is a good approximation for the present application, except a
 between batches.
 For this reason, we allow some overlap between batches when obtaining predictions,
 so that every prediction is made far away from these boundaries.
-The duration of each batch compromises computational efficiency and the amount of information made
+The duration of each batch is a compromise between computational speed and the amount of information made
 available to each window.
 In our implementation, we used the following batch durations at each stage of the imputation strategy, referring to \autoref{fig:paper_in_one_figure}:
 \begin{enumerate}[label=(\alph*),start=2]
@@ -174,8 +174,7 @@ In our implementation, we used the following batch durations at each stage of th
           is required, so we divide the year of data into 5 equal batches (73 days), with each
           subsequent batch starting a third of the batch duration after the start of the last one.
           \label{step:nearby}
-    \item When constraining imputations with SmoothHMC, we use 9-day (\autoref{sec:constrained_imputations}) or 12-day windows starting and ending
-          at the hour of measurement, so as to avoid partial measurement windows.
+    \item When constraining imputations with SmoothHMC, we use 9-day (\autoref{sec:constrained_imputations}) or 12-day (\autoref{sec:results}) batches, which start and end at the hour of measurement so as to avoid partial measurement windows.
           Each subsequent batch starts a third of the batch duration after the start of the last one.
           The prior mean and covariance from step \ref{step:nearby} is 
           obtained from the \emph{prediction} window that maximizes the buffer on both sides
@@ -254,8 +253,8 @@ where each entry is taken from the batch where the corresponding pair of days
 are furthest from the edges of the batch.
 Pairs of days that are not simulataneously imputed in any imputation batch are
 given a zero covariance.
-For illustration, we show a submatrix of the resulting covariance at KBDL in
-\autoref{fig:infermean_subcov}, which shows the resulting block tridiagonal
+For illustration, we visualize a submatrix of the covariance at KBDL in
+\autoref{fig:infermean_subcov}, which shows the block tridiagonal
 structure of the estimated covariance.
 The estimate of the yearly mean temperature is a weighted sum of the daily posterior means,
 where the weight is proportional to the total duration of time intervals assigned to each day.
@@ -263,7 +262,7 @@ The posterior variance of the estimated is then obtained by $w\trans \Sigma w$,
 where $w$ is the vector of weights (normalized to sum to 1), and $\Sigma$ is the matrix of
 estimated covariances.
 
-\autoref{fig:infermean_covariance} shows that the covariance drops rapidly
+\autoref{fig:infermean_subcov} shows that the covariance drops rapidly
 for days separated by higher lags.
 However, it can also be seen that it does not drop to zero even for entries 11 days apart
 (the maximum lag estimable with 12-day batches).

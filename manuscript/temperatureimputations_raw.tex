@@ -226,7 +226,7 @@ Software is readily available in many programming languages for fitting Gaussian
 The Iowa data set includes 47,864 measurements, which is computationally challenging to fit directly with a single Gaussian process.
 There are many methods to handle large data sets with Gaussian processes: for example \citet{quinonero2007approximation} review sparse approximations to Gaussian processes from a machine learning perspective, while \citet{banerjee2008gaussian} develop a method specifically for large spatial data sets.
 For simplicity, we chose instead to divide the data into 10-day batches, modeled as independent Gaussian processes with shared hyperparameters (see \autoref{appendix:batch_details} for details).
-We put weak normal priors on \(\mu_{\station{i}}\) with large standard deviation \(\sigma_{\mu}=20\,\degreeC\), which can be incorporated into the Gaussian process with an additional term
+We put weak normal priors on \(\mu_{\station{i}}\) with large standard deviation \(\sigma_{\mu}=20\degreeC\), which can be incorporated into the Gaussian process with an additional term
 \begin{equation}
     k_{\mu}(\xvec, \xvec') = \begin{cases}
 \sigma_\mu^2 &\text{if } \xvec = \xvec'\,, \\
@@ -859,7 +859,7 @@ which is concerning.
 The poor coverage of the credible interval at KBDL prompted several improvements to our model, which we now discuss.
 Firstly, we changed the optimization of the hyperparameters to target a site-wise cross-validation metric
 instead of the marginal likelihood.
-Give $J$ stations, let us denote the hourly data at station $J$ by $\Tobs^j$,
+Given $J$ stations, let us denote the hourly data at station $J$ by $\Tobs^j$,
 and the hourly data at all other stations in the training set as $\Tobs^{-j}$.
 With this notation, the marginal log likelihood of \autoref{sec:hyperparameters}
 can be written as $\log \prob(\Tobs^1, \dotsc, \Tobs^J \mid \theta)$,
@@ -920,11 +920,11 @@ to unambiguously establish the true mean temperature for the year.
 Comparisons of the imputed and true mean temperature are shown in \autoref{fig:infermean_errors}.
 For each station, the orange line and diamond compress the information from \autoref{fig:mean_TnTx},
 indicating the range of possible estimates obtained by averaging $\Tn$ and $\Tx$, and the estimate
-obtained at 17:00~UTC, from which the true value is subtracted (extracted directly from the withheld hourly data).
-We compare this estimate to the mean of all imputations obtained using 
-hourly data from the five nearest station and the $\Tn$ and $\Tx$ data obtained at 17:00~UTC.
-The darker errors bars span $\pm 2$ posterior standard deviations,
-while the lighter errors bars additionally incorporate the estimated for days
+obtained if the measurements are at 17:00~UTC each day.
+For ease of visualization, we subtract the true value of the yearly mean temperature (extracted directly from the withheld hourly data) from the estimates.
+We compare this estimate to the mean of all SmoothHMC imputations obtained at the same location.
+The darker errors bars span $\pm 2$ posterior standard deviations on either side of the posterior mean,
+while the lighter errors bars additionally incorporate the estimated covariance for days
 which are not in the same imputation batch.
 See \autoref{appendix:infermean_details} for details of how the posterior standard deviation is implemented.
 
@@ -941,7 +941,7 @@ See \autoref{appendix:infermean_details} for details of how the posterior standa
         separate imputation batches (see \autoref{appendix:infermean_details}).
         Each row corresponds to one weather station labeled by its ICAO code.
         The oranges lines show the range of mean temperatures that can be estimated by averaging the
-        daily minima and maxima measured at different hours (from 1:00 to 24:00).
+        daily minima and maxima measured at different hours of the day.
     }
 \end{figure}
 
