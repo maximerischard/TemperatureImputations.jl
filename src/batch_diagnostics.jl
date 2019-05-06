@@ -150,7 +150,7 @@ end
 
 function read_ts(stan_fw_dir::String)
     ts_path = joinpath(stan_fw_dir, "timestamps.csv")
-    ts = CSV.read(ts_path, DataFrame;  header=[:ts], datarow=1, allowmissing=:none)[:ts]
+    ts = CSV.read(ts_path;  header=[:ts], datarow=1, allowmissing=:none)[:ts]
     ts::Vector{DateTime}
     return ts
 end

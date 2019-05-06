@@ -3,8 +3,8 @@ using CSV
 
 function read_station(usaf::Int, wban::Int, id::Int; data_dir::String=".")
     fn = @sprintf("%06d.%05d.processed.2015.2015.csv", usaf, wban)
-    station_data = CSV.read(joinpath(data_dir, "data2015", fn), DataFrame,
-                            datarow=1,
+    station_data = CSV.read(joinpath(data_dir, "data2015", fn), 
+                            datarow=1, copycols=true,
                             header=[:year, :month, :day, :hour, :min, :seconds, :temp],
                             types=Dict(:year=>Int64, :month=>Int64, :day=>Int64, 
                                        :hour=>Int64, :min=>Int64, :seconds=>Int64,
@@ -25,11 +25,11 @@ function read_station(usaf::Int, wban::Int, id::Int; data_dir::String=".")
 end
 function read_isdList(;data_dir::String=".", epsg::Int=2794)
     # Read stations data
-    # isdList = CSV.read(joinpath(data_dir,"isdList.csv"), DataFrame;
+    # isdList = CSV.read(joinpath(data_dir,"isdList.csv");
         # header=1,
         # weakrefstrings=false
         # )
-    isdList = CSV.read(joinpath(data_dir,"isdList.csv"), DataFrame)
+    isdList = CSV.read(joinpath(data_dir,"isdList.csv"), copycols=true)
 
     # Project onto Euclidean plane
     epsg=Proj4.Projection(Proj4.epsg[epsg])
