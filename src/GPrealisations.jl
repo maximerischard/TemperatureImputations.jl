@@ -1,5 +1,5 @@
 import GaussianProcesses: logp_CVfold, dlogpdθ_CVfold
-using GaussianProcesses: Folds
+using GaussianProcesses: Folds, init_precompute
 
 mutable struct GPRealisations
     reals::Vector{GPE}
@@ -53,10 +53,10 @@ function update_mll!(gpr::GPRealisations)
     gpr.mll = mll
     return mll
 end
-function update_mll_and_dmll!(gpr::GPRealisations, ααinvcKIs::Dict{Int,Matrix}; kwargs...)
+function update_mll_and_dmll!(gpr::GPRealisations, precomp::Dict{Int}; kwargs...)
     mll = 0.0
     for gp in gpr.reals
-        update_mll_and_dmll!(gp, ααinvcKIs[gp.nobs]; kwargs...)
+        update_mll_and_dmll!(gp, precomp[gp.nobs]; kwargs...)
         mll += gp.mll
     end
     gpr.dmll = gpr.reals[1].dmll
@@ -67,23 +67,27 @@ function update_mll_and_dmll!(gpr::GPRealisations, ααinvcKIs::Dict{Int,Matrix}
     return gpr.dmll
 end
 function update_mll_and_dmll!(gpr::GPRealisations; kwargs...)
-    ααinvcKIs = Dict{Int,Matrix}()
+    buf = init_precompute(gpr.reals[1])
+    precomp = Dict{Int,typeof(buf)}()
     for gp in gpr.reals
-        if haskey(ααinvcKIs, gp.nobs)
+        if haskey(precomp, gp.nobs)
             continue
+        else
+            precomp[gp.nobs] = init_precompute(gp)
         end
-        ααinvcKIs[gp.nobs] = Array{Float64}(undef, gp.nobs, gp.nobs)
     end
-    return update_mll_and_dmll!(gpr, ααinvcKIs; kwargs...)
+    return update_mll_and_dmll!(gpr, precomp; kwargs...)
 end
 
 function get_optim_target(gpr::GPRealisations; noise::Bool=true, domean::Bool=true, kern::Bool=true)
-    ααinvcKIs = Dict{Int,Matrix}()
+    buf = init_precompute(gpr.reals[1])
+    precomp = Dict{Int,typeof(buf)}()
     for gp in gpr.reals
-        if haskey(ααinvcKIs, gp.nobs)
+        if haskey(precomp, gp.nobs)
             continue
+        else
+            precomp[gp.nobs] = init_precompute(gp)
         end
-        ααinvcKIs[gp.nobs] = Array{Float64}(undef, gp.nobs, gp.nobs)
     end
     function mll(hyp::Vector{Float64})
         try
@@ -112,7 +116,7 @@ function get_optim_target(gpr::GPRealisations; noise::Bool=true, domean::Bool=tr
     function mll_and_dmll!(grad::Vector{Float64}, hyp::Vector{Float64})
         try
             set_params!(gpr, hyp; noise=noise, domean=domean, kern=kern)
-            update_mll_and_dmll!(gpr, ααinvcKIs; noise=noise, domean=domean, kern=kern)
+            update_mll_and_dmll!(gpr, precomp; noise=noise, domean=domean, kern=kern)
             grad[:] = -gpr.dmll
             if !isfinite(gpr.mll)
                 return Inf
@@ -209,13 +213,6 @@ function dlogpdθ_CVfold(gpr::GPRealisations, folds_reals::Vector{<:Folds}; kwar
 end
 function get_optimCV_target(gpr::GPRealisations, folds_reals::Vector{Folds};
                             whichparams...)
-    ααinvcKIs = Dict{Int,Matrix}()
-    for gp in gpr.reals
-        if haskey(ααinvcKIs, gp.nobs)
-            continue
-        end
-        ααinvcKIs[gp.nobs] = Array{Float64}(undef, gp.nobs, gp.nobs)
-    end
     function logpCV(hyp::Vector{Float64})
         try
             set_params!(gpr, hyp; whichparams...)
