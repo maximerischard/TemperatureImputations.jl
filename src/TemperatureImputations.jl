@@ -1,4 +1,4 @@
-module TempModel
+module TemperatureImputations
     using Statistics: mean
 
     using GaussianProcesses
@@ -29,4 +29,5 @@ module TempModel
     include("variogram.jl")
     include("covariance.jl")
     include("smoothhmc.jl")
-end
+
+end # module
