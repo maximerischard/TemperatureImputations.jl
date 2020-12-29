@@ -1,9 +1,8 @@
 using LinearAlgebra
 using PDMats
 import LogDensityProblems
-import LogDensityProblems: dimension, logdensity
-using LogDensityProblems: Value, ValueGradient
-struct PredictTemperatures <: LogDensityProblems.AbstractLogDensityProblem
+import LogDensityProblems: dimension, logdensity, logdensity_and_gradient
+struct PredictTemperatures
     impt_times_p_day::Vector{Int}
     Tn::Vector{Float64}
     Tx::Vector{Float64}
@@ -99,9 +98,10 @@ function dlogtargetdθ(pt::PredictTemperatures, θ)
     prior = logprior(θ)
     return loglik+prior, dloglik.+dprior
 end
-# LogDensityProblem interface
+# LogDensityProblems interface
 dimension(pt::PredictTemperatures) = pt.Nimpt
-function logdensity(::Type{LogDensityProblems.ValueGradient}, pt::PredictTemperatures, θ::AbstractVector)
+LogDensityProblems.capabilities(::Type{<:PredictTemperatures}) = LogDensityProblems.LogDensityOrder{1}() # can do gradient
+function logdensity_and_gradient(pt::PredictTemperatures, θ::AbstractVector)
     logtarget, dlogtarget = dlogtargetdθ(pt, θ)
     if !isfinite(logtarget)
         logtarget = -Inf
@@ -111,9 +111,9 @@ function logdensity(::Type{LogDensityProblems.ValueGradient}, pt::PredictTempera
         end
         @assert all(isfinite, dlogtarget)
     end
-    return ValueGradient(logtarget, dlogtarget)
+    return logtarget, dlogtarget
 end
-function logdensity(::Type{LogDensityProblems.Value}, pt::PredictTemperatures, θ::AbstractVector)
+function logdensity(pt::PredictTemperatures, θ::AbstractVector)
     val = Value(logtarget(pt, θ))
     if !isfinite(val)
         return -Inf
