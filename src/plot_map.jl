@@ -3,44 +3,50 @@ using Printf
 @pyimport mpl_toolkits.basemap as basemap
 cbbPalette = ["#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7"]
 
-function plot_map(isdSubset, epsg::Int; first_test::Bool=false, arcgis::Bool=false, resolution="l", horizontalalignment="auto")
-    minlon = minimum(isdSubset[:LON])
-    maxlon = maximum(isdSubset[:LON])
-    minlat = minimum(isdSubset[:LAT])
-    maxlat = maximum(isdSubset[:LAT])
-    
-    # add a bit of padding
-    pad = 0.1
-    llcrnrlon = minlon - pad*(maxlon-minlon)
-    llcrnrlat = minlat - pad*(maxlat-minlat)
-    urcrnrlon = maxlon + pad*(maxlon-minlon)
-    urcrnrlat = maxlat + pad*(maxlat-minlat)
-    @show llcrnrlon, urcrnrlon
-    @show llcrnrlat, urcrnrlat
-    @show resolution
+using PyCall
+@pyimport cartopy
+@pyimport cartopy.crs as ccrs
+@pyimport cartopy.feature as cfeature
+@pyimport cartopy.io.img_tiles as cimgt
+@pyimport matplotlib
 
-    map = basemap.Basemap(epsg=epsg, 
-                          llcrnrlon=llcrnrlon, llcrnrlat=llcrnrlat, urcrnrlon=urcrnrlon, urcrnrlat=urcrnrlat, 
-                          resolution=resolution, suppress_ticks=false)
-    if arcgis
-        map[:arcgisimage](service="World_Shaded_Relief", xpixels = 1500, verbose=true, zorder=1, dpi=100)
-    end
-    map[:drawstates](linewidth=1.0, zorder=2, color=cbbPalette[1])
+function plot_map(isdSubset, epsg::Int; first_test::Bool=false, horizontalalignment="auto")
+    crs = cartopy.crs.epsg(epsg)
     
-    llcrnrx, urcrnrx = map[:llcrnrx], map[:urcrnrx]
-    width = urcrnrx - llcrnrx
-    @show llcrnrx, urcrnrx
+    # Create a Stamen terrain background instance.
+    stamen_terrain = cimgt.Stamen("terrain-background")
+    
+    # Create a GeoAxes in the tile's projection.
+    fig = plt.figure()
+    ax = fig.add_subplot(1, 1, 1, projection=crs)
 
-    x_0 = map[:projparams]["x_0"]
-    y_0 = map[:projparams]["y_0"]
-    @show x_0, y_0
-    _xlim = plt.xlim()
-    _ylim = plt.ylim()
+    # Limit the extent of the map to a small longitude/latitude range.
+    xmin = floor(minimum(isdSubset.X_PRJ); digits=-5) # to the nearest 100km
+    xmax = ceil( maximum(isdSubset.X_PRJ)+20e3; digits=-5) # leave room for text labels
+    ymin = floor(minimum(isdSubset.Y_PRJ); digits=-5)
+    ymax = ceil( maximum(isdSubset.Y_PRJ); digits=-5)
+    ax.set_extent([xmin-10e3, xmax+10e3, ymin-10e3, ymax+10e3], crs=crs)
     
+    # Add the Stamen data at zoom level 8.
+    ax.add_image(stamen_terrain, 8)
+    
+    # Add State lines
+    ax.add_feature(cfeature.NaturalEarthFeature(
+        "cultural", "admin_1_states_provinces_lines", "10m",
+        edgecolor="black", facecolor="none"))
+
+    # Tick marks and axis labels
+    fmt_km = matplotlib.ticker.FuncFormatter(py"""lambda x, p: format(x/1000, ",.0f")"""o)
+    ax.set_xticks(range(xmin; stop=xmax, step=50e3))
+    ax.set_yticks(range(ymin; stop=ymax, step=50e3))
+    ax.xaxis.set_major_formatter(fmt_km)
+    ax.yaxis.set_major_formatter(fmt_km)
+    plt.xlabel("Eastings (km)")
+    plt.ylabel("Northings (km)")
+    
+    # Add crosses for each weather station
     for i in 1:nrow(isdSubset)
-        lat, lon = isdSubset[i, :LAT], isdSubset[i, :LON]
-
-        x, y = map(lon, lat)
+        x, y = isdSubset[i, :X_PRJ], isdSubset[i, :Y_PRJ]
         if !ismissing(isdSubset[i, :ICAO])
             label = isdSubset[i, :ICAO]
         else
@@ -48,10 +54,13 @@ function plot_map(isdSubset, epsg::Int; first_test::Bool=false, arcgis::Bool=fal
         end
         if i == 1 && first_test
             plt.plot(x, y, "o", color=cbbPalette[6], zorder=4)
+            plt.plot(x, y, "o", color=cbbPalette[6],
+                     transform=crs)
         else
-            plt.plot(x, y, "x", color="black", zorder=4)
+            plt.plot(x, y, "x", color="black",
+                     transform=crs)
         end
-        if lon > (llcrnrlon+urcrnrlon)/2
+        if x > (xmin+xmax)/2
             # align right
             plt.annotate(label, xy=(x, y),  xycoords="data",
                             xytext=(0, 5), textcoords="offset points",
@@ -70,21 +79,10 @@ function plot_map(isdSubset, epsg::Int; first_test::Bool=false, arcgis::Bool=fal
                             )
         end
     end
-
-    # assumes EPSG unit is meters
-    _xticks = plt.xticks()[1]
-    plt.xticks(_xticks, [@sprintf("%.0f", x/1000) for x in _xticks])
-    _yticks = plt.yticks()[1]
-    plt.yticks(_yticks, [@sprintf("%.0f", x/1000) for x in _yticks])
-    plt.xlabel("Eastings (km)")
-    plt.ylabel("Northings (km)")
-    plt.xlim(_xlim)
-    plt.ylim(_ylim)
-    plt.text(0.99, 0.01, "Esri, HERE, Garmin, FAO, NOAA | Copyright: 2014 Esri",
+    plt.text(0.99, 0.01, "Map tiles by Stamen Design, under CC BY 3.0. Data © OpenStreetMap contributors.",
         horizontalalignment="right",
         verticalalignment="bottom",
         fontsize=5,
         bbox=Dict(:edgecolor=>"none",:facecolor=>"white", :alpha=>0.7, :pad=>1.0),
         transform = plt.gca()[:transAxes],)
 end
-;
