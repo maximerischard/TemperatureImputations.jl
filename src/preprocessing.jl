@@ -23,7 +23,7 @@ function read_station(usaf::Int, wban::Int, id::Int; data_dir::String=".")
     station_data[!,:station] .= id
     return station_data
 end
-function read_isdList(;data_dir::String=".", epsg::Int=2794)
+function read_isdList(;data_dir::String=".", epsg::Int)
     # Read stations data
     # isdList = CSV.read(joinpath(data_dir,"isdList.csv");
         # header=1,
