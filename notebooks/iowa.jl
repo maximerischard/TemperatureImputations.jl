@@ -39,6 +39,7 @@ function prepare_iowa_data(data_dir)
         :TnTx => TnTx,
         :hourly_train => hourly_train,
         :hourly_test => hourly_test,
+        :hr_measure => hr_measure,
        )
 end
 
