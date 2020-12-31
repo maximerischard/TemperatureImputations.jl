@@ -12,3 +12,4 @@ TemperatureImputations_files/
 *.fls
 tmp
 */tmp
+notebooks/stan_tmpdir
