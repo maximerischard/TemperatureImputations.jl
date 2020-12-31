@@ -10,9 +10,9 @@ function prep_data(nearby_pred::NearbyPrediction, TnTx::DataFrame,
     # for each 
     ts_window_day = [measurement_date(dt, hr_measure) for dt in ts_window]
     window_days = collect(date_start:Day(1):date_end)
-    window_TnTx=TnTx[[d ∈ window_days for d in TnTx[:ts_day]],:]
+    window_TnTx=TnTx[[d ∈ window_days for d in TnTx.ts_day],:]
 
-    mean_TnTx = (mean(window_TnTx[:Tn]) + mean(window_TnTx[:Tx])) / 2
+    mean_TnTx = (mean(window_TnTx.Tn) + mean(window_TnTx.Tx)) / 2
     shifted_μ = μ_window .+ mean_TnTx .- mean(μ_window)
 
     day_impute = Day.(ts_window_day .- minimum(ts_window_day))
@@ -20,11 +20,11 @@ function prep_data(nearby_pred::NearbyPrediction, TnTx::DataFrame,
     # day_impute = convert(Vector{Int}, Dates.value(ts_window_day .- minimum(ts_window_day))+1
     imputation_data = Dict(
         "N_TxTn" => nrow(window_TnTx),
-        "Tn" => window_TnTx[:Tn],
-        "Tx" => window_TnTx[:Tx],
+        "Tn" => window_TnTx.Tn,
+        "Tx" => window_TnTx.Tx,
         "Nimpt" => sum(in_window),
         "day_impute" => day_impute_numeric,
-        "impt_times_p_day" => window_TnTx[:times_p_day],
+        "impt_times_p_day" => window_TnTx.times_p_day,
         "predicted_mean" => shifted_μ,
         "predicted_cov" => Σ_window.mat,
         "predicted_cov_chol" => Matrix(Σ_window.chol.L),
@@ -99,15 +99,17 @@ function get_imputation_model(; pdir=pwd(), seed::Int)
             Tx ~ normal(Tsmoothmax, epsilon);
         }
     """
-    stanmodel = Stanmodel(;
-            name="imputation", 
-            model=imputation_model, 
-            random=CmdStan.Random(seed),
-            nchains=4,
-            num_warmup=1000,
-            num_samples=1000,
-            pdir=pdir, 
-        )
+    stanmodel = StanSample.SampleModel(
+            "imputation",
+            imputation_model,
+            [4];
+            seed=StanBase.RandomSeed(seed),
+            method=StanSample.Sample(
+                save_warmup=false,
+                num_warmup=1000,
+                num_samples=1000,
+                thin=1),
+            tmpdir=pdir)
     return stanmodel
 end
 

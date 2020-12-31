@@ -12,7 +12,7 @@ module TemperatureImputations
     using PDMats
     using Optim
     using Optim: minimizer
-    using CmdStan
+    import StanBase, StanSample
     import Proj4
     import NLopt
     using Dates: Day, Hour, DateTime, Date, Millisecond, value
