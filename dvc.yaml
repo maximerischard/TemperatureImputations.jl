@@ -1,0 +1,12 @@
+stages:
+  choose_test_stations:
+    cmd: julia --project=batch batch/choose_test_stations.jl ./data ./data/test_stations.csv
+      --epsg=5072 --maxgap=4
+    deps:
+    - batch/choose_test_stations.jl
+    - data/data2015
+    - data/isdList.csv
+    - src/preprocessing.jl
+    outs:
+    - data/test_stations.csv:
+        cache: false

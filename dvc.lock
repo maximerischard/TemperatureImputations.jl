@@ -1,0 +1,21 @@
+choose_test_stations:
+  cmd: julia --project=batch batch/choose_test_stations.jl ./data ./data/test_stations.csv
+    --epsg=5072 --maxgap=4
+  deps:
+  - path: batch/choose_test_stations.jl
+    md5: 7d2c2ef31c313ac8d609c777e92660c9
+    size: 3099
+  - path: data/data2015
+    md5: 7876b43292fe2bc1574b5c2af227d9fc.dir
+    size: 93761823
+    nfiles: 315
+  - path: data/isdList.csv
+    md5: 630e8b052daf8fc71b0ad7a3cbd2c350
+    size: 290180
+  - path: src/preprocessing.jl
+    md5: 8c08ea5e01f5c477c90126e102dbb406
+    size: 3941
+  outs:
+  - path: data/test_stations.csv
+    md5: a7cba2e87ba74058b07af8c9a7bcea51
+    size: 5527
