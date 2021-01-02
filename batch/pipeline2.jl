@@ -9,22 +9,21 @@ doc = """
         pipeline2.jl impute <ICAO> <model> <windownum> <data_dir> <save_dir> [options]
         pipeline2.jl outputdir <ICAO> <model> <windownum> <data_dir> <save_dir> [options]
 
-    --seed=<seed>
-    --ksmoothmax=<ksmoothmax>
-    --epsilon=<epsilon>
-    [--cheat]
-    [--crossval]
+    Options:
+        --seed=<seed>
+        --ksmoothmax=<ksmoothmax>
+        --epsilon=<epsilon>
+        [--crossval]
 """
 using DocOpt
 arguments = docopt(doc)
-using CmdStan
+using StanSample
 using Dates
 using Dates: Day, Hour, Date, DateTime
 using JLD
 using CSV
 import TemperatureImputations
 using LinearAlgebra
-using PDMats
 using DataFrames
 using Printf
 using Statistics
@@ -38,7 +37,6 @@ data_dir = joinpath(data_dir)
 windownum = parse(Int, arguments["<windownum>"])
 ICAO = arguments["<ICAO>"]
 GPmodel = arguments["<model>"]
-cheat = arguments["--cheat"]
 seed = parse(Int, arguments["--seed"])
 ksmoothmax = parse(Float64, arguments["--ksmoothmax"])
 epsilon = parse(Float64, arguments["--epsilon"])
@@ -143,52 +141,11 @@ nearby_dir = joinpath(save_dir, "predictions_from_nearby", crossval ? "crossval"
 nearby_path =  joinpath(nearby_dir, predictions_fname(USAF, WBAN, ICAO, best_window))
 @show nearby_path
 nearby_pred=load(nearby_path)["nearby_pred"];
-"""
-    In order to test whether the overestimated variance is causing
-    the bias in yearly imputed mean temperatures, I'm going
-    to rescale the predictive variances down so the
-    standardized errors have variance 1.
-    The function name is meant as a reminder that this is not
-    an actual solution, just a diagnostic, as it requires
-    access to the very truth that we are ultimately trying to impute.
-"""
-function variancecheat(nearby::TemperatureImputations.NearbyPrediction, truth::DataFrame)
-    μ, Σ, nearbyts = nearby.μ, nearby.Σ, nearby.ts
-    nobsv = length(nearbyts)
-    centering = Matrix(1.0I, nobsv, nobsv) .- (1.0/nobsv)
-    Σcentered = centering * Matrix(Σ) * centering
-    Σmeanshift = Matrix(Σ) .- Σcentered
-    
-    # find the corresponding indices in `truth`
-    ifirst = findfirst(isequal(nearbyts[1]), truth[:ts])
-    ilast = ifirst + nobsv - 1
-    @assert nearbyts[end] == truth[:ts][ilast]
-    
-    error = truth[ifirst:ilast,:temp] .- μ
-    error .-= mean(error)
-    stdpred = sqrt.(diag(Σcentered))
-    sigma = error ./ stdpred
-    @show mean(sigma), std(sigma) # should be 0,1
-    scale = var(sigma)
-    Σscaled = scale .* Σcentered
-    
-    # add some variance back in for an overall shift
-    Σreshifted = Σscaled .+ mean(Σmeanshift) + 1e-12*I
-    return TemperatureImputations.NearbyPrediction(nearbyts, μ, PDMats.PDMat(Symmetric(Σreshifted)))
-end
-if cheat
-    @warn("THIS IS CHEATING!")
-    truth = TemperatureImputations.read_Stations(test_station; data_dir=data_dir)
-    global nearby_pred = variancecheat(nearby_pred, truth)
-end
 
 start_date = Date(stan_window.start_date)+Day(1) # date of first measurement
 imputation_data, ts_window = TemperatureImputations.prep_data(nearby_pred, TnTx, start_date, hr_measure, stan_days; ksmoothmax=ksmoothmax, epsilon=epsilon)
 
 
-if cheat
-    stan_dir = joinpath(save_dir,"stan_fit", GPmodel, "cheat", stan_dirname(USAF, WBAN, ICAO, stan_window))
-end
 if !isdir(stan_dir)
     mkpath(stan_dir)
 end
