@@ -10,3 +10,47 @@ stages:
     outs:
     - data/test_stations.csv:
         cache: false
+  kernelfit_KMOB_SExSE:
+    cmd: julia --project=batch batch/pipeline0_kernelfit.jl KMOB SExSE ./data ./data/outputs
+      --timelimit=Inf --knearest=5
+    deps:
+    - batch/pipeline0_kernelfit.jl
+    - data/data2015
+    - src/preprocessing.jl
+    outs:
+    - data/outputs/fitted_kernel/mll/SExSE/hyperparams_SExSE_KMOB.json:
+        cache: false
+  kernelfit_KINW_SExSE:
+    cmd: julia --project=batch batch/pipeline0_kernelfit.jl KINW SExSE ./data ./data/outputs
+      --timelimit=Inf --knearest=5
+    deps:
+    - batch/pipeline0_kernelfit.jl
+    - data/data2015
+    - src/preprocessing.jl
+    outs:
+    - data/outputs/fitted_kernel/mll/SExSE/hyperparams_SExSE_KINW.json:
+        cache: false
+  nearby_predictions_KINW_SExSE:
+    cmd: julia --project=batch batch/pipeline1.jl KINW SExSE ./data ./data/outputs
+      --knearest=5
+    deps:
+    - batch/pipeline1.jl
+    - data/data2015
+    - data/outputs/fitted_kernel/mll/SExSE/hyperparams_SExSE_KINW.json
+    - src/GPrealisations.jl
+    - src/predict_from_nearby.jl
+    - src/preprocessing.jl
+    outs:
+    - data/outputs/predictions_from_nearby/mll/SExSE/KINW
+  nearby_predictions_KMOB_SExSE:
+    cmd: julia --project=batch batch/pipeline1.jl KMOB SExSE ./data ./data/outputs
+      --knearest=5
+    deps:
+    - batch/pipeline1.jl
+    - data/data2015
+    - data/outputs/fitted_kernel/mll/SExSE/hyperparams_SExSE_KMOB.json
+    - src/GPrealisations.jl
+    - src/predict_from_nearby.jl
+    - src/preprocessing.jl
+    outs:
+    - data/outputs/predictions_from_nearby/mll/SExSE/KMOB
