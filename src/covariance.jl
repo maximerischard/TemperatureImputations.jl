@@ -8,32 +8,32 @@ function make_chunks_and_folds(k_spatiotemporal::Kernel, logNoise::Float64,
     chunk_width=24*(window/Day(1))
     tstart=0.0
     nobsv=0
-    max_time = maximum(hourly_data[:ts_hours])
+    max_time = maximum(hourly_data.ts_hours)
     println("creating GP chunks")
     folds_reals = Folds[]
     while tstart < max_time
         tend=tstart+chunk_width
-        in_chunk= tstart .<= hourly_data[:ts_hours] .< tend
+        in_chunk= tstart .<= hourly_data.ts_hours .< tend
         hourly_chunk = hourly_data[in_chunk,:]
         nobsv_chunk = sum(in_chunk)
         nobsv += nobsv_chunk
 
-        chunk_X_PRJ = stations_data[:X_PRJ][hourly_chunk[:station]]
-        chunk_Y_PRJ = stations_data[:Y_PRJ][hourly_chunk[:station]]
-        chunk_X = [hourly_chunk[:ts_hours] chunk_X_PRJ chunk_Y_PRJ]
+        chunk_X_PRJ = stations_data.X_PRJ[hourly_chunk.station]
+        chunk_Y_PRJ = stations_data.Y_PRJ[hourly_chunk.station]
+        chunk_X = [hourly_chunk.ts_hours chunk_X_PRJ chunk_Y_PRJ]
 
-        y = hourly_chunk[:temp]
+        y = hourly_chunk.temp
         chunk = GPE(chunk_X', y, MeanConst(mean(y)), k_spatiotemporal, logNoise)
         push!(chunks, chunk)
         
-        station = hourly_chunk[:station]
+        station = hourly_chunk.station
         chunk_folds = [findall(isequal(statuniq), station) 
                 for statuniq in unique(station)]
         push!(folds_reals, chunk_folds)
 
         tstart=tend
     end
-    reals = TempModel.GPRealisations(chunks)
+    reals = TemperatureImputations.GPRealisations(chunks)
     return reals, folds_reals
 end
 
@@ -49,11 +49,11 @@ function optim_kernel(k_spatiotemporal::Kernel, logNoise_init::Float64,
     local opt_out
     println("begin optimization")
     if method == :NLopt
-        min_neg_ll, min_hyp, ret, count = TempModel.optimize_NLopt(reals, domean=false, kern=true, noise=true, x_tol=x_tol, f_tol=f_tol)
+        min_neg_ll, min_hyp, ret, count = TemperatureImputations.optimize_NLopt(reals, domean=false, kern=true, noise=true, x_tol=x_tol, f_tol=f_tol)
         opt_out = (min_neg_ll, min_hyp, ret, count)
         converged = ret ∈ (:SUCCESS, :FTOL_REACHED, :XTOL_REACHED)
     elseif method == :Optim
-        opt_out = TempModel.optimize!(reals; domean=false, kern=true, noise=true,
+        opt_out = TemperatureImputations.optimize!(reals; domean=false, kern=true, noise=true,
                                       options=Optim.Options(;x_tol=x_tol, f_tol=f_tol, kwargs...)
                                      )
         min_hyp = Optim.minimizer(opt_out)
@@ -84,14 +84,14 @@ function optim_kernel_CV(k_spatiotemporal::Kernel, logNoise_init::Float64,
     local opt_out
     println("begin optimization")
     if method == :NLopt
-        min_neg_ll, min_hyp, ret, count = TempModel.optimize_NLopt_CV(
+        min_neg_ll, min_hyp, ret, count = TemperatureImputations.optimize_NLopt_CV(
                 reals, folds_reals,
                 domean=false, kern=true, noise=true,
                 x_tol=x_tol, f_tol=f_tol)
         opt_out = (min_neg_ll, min_hyp, ret, count)
         converged = ret ∈ (:SUCCESS, :FTOL_REACHED, :XTOL_REACHED)
     elseif method == :Optim
-        opt_out = TempModel.optimize_CV!(reals, folds_reals;
+        opt_out = TemperatureImputations.optimize_CV!(reals, folds_reals;
                 domean=false, kern=true, noise=true,
                 options=Optim.Options(;x_tol=x_tol, f_tol=f_tol, kwargs...)
                                      )

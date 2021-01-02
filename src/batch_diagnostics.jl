@@ -78,7 +78,7 @@ function get_nearby(fw::FittingWindow, GPmodel::AbstractString, usaf::Int, wban:
     return nearby_pred
 end
 
-function print_diagnostics(nearby::TempModel.NearbyPrediction,
+function print_diagnostics(nearby::TemperatureImputations.NearbyPrediction,
         test_data, train_data; ndraws=10000)
     ts = nearby.ts
     ts_start = minimum(ts)
@@ -114,7 +114,7 @@ function t_inside_wt(t::DateTime, wt::WindowTime)
     return wt.start_time <= t <= wt.end_time
 end
 function t_inside_fw(t::DateTime, fw::FittingWindow, hr_measure::Hour)
-    measure_day = TempModel.measurement_date(t, hr_measure)
+    measure_day = TemperatureImputations.measurement_date(t, hr_measure)
     in_window = fw.start_date <= measure_day <= fw.end_date-Day(1)
     return in_window
 end
@@ -367,7 +367,7 @@ function +(diag1::NearbyPredDiagnostic,diag2::NearbyPredDiagnostic)
         )
 end
 function get_diagnostics(
-        nearby::TempModel.NearbyPrediction, 
+        nearby::TemperatureImputations.NearbyPrediction, 
         test_data, 
         ts_start::DateTime, ts_end::DateTime; 
         ndraws=10000)

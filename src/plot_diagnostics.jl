@@ -30,8 +30,8 @@ end
 
 function plot_TnTx(hourly_data, station, hr_measure, local_time::Function; linewidth=3, zorder=-1, kwargs...)
     hourly_test = hourly_data[hourly_data[:station] .== station, :]
-    TnTx = TempModel.test_data(hourly_test, station, hr_measure)
-    hourly_test[:ts_day] = TempModel.measurement_date.(hourly_test[:ts], hr_measure)
+    TnTx = TemperatureImputations.test_data(hourly_test, station, hr_measure)
+    hourly_test[:ts_day] = TemperatureImputations.measurement_date.(hourly_test[:ts], hr_measure)
     hourly_TnTx = join(hourly_test, TnTx, on=:ts_day)
     local_ts = local_time.(hourly_TnTx[:ts])
     plt.plot(local_ts, hourly_TnTx[:Tn], # where="pre",
@@ -74,7 +74,7 @@ function plot_neighbours(train_data, stations_metadata, local_time::Function, xl
     end
 end
 function plot_predictive(
-        nearby_pred::TempModel.NearbyPrediction, 
+        nearby_pred::TemperatureImputations.NearbyPrediction, 
         test_data, train_data, stations_metadata,
         local_time::Function,
         xlim::Tuple{DateTime,DateTime};
@@ -159,7 +159,7 @@ function plot_predictive(
     plt.gcf()[:autofmt_xdate]()
     plt.xlim(local_time.(xlim))
 end
-function plot_residuals(nearby::TempModel.NearbyPrediction, test_data)
+function plot_residuals(nearby::TemperatureImputations.NearbyPrediction, test_data)
     ts = nearby.ts
     ts_start = minimum(ts)
     ts_end = maximum(ts)
