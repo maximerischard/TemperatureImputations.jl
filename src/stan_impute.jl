@@ -117,13 +117,39 @@ end
  # convenience function to extract the imputed temperatures
  # from the STAN model object
 # """
-# function get_temperatures(sim::Mamba.Chains)
-    # temp_varnames=[@sprintf("temp_impt.%d", i) for i in 1:imputation_data["Nimpt"]]
-    # temp_samples=getindex(sim, :, temp_varnames, :).value
-    # return temp_samples
-# end
+# convenience function to extract the imputed temperatures
 function get_temperatures_reparam(chains::DataFrame)
     temp_varnames = [h for h in names(chains) if startswith(h, "temp_impt.")]
-    temp_samples=getindex(chains, :, temp_varnames, :)
+    temp_samples=getindex(chains, :, temp_varnames, :) # this doesn't look right
     return temp_samples
+end
+function get_param_names(chains::AxisArrays.AxisArray)
+    # there should be a more elegant way to obtain the names of an axis
+    PARAM = AxisArrays.Axis{:var}
+    jparam = AxisArrays.axisdim(chains, PARAM)
+    param_axis = AxisArrays.axes(chains)[jparam]
+    param_names = AxisArrays.axisvalues(param_axis)[1]
+    return param_names
+end
+function get_temperatures_reparam(chains::AxisArrays.AxisArray)
+    param_names = get_param_names(chains)
+    temp_varnames = [h for h in param_names if startswith(h, "temp_impt.")]
+    temp_samples = chains[var=temp_varnames]
+    return temp_samples
+end
+
+function get_temp_percentiles(temp_impute)
+    stacked_impute=vcat((temp_impute[:,:,i] for i in 1:size(temp_impute,3))...)
+    sorted_impute = sort(stacked_impute, dims=1)
+    nsamples=size(sorted_impute,1)
+    # extract  10th and 90th percentiles
+    # of the imputations
+    imputed_10 = sorted_impute[div(nsamples,10), :]
+    imputed_90 = sorted_impute[nsamples-div(nsamples,10), :]
+    return imputed_10, imputed_90
+end
+function get_temp_mean(temp_impute)
+    stacked_impute=vcat((temp_impute[:,:,i] for i in 1:size(temp_impute,3))...)
+    μ = vec(mean(stacked_impute, dims=1))
+    return μ
 end

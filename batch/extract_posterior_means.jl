@@ -17,7 +17,6 @@ using DataFrames
 using Statistics
 using Printf
 
-
 arguments = docopt(doc)
 ICAO = arguments["<ICAO>"]
 @show ICAO

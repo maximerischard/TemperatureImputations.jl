@@ -1,24 +1,3 @@
-import Base.+
-using TimeSeries
-using DataFrames
-using CSV
-using GaussianProcesses
-#=using GaussianProcesses: Mean, Kernel, evaluate, metric, IsotropicData=#
-#=using GaussianProcesses: Stationary, KernelData, predict=#
-#=import GaussianProcesses: num_params, set_params!, get_params, update_mll!, update_mll_and_dmll!=#
-#=import GaussianProcesses: get_param_names=#
-#=import Proj4=#
-import PDMats
-# import Mamba
-using JLD
-#=using Distances=#
-using AxisArrays
-using DataFrames: by, head
-using Dates: tonext, Hour, Day
-using LinearAlgebra: cholesky!, Hermitian
-using LinearAlgebra
-using Random
-using Printf
 
 
 function subset(df, from, to; closed_start=true, closed_end=true)
@@ -164,46 +143,11 @@ function read_ts(fw::FittingWindow, GPmodel::AbstractString, hr_measure_fals::Ho
     stan_model_dir = joinpath(SAVED_DIR, "hr_measure", GPmodel, str_hour(hr_measure_fals))
     return read_ts(joinpath(stan_model_dir, stan_fw_dir))
 end
-function read_samples_csv(samples_path::String)
-    types = Dict(:lp__ => Float64, :accept_stat__ => Float64,
-                 :stepsize__ => Float64, :treedepth__ => Int64,
-                 :n_leapfrog__ => Int64, :divergent__ => Int64,
-                 :energy__ => Float64)
-    for i in 1:1000 # arbitrary number of times
-        types[Symbol("w_uncorr.", i)] = Float64
-        types[Symbol("temp_impt.", i)] = Float64
-        types[Symbol("Tsmoothmin.", i)] = Float64
-        types[Symbol("Tsmoothmax.", i)] = Float64
-    end
-    samples_df = CSV.File(samples_path, 
-            comment="#",
-            header=38, # hacky pending https://github.com/JuliaData/CSV.jl/issues/351
-            skipto=43, # hacky
-            allowmissing=:none, types=types,
-            ) |> DataFrame;
-    data = Matrix{Float64}(samples_df)
-    header = String.(names(samples_df))
-    # DelimitedFiles.readdlm is too slow
-    # data, header = DelimitedFiles.readdlm(samples_path, ',', Float64, '\n'; comments=true, header=true) 
-    return data, header
-end
 function get_chains_and_ts(stan_fw_dir::String)
-    stan_window_files = readdir(stan_fw_dir)
-    samplefiles = [joinpath(stan_fw_dir, f) for 
-        f in stan_window_files if 
-        (startswith(f,"imputation_samples") &
-        endswith(f,".csv"))]
-    header=String[]
-    all_samples=Matrix{Float64}[]
-    for sf in samplefiles
-        s, header = read_samples_csv(sf)
-        push!(all_samples, s)
+    chains = let
+        imputation_model = get_imputation_model(;pdir=stan_fw_dir, seed=-1)
+        StanSample.read_samples(imputation_model; output_format=:mcmcchains)
     end
-
-    samples = cat(all_samples..., dims=3)
-    # chains = Mamba.Chains(samples; start=1, thin=1, chains=[i for i in 1:4], names=vec(header))
-    chains = Chains(samples, vec(header))
-    
     ts = read_ts(stan_fw_dir)
     return chains, ts
 end
@@ -219,51 +163,6 @@ function get_chains_and_ts(fw::FittingWindow, GPmodel::AbstractString, hr_measur
     stan_fw_dir = joinpath(stan_model_dir, stan_dirname(usaf, wban, icao, fw))
     return get_chains_and_ts(usaf, wban, icao, stan_fw_dir)
 end
-
-# convenience function to extract the imputed temperatures
-# from the Mamba Chains object
-# function get_temperatures_reparam(chains::Mamba.Chains)
-    # temp_varnames = [h for h in chains.names if startswith(h, "temp_impt.")]
-    # temp_samples=getindex(chains, :, temp_varnames, :).value
-    # return temp_samples
-# end
-function get_temperatures_reparam(chains::DataFrame)
-    temp_varnames = [h for h in names(chains) if startswith(h, "temp_impt.")]
-    temp_samples=getindex(chains, :, temp_varnames, :)
-    return temp_samples
-end
-function get_param_names(chains::AxisArray)
-    # there should be a more elegant way to obtain the names of an axis
-    PARAM = Axis{:param}
-    jparam = axisdim(chains, PARAM)
-    param_axis = AxisArrays.axes(chains)[jparam]
-    param_names = axisvalues(param_axis)[1]
-    return param_names
-end
-function get_temperatures_reparam(chains::AxisArray)
-    # next 4 lines: tedious way to get names of parameters
-    param_names = get_param_names(chains)
-    temp_varnames = [h for h in param_names if startswith(h, "temp_impt.")]
-    temp_samples = view(chains, :, Axis{:param}(temp_varnames), :)
-    return temp_samples
-end
-
-function get_temp_percentiles(temp_impute)
-    stacked_impute=vcat((temp_impute[:,:,i] for i in 1:size(temp_impute,3))...)
-    sorted_impute = sort(stacked_impute, dims=1)
-    nsamples=size(sorted_impute,1)
-    # extract  10th and 90th percentiles
-    # of the imputations
-    imputed_10 = sorted_impute[div(nsamples,10), :]
-    imputed_90 = sorted_impute[nsamples-div(nsamples,10), :]
-    return imputed_10, imputed_90
-end
-function get_temp_mean(temp_impute)
-    stacked_impute=vcat((temp_impute[:,:,i] for i in 1:size(temp_impute,3))...)
-    μ = vec(mean(stacked_impute, dims=1))
-    return μ
-end
-
 
 mse(yhat::Vector,y::Vector) = mean((y.-yhat).^2)
 verr(yhat::Vector,y::Vector) = var(y.-yhat)

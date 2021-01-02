@@ -9,7 +9,7 @@ doc = """
         pipeline2.jl (outputdir|compilestan|impute) <ICAO> <model> <windownum> <data_dir> <save_dir> [options] [--crossval]
 
     Options:
-        --seed=<seed>
+        --seed=<seed>  Random seed for Stan.  [default: -1]
         --ksmoothmax=<ksmoothmax>
         --epsilon=<epsilon>
 """
@@ -26,6 +26,14 @@ using DataFrames
 using Printf
 using Statistics
 
+function parse_if_not_empty(T, arg)
+    if arg != ""
+        return parse(T, arg)
+    else
+        return nothing
+    end
+end
+
 save_dir = arguments["<save_dir>"]
 save_dir = joinpath(save_dir)
 @assert isdir(save_dir)
@@ -34,9 +42,9 @@ data_dir = joinpath(data_dir)
 windownum = parse(Int, arguments["<windownum>"])
 ICAO = arguments["<ICAO>"]
 GPmodel = arguments["<model>"]
-seed = parse(Int, arguments["--seed"])
-ksmoothmax = parse(Float64, arguments["--ksmoothmax"])
-epsilon = parse(Float64, arguments["--epsilon"])
+seed = parse_if_not_empty(Int, arguments["--seed"])
+ksmoothmax = parse_if_not_empty(Float64, arguments["--ksmoothmax"])
+epsilon = p_if_not_emptyarse(Float64, arguments["--epsilon"])
 crossval = arguments["--crossval"]::Bool
 
 test_station_df = let

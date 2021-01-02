@@ -19,6 +19,7 @@ module TemperatureImputations
     using Printf: @sprintf
     using LinearAlgebra
     using LinearAlgebra: cholesky!, Hermitian
+    import AxisArrays
 
     include("GPrealisations.jl")
     include("utils.jl")
@@ -29,5 +30,4 @@ module TemperatureImputations
     include("variogram.jl")
     include("covariance.jl")
     include("smoothhmc.jl")
-
 end # module
