@@ -7,18 +7,19 @@ doc = """
         pipeline1.jl <ICAO> <model> <data_dir> <save_dir> [--knearest=<kn>] [--crossval]
 
     Options:
-        -h --help     Show this screen.
-        --knearest=<kn> Number of nearby stations to include [default: 5]
+        -h --help        Show this screen.
+        --knearest=<kn>  Number of nearby stations to include  [default: 5]
         --crossval       Use cross-validation
 """
 using Printf
 using DocOpt
 using DataFrames
 using JLD
-using TempModel
+using TemperatureImputations
 using Dates: Date, DateTime
 using GaussianProcesses: set_params!
 import JSON
+using Printf
 
 arguments = docopt(doc)
 GPmodel = arguments["<model>"]
@@ -38,22 +39,22 @@ crossval = arguments["--crossval"]::Bool
 global k_spatiotemporal
 global logNoise
 if GPmodel=="fixed_var"
-    k_spatiotemporal,logNoise = TempModel.fitted_sptemp_fixedvar(;kmean=true)
+    k_spatiotemporal,logNoise = TemperatureImputations.fitted_sptemp_fixedvar(;kmean=true)
 elseif GPmodel=="free_var"
-    k_spatiotemporal,logNoise = TempModel.fitted_sptemp_freevar(;kmean=true)
+    k_spatiotemporal,logNoise = TemperatureImputations.fitted_sptemp_freevar(;kmean=true)
 elseif GPmodel=="sumprod"
-    k_spatiotemporal,logNoise = TempModel.fitted_sptemp_sumprod(;kmean=true)
+    k_spatiotemporal,logNoise = TemperatureImputations.fitted_sptemp_sumprod(;kmean=true)
 elseif GPmodel=="SExSE"
-    k_spatiotemporal,logNoise = TempModel.fitted_sptemp_SExSE(;kmean=true)
+    k_spatiotemporal,logNoise = TemperatureImputations.fitted_sptemp_SExSE(;kmean=true)
 elseif GPmodel=="diurnal"
-    k_spatiotemporal,logNoise = TempModel.fitted_sptemp_diurnal(;kmean=true)
+    k_spatiotemporal,logNoise = TemperatureImputations.fitted_sptemp_diurnal(;kmean=true)
 elseif GPmodel=="simpler"
-    k_spatiotemporal,logNoise = TempModel.fitted_sptemp_simpler(;kmean=true)
+    k_spatiotemporal,logNoise = TemperatureImputations.fitted_sptemp_simpler(;kmean=true)
 elseif GPmodel=="matern"
-    kdict = TempModel.kernel_sptemp_matern(;kmean=true)
+    kdict = TemperatureImputations.kernel_sptemp_matern(;kmean=true)
     k_spatiotemporal = kdict[:spatiotemporal]
 elseif GPmodel=="maternlocal"
-    kdict = TempModel.kernel_sptemp_maternlocal(;kmean=true)
+    kdict = TemperatureImputations.kernel_sptemp_maternlocal(;kmean=true)
     k_spatiotemporal = kdict[:spatiotemporal]
 else
     error(@sprintf("unknown model: %s", GPmodel))
@@ -70,20 +71,20 @@ hyp = Float64.(output_dictionary["hyp"])
 set_params!(k_spatiotemporal, hyp[2:end])
 logNoise = hyp[1]
 
-epsg = 3857 # Web Mercator (m)
-isdList = TempModel.read_isdList(; data_dir=data_dir, epsg=epsg)
-isd_wData = TempModel.stations_with_data(isdList; data_dir=data_dir)
+epsg = 5072 # Albers
+isdList = TemperatureImputations.read_isdList(; data_dir=data_dir, epsg=epsg)
+isd_wData = TemperatureImputations.stations_with_data(isdList; data_dir=data_dir)
 
-test_station = isd_wData[isd_wData[:ICAO].==ICAO, :]
+test_station = isd_wData[isd_wData.ICAO.==ICAO, :]
 @assert nrow(test_station) == 1
 USAF = test_station[1, :USAF]
 WBAN = test_station[1, :WBAN]
 
-isd_nearest_and_test = TempModel.find_nearest(isd_wData, USAF, WBAN, k_nearest)
+isd_nearest_and_test = TemperatureImputations.find_nearest(isd_wData, USAF, WBAN, k_nearest)
 
 @show isd_nearest_and_test
 
-@time hourly_cat=TempModel.read_Stations(isd_nearest_and_test; data_dir=data_dir)
+@time hourly_cat=TemperatureImputations.read_Stations(isd_nearest_and_test; data_dir=data_dir)
 itest=1 # first row of isd_nearest_and_test is the test station
 
 dt_start=DateTime(2015,1,1,0,0,0)
@@ -106,7 +107,7 @@ dt_start = mintime
     end
     @show dt_start, dt_end
     GC.gc()
-    @time nearby_pred = TempModel.predict_from_nearby(hourly_cat, isd_nearest_and_test, 
+    @time nearby_pred = TemperatureImputations.predict_from_nearby(hourly_cat, isd_nearest_and_test, 
         k_spatiotemporal, logNoise,
         itest, dt_start, dt_end)
     save(joinpath(savemodel_dir,
@@ -119,7 +120,7 @@ dt_start = mintime
         "nearby_pred", 
         nearby_pred)
     dt_start+=increm
-    if dt_end >= maximum(hourly_cat[:ts])
+    if dt_end >= maximum(hourly_cat.ts)
         break
     end
     GC.gc()
