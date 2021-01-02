@@ -6,10 +6,28 @@ doc = """
     This script constrains those posteriors to be within the measured Tn&Tx.
 
     Usage:
-        pipeline2.jl <ICAO> <model> <windownum> <data_dir> <save_dir> --seed=<seed> --ksmoothmax=<ksmoothmax> --epsilon=<epsilon> [--cheat] [--crossval]
+        pipeline2.jl impute <ICAO> <model> <windownum> <data_dir> <save_dir> [options]
+        pipeline2.jl outputdir <ICAO> <model> <windownum> <data_dir> <save_dir> [options]
+
+    --seed=<seed>
+    --ksmoothmax=<ksmoothmax>
+    --epsilon=<epsilon>
+    [--cheat]
+    [--crossval]
 """
 using DocOpt
 arguments = docopt(doc)
+using CmdStan
+using Dates
+using Dates: Day, Hour, Date, DateTime
+using JLD
+using CSV
+import TemperatureImputations
+using LinearAlgebra
+using PDMats
+using DataFrames
+using Printf
+using Statistics
 
 save_dir = arguments["<save_dir>"]
 save_dir = joinpath(save_dir)
@@ -18,57 +36,56 @@ println("directory for saved files: ", save_dir)
 data_dir = arguments["<data_dir>"]
 data_dir = joinpath(data_dir)
 windownum = parse(Int, arguments["<windownum>"])
-@show windownum
 ICAO = arguments["<ICAO>"]
-@show ICAO
 GPmodel = arguments["<model>"]
-@show GPmodel
 cheat = arguments["--cheat"]
-@show cheat
 seed = parse(Int, arguments["--seed"])
-@show seed
 ksmoothmax = parse(Float64, arguments["--ksmoothmax"])
 epsilon = parse(Float64, arguments["--epsilon"])
-@show ksmoothmax
-@show epsilon
-@show cheat
 crossval = arguments["--crossval"]::Bool
-@show crossval
 
-using CmdStan
-using Dates
-using Dates: Day, Hour, Date, DateTime
-using JLD
-using CSV
-using TempModel
-using LinearAlgebra
-using PDMats
-using DataFrames
-using Printf
-using Statistics
+struct FittingWindow
+    start_date::DateTime
+    end_date::DateTime
+end
+function stan_dirname(usaf::Int, wban::Int, icao::String, fw::FittingWindow)
+    return @sprintf("%s/%d_%d_%s_%s_to_%s/", 
+                    icao, usaf, wban, icao, Date(fw.start_date)+Day(1), Date(fw.end_date))
+end
 
 stan_days = Day(24)
+hr_measure = Hour(17)
 stan_increment = Day(14) # (24-14)/2 = 5 days of buffer
+janfirst = DateTime(2014,12,31,hr_measure.value,0,0)
+mintime = DateTime(2015,1,1,0,0,0)
+maxtime = DateTime(2016,1,1,0,0,0)
+stan_start = janfirst + (windownum-1)*stan_increment
+stan_end = stan_start + stan_days
+stan_window = FittingWindow(max(stan_start,mintime), min(stan_end,maxtime))
+stan_dir = joinpath(save_dir, "stan_fit", 
+                    crossval ? "crossval" : "mll",
+                    GPmodel, stan_dirname(USAF, WBAN, ICAO, stan_window))
+if arguments["outputdir"]
+    print(stan_dir)
+    exit()
+end
 
-isdList = dropmissing(TempModel.read_isdList(; data_dir=data_dir); disallowmissing=true)
+
+
+isdList = dropmissing(TemperatureImputations.read_isdList(; data_dir=data_dir); disallowmissing=true)
 test_station = isdList[isdList[:ICAO].==ICAO, :]
 @assert nrow(test_station) == 1
 USAF = test_station[1, :USAF]
 WBAN = test_station[1, :WBAN]
 @show USAF
 @show WBAN
-hr_measure = Hour(17)
 
 let
-    hourly_test=TempModel.read_Stations(test_station; data_dir=data_dir)
+    hourly_test=TemperatureImputations.read_Stations(test_station; data_dir=data_dir)
     itest=1
-    global TnTx = TempModel.test_data(hourly_test, itest, hr_measure)
+    global TnTx = TemperatureImputations.test_data(hourly_test, itest, hr_measure)
 end
 
-struct FittingWindow
-    start_date::DateTime
-    end_date::DateTime
-end
 
 function predictions_fname(usaf::Int, wban::Int, icao::String, fw::FittingWindow)
      @sprintf("%d_%d_%s_%s_to_%s.jld", 
@@ -78,8 +95,6 @@ end
 
 # copy-pasted from pipeline1.jl
 nearby_windows = FittingWindow[]
-mintime = DateTime(2015,1,1,0,0,0)
-maxtime = DateTime(2016,1,1,0,0,0)
 increm=(maxtime-mintime) / 15
 dt_start = mintime
 window=3*increm
@@ -120,11 +135,6 @@ function find_best_window(wind::FittingWindow, cands::Vector{FittingWindow})
     return best_window
 end
 
-janfirst = DateTime(2014,12,31,hr_measure.value,0,0)
-stan_start = janfirst + (windownum-1)*stan_increment
-stan_end = stan_start + stan_days
-stan_window = FittingWindow(max(stan_start,mintime), min(stan_end,maxtime))
-println("STAN fitting window: ", stan_window)
 
 best_window = find_best_window(stan_window, nearby_windows)
 println("using nearby-predictions from: ", best_window)
@@ -142,7 +152,7 @@ nearby_pred=load(nearby_path)["nearby_pred"];
     an actual solution, just a diagnostic, as it requires
     access to the very truth that we are ultimately trying to impute.
 """
-function variancecheat(nearby::TempModel.NearbyPrediction, truth::DataFrame)
+function variancecheat(nearby::TemperatureImputations.NearbyPrediction, truth::DataFrame)
     μ, Σ, nearbyts = nearby.μ, nearby.Σ, nearby.ts
     nobsv = length(nearbyts)
     centering = Matrix(1.0I, nobsv, nobsv) .- (1.0/nobsv)
@@ -164,32 +174,25 @@ function variancecheat(nearby::TempModel.NearbyPrediction, truth::DataFrame)
     
     # add some variance back in for an overall shift
     Σreshifted = Σscaled .+ mean(Σmeanshift) + 1e-12*I
-    return TempModel.NearbyPrediction(nearbyts, μ, PDMats.PDMat(Symmetric(Σreshifted)))
+    return TemperatureImputations.NearbyPrediction(nearbyts, μ, PDMats.PDMat(Symmetric(Σreshifted)))
 end
 if cheat
     @warn("THIS IS CHEATING!")
-    truth = TempModel.read_Stations(test_station; data_dir=data_dir)
+    truth = TemperatureImputations.read_Stations(test_station; data_dir=data_dir)
     global nearby_pred = variancecheat(nearby_pred, truth)
 end
 
 start_date = Date(stan_window.start_date)+Day(1) # date of first measurement
-imputation_data, ts_window = TempModel.prep_data(nearby_pred, TnTx, start_date, hr_measure, stan_days; ksmoothmax=ksmoothmax, epsilon=epsilon)
+imputation_data, ts_window = TemperatureImputations.prep_data(nearby_pred, TnTx, start_date, hr_measure, stan_days; ksmoothmax=ksmoothmax, epsilon=epsilon)
 
-function stan_dirname(usaf::Int, wban::Int, icao::String, fw::FittingWindow)
-    return @sprintf("%s/%d_%d_%s_%s_to_%s/", 
-                    icao, usaf, wban, icao, Date(fw.start_date)+Day(1), Date(fw.end_date))
-end
 
-stan_dir = joinpath(save_dir, "stan_fit", 
-                    crossval ? "crossval" : "mll",
-                    GPmodel, stan_dirname(USAF, WBAN, ICAO, stan_window))
 if cheat
     stan_dir = joinpath(save_dir,"stan_fit", GPmodel, "cheat", stan_dirname(USAF, WBAN, ICAO, stan_window))
 end
 if !isdir(stan_dir)
     mkpath(stan_dir)
 end
-imputation_model = TempModel.get_imputation_model(; pdir=stan_dir, seed=seed)
+imputation_model = TemperatureImputations.get_imputation_model(; pdir=stan_dir, seed=seed)
 for fname in readdir(joinpath(stan_dir, "tmp"))
     mv(joinpath(stan_dir, "tmp", fname), joinpath(stan_dir, fname); force=true)
 end
