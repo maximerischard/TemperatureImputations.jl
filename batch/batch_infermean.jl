@@ -11,7 +11,7 @@ doc = """
 """
 using DocOpt
 using DataFrames
-using TempModel
+using TemperatureImputations
 using Dates
 using PDMats
 using LinearAlgebra
@@ -47,7 +47,7 @@ end
 
 
 module Batch
-    using ..TempModel
+    using ..TemperatureImputations
     using DataFrames
     using Dates
     using Distributions
@@ -55,7 +55,7 @@ module Batch
     using LinearAlgebra
     using Printf
     ;
-    src_dir = dirname(pathof(TempModel))
+    src_dir = dirname(pathof(TemperatureImputations))
     include(joinpath(src_dir, "batch_diagnostics.jl"))
     include(joinpath(src_dir, "infermean.jl"))
 end
@@ -69,7 +69,7 @@ function get_day_durations(ts_min, ts_max, hr_measure::Hour)
     measurement_times = collect(first_measurement:Day(1):ts_max)
     measurement_edges = [ts_min; measurement_times; ts_max]
     durations_hours = diff(measurement_edges) ./ (convert(Millisecond, Hour(1)))
-    day_edges = TempModel.measurement_date.(measurement_edges, hr_measure)
+    day_edges = TemperatureImputations.measurement_date.(measurement_edges, hr_measure)
     @assert measurement_times[1] != ts_min # would need to think about this
     @assert measurement_times[end] != ts_max # would need to think about this
     # if measurement_times[1] == ts_min
@@ -99,7 +99,7 @@ function true_mean_day(hourly, hr_measure)
     ts, temp = hourly[:ts], hourly[:temp]
     temp_mid = midpoints(temp)
     ts_mid, ts_diff = midpoints(ts), diff(ts)
-    ts_mid_day = TempModel.measurement_date.(ts_mid, hr_measure)
+    ts_mid_day = TemperatureImputations.measurement_date.(ts_mid, hr_measure)
     days = sort(unique(ts_mid_day))[1:end]
     ndays = length(days)
     means_by_day = Float64[]
@@ -118,8 +118,8 @@ function true_mean_day(hourly, hr_measure)
 end
 
 epsg = 3857 # Web Mercator (m)
-isdList = TempModel.read_isdList(; data_dir=data_dir, epsg=epsg)
-isd_wData = TempModel.stations_with_data(isdList; data_dir=data_dir)
+isdList = TemperatureImputations.read_isdList(; data_dir=data_dir, epsg=epsg)
+isd_wData = TemperatureImputations.stations_with_data(isdList; data_dir=data_dir)
 
 println(join(("ICAO", "true", "meanTnTx17", "meanTnTx_min", "meanTnTx_max", "imputed_mean", "imputed_std", "sigma", "augmented_std"), ","))
 for ICAO in ICAO_list
@@ -129,7 +129,7 @@ for ICAO in ICAO_list
     WBAN = test_station[1, :WBAN]
 
     k_nearest = 5
-    isd_nearest_and_test = TempModel.find_nearest(isd_wData, USAF, WBAN, k_nearest)
+    isd_nearest_and_test = TemperatureImputations.find_nearest(isd_wData, USAF, WBAN, k_nearest)
 
     timezoneGMT = -5 # Georgia
     # timezoneGMT = -7 # Arizona
@@ -138,7 +138,7 @@ for ICAO in ICAO_list
     ;
 
     # obtain the hourly temperature measurements for those stations
-    hourly_cat=TempModel.read_Stations(isd_nearest_and_test; data_dir=data_dir)
+    hourly_cat=TemperatureImputations.read_Stations(isd_nearest_and_test; data_dir=data_dir)
     # mark station 1 as the test station
     itest=1
     # separate temperatures into train and test
@@ -147,7 +147,7 @@ for ICAO in ICAO_list
 
     # emulate daily Tx/Tn measurement
     hr_measure = Hour(17) # number between 0 and 24
-    TnTx = TempModel.test_data(hourly_test, itest, hr_measure)
+    TnTx = TemperatureImputations.test_data(hourly_test, itest, hr_measure)
 
     true_days, true_means_by_day, day_duration = true_mean_day(hourly_test, hr_measure)
     if verbose
@@ -184,7 +184,7 @@ for ICAO in ICAO_list
     @assert length(imput_days) == length(true_days) # actually...
     ts_min, ts_max = extrema(hourly_test[:ts])
     meanTnTx = get_meanTnTx(TnTx, hr_measure, ts_min, ts_max)
-    meanTnTx_by_hr = [get_meanTnTx(TempModel.test_data(hourly_test, itest, hr), hr, ts_min, ts_max)
+    meanTnTx_by_hr = [get_meanTnTx(TemperatureImputations.test_data(hourly_test, itest, hr), hr, ts_min, ts_max)
                       for hr in Hour(1):Hour(1):Hour(24)]
     meanTnTx_min, meanTnTx_max = extrema(meanTnTx_by_hr)
     if verbose

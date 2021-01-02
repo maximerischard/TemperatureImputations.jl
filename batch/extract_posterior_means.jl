@@ -9,7 +9,7 @@ doc = """
         --hr_measure=<hr> Hour of daily measurement in UTC timezone [default: 17]
 """
 using DocOpt
-import TempModel
+import TemperatureImputations
 # using Printf: @printf, @sprintf
 import JSON
 using Dates
@@ -41,7 +41,7 @@ crossval = arguments["--crossval"]::Bool
 @show crossval
 
 module Batch
-    using ..TempModel
+    using ..TemperatureImputations
     using DataFrames
     using Dates
     using Distributions
@@ -49,14 +49,14 @@ module Batch
     using LinearAlgebra
     using Printf
     using Statistics
-    src_dir = dirname(pathof(TempModel))
+    src_dir = dirname(pathof(TemperatureImputations))
     include(joinpath(src_dir, "batch_diagnostics.jl"))
     include(joinpath(src_dir, "infermean.jl"))
 end
 
 epsg = 3857 # Web Mercator (m)
-isdList = TempModel.read_isdList(; data_dir=data_dir, epsg=epsg)
-isd_wData = TempModel.stations_with_data(isdList; data_dir=data_dir)
+isdList = TemperatureImputations.read_isdList(; data_dir=data_dir, epsg=epsg)
+isd_wData = TemperatureImputations.stations_with_data(isdList; data_dir=data_dir)
 
 test_station = isd_wData[isd_wData[:ICAO].==ICAO, :]
 @assert nrow(test_station) == 1

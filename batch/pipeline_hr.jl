@@ -33,7 +33,7 @@ root_dir = ".."
 stan_days = Day(9)
 stan_increment = Day(3)
 
-module TempModel
+module TemperatureImputations
     root_dir = ".."
     using PDMats
     using PDMats: PDMat
@@ -61,15 +61,15 @@ function predictions_fname(usaf::Int, fw::FittingWindow)
                     usaf, fw.start_date, fw.end_date)
 end
 
-isdList=TempModel.read_isdList(;data_dir=root_dir)
+isdList=TemperatureImputations.read_isdList(;data_dir=root_dir)
 isdSubset=isdList[[(usaf in (725450,725460,725480,725485)) for usaf in isdList[:USAF]],:]
 
-hourly_cat=TempModel.read_Stations(isdSubset; data_dir=root_dir)
+hourly_cat=TemperatureImputations.read_Stations(isdSubset; data_dir=root_dir)
 itest=3
 test_usaf=isdSubset[itest,:USAF]
 
-TnTx_true = TempModel.test_data(hourly_cat, itest, hr_measure_true)
-TnTx_fals = TempModel.test_data(hourly_cat, itest, hr_measure_fals)
+TnTx_true = TemperatureImputations.test_data(hourly_cat, itest, hr_measure_true)
+TnTx_fals = TemperatureImputations.test_data(hourly_cat, itest, hr_measure_fals)
 TnTx_fals[:Tn] = TnTx_true[:Tn] # corrupt TnTx
 TnTx_fals[:Tx] = TnTx_true[:Tx]
 ;
@@ -134,7 +134,7 @@ nearby_pred=load(joinpath(saved_dir,
                         predictions_fname(test_usaf, best_window),
                 ))["nearby_pred"];
 
-imputation_data, ts_window = TempModel.prep_data(nearby_pred, TnTx_fals, stan_window.start_date, hr_measure_fals, stan_days; ksmoothmax=ksmoothmax, epsilon=epsilon)
+imputation_data, ts_window = TemperatureImputations.prep_data(nearby_pred, TnTx_fals, stan_window.start_date, hr_measure_fals, stan_days; ksmoothmax=ksmoothmax, epsilon=epsilon)
 
 function stan_dirname(usaf::Int, fw::FittingWindow)
     return @sprintf("%d_%s_to_%s/", 
@@ -145,7 +145,7 @@ if !isdir(stan_dir)
     mkpath(stan_dir)
 end
 
-imputation_model = TempModel.get_imputation_model(; pdir=stan_dir)
+imputation_model = TemperatureImputations.get_imputation_model(; pdir=stan_dir)
 for fname in readdir(joinpath(stan_dir, "tmp"))
     mv(joinpath(stan_dir, "tmp", fname), joinpath(stan_dir, fname); remove_destination=true)
 end
