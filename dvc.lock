@@ -6,9 +6,9 @@ choose_test_stations:
     md5: 7d2c2ef31c313ac8d609c777e92660c9
     size: 3099
   - path: data/data2015
-    md5: 7876b43292fe2bc1574b5c2af227d9fc.dir
-    size: 93761823
-    nfiles: 315
+    md5: 7c4a70921b6fb9788ec1c9afc6c21240.dir
+    size: 93806604
+    nfiles: 627
   - path: data/isdList.csv
     md5: 630e8b052daf8fc71b0ad7a3cbd2c350
     size: 290180
