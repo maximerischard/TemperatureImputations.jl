@@ -6,14 +6,12 @@ doc = """
     This script constrains those posteriors to be within the measured Tn&Tx.
 
     Usage:
-        pipeline2.jl impute <ICAO> <model> <windownum> <data_dir> <save_dir> [options]
-        pipeline2.jl outputdir <ICAO> <model> <windownum> <data_dir> <save_dir> [options]
+        pipeline2.jl (outputdir|compilestan|impute) <ICAO> <model> <windownum> <data_dir> <save_dir> [options] [--crossval]
 
     Options:
         --seed=<seed>
         --ksmoothmax=<ksmoothmax>
         --epsilon=<epsilon>
-        [--crossval]
 """
 using DocOpt
 arguments = docopt(doc)
@@ -30,7 +28,6 @@ using Statistics
 
 save_dir = arguments["<save_dir>"]
 save_dir = joinpath(save_dir)
-println("directory for saved files: ", save_dir)
 @assert isdir(save_dir)
 data_dir = arguments["<data_dir>"]
 data_dir = joinpath(data_dir)
@@ -41,6 +38,17 @@ seed = parse(Int, arguments["--seed"])
 ksmoothmax = parse(Float64, arguments["--ksmoothmax"])
 epsilon = parse(Float64, arguments["--epsilon"])
 crossval = arguments["--crossval"]::Bool
+
+test_station_df = let
+    epsg = 5072 # doesn't actually matter in this script
+    isdList = dropmissing(TemperatureImputations.read_isdList(; epsg=epsg, data_dir=data_dir); disallowmissing=true)
+    test_station_df = isdList[isdList.ICAO .== ICAO, :]
+end
+
+@assert nrow(test_station_df) == 1
+test_station=test_station_df[1,:]
+USAF = test_station.USAF
+WBAN = test_station.WBAN
 
 struct FittingWindow
     start_date::DateTime
@@ -60,28 +68,28 @@ maxtime = DateTime(2016,1,1,0,0,0)
 stan_start = janfirst + (windownum-1)*stan_increment
 stan_end = stan_start + stan_days
 stan_window = FittingWindow(max(stan_start,mintime), min(stan_end,maxtime))
-stan_dir = joinpath(save_dir, "stan_fit", 
-                    crossval ? "crossval" : "mll",
-                    GPmodel, stan_dirname(USAF, WBAN, ICAO, stan_window))
+stan_dir = abspath(joinpath(
+        save_dir, "stan_fit", 
+        crossval ? "crossval" : "mll",
+        GPmodel,
+        stan_dirname(USAF, WBAN, ICAO, stan_window)
+    ))
 if arguments["outputdir"]
-    print(stan_dir)
+    println(stan_dir)
+    exit()
+end
+if !isdir(stan_dir)
+    mkpath(stan_dir)
+end
+imputation_model = TemperatureImputations.get_imputation_model(; pdir=stan_dir, seed=seed)
+if arguments["compilestan"]
     exit()
 end
 
-
-
-isdList = dropmissing(TemperatureImputations.read_isdList(; data_dir=data_dir); disallowmissing=true)
-test_station = isdList[isdList[:ICAO].==ICAO, :]
-@assert nrow(test_station) == 1
-USAF = test_station[1, :USAF]
-WBAN = test_station[1, :WBAN]
-@show USAF
-@show WBAN
-
-let
-    hourly_test=TemperatureImputations.read_Stations(test_station; data_dir=data_dir)
+TnTx = let
+    hourly_test=TemperatureImputations.read_Stations(test_station_df; data_dir=data_dir)
     itest=1
-    global TnTx = TemperatureImputations.test_data(hourly_test, itest, hr_measure)
+    TemperatureImputations.test_data(hourly_test, itest, hr_measure)
 end
 
 
@@ -146,14 +154,10 @@ start_date = Date(stan_window.start_date)+Day(1) # date of first measurement
 imputation_data, ts_window = TemperatureImputations.prep_data(nearby_pred, TnTx, start_date, hr_measure, stan_days; ksmoothmax=ksmoothmax, epsilon=epsilon)
 
 
-if !isdir(stan_dir)
-    mkpath(stan_dir)
-end
-imputation_model = TemperatureImputations.get_imputation_model(; pdir=stan_dir, seed=seed)
-for fname in readdir(joinpath(stan_dir, "tmp"))
-    mv(joinpath(stan_dir, "tmp", fname), joinpath(stan_dir, fname); force=true)
-end
-rm(joinpath(stan_dir, "tmp"))
+# for fname in readdir(joinpath(stan_dir, "tmp"))
+    # mv(joinpath(stan_dir, "tmp", fname), joinpath(stan_dir, fname); force=true)
+# end
+# rm(joinpath(stan_dir, "tmp"))
 
 CSV.write(joinpath(stan_dir,"timestamps.csv"), DataFrame(ts=ts_window), writeheader=false)
 
@@ -170,13 +174,11 @@ if isfile(joinpath(stan_dir,"imputation"))
     chmod(joinpath(stan_dir,"imputation"), 0o744)
 end
 
-imputation_model.tmpdir = stan_dir;
+@time rc = StanSample.stan_sample(imputation_model, data=imputation_data)
+@assert success(rc)
 
-@time sim1 = stan(
-    imputation_model, 
-    [imputation_data], 
-    stan_dir,
-    summary=false, 
-    diagnostics=false
-    )
-println("=========")
+ENV["LINES"] = 2000
+(StanSample.read_samples(imputation_model; output_format=:mcmcchains)
+    |> x -> StanSample.summarystats(x)
+    |> display
+)
