@@ -1,4 +1,4 @@
-import GaussianProcesses: logp_CVfold, dlogpdθ_CVfold
+import GaussianProcesses: logp_CVfold, dlogpdθ_CVfold, get_value
 using GaussianProcesses: Folds, init_precompute
 
 mutable struct GPRealisations
@@ -12,7 +12,7 @@ end
 
 function GPRealisations(reals::Vector{GPE})
     first = reals[1]
-    gpr = GPRealisations(reals, first.mean, first.kernel, first.logNoise, NaN, [])
+    gpr = GPRealisations(reals, first.mean, first.kernel, get_value(first.logNoise), NaN, [])
 end
 
 function get_params(gpr::GPRealisations; noise::Bool=true, domean::Bool=true, kern::Bool=true)
@@ -23,17 +23,9 @@ function get_params(gpr::GPRealisations; noise::Bool=true, domean::Bool=true, ke
     return params
 end
 function propagate_params!(gpr::GPRealisations; noise::Bool=true, domean::Bool=true, kern::Bool=true)
+    # harmonize parameters
     for gp in gpr.reals
-        # harmonize parameters
-        if kern
-            gp.kernel = gpr.kernel
-        end
-        if domean
-            gp.mean = gpr.mean
-        end
-        if noise
-            gp.logNoise = gpr.logNoise
-        end
+        set_params!(gp, get_params(gpr))
     end
 end
 function set_params!(gpr::GPRealisations, hyp::Vector{Float64}; noise::Bool=true, domean::Bool=true, kern::Bool=true)
