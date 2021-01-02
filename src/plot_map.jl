@@ -10,7 +10,13 @@ using PyCall
 @pyimport cartopy.io.img_tiles as cimgt
 @pyimport matplotlib
 
-function plot_map(isdSubset, epsg::Int; first_test::Bool=false, horizontalalignment="auto")
+function plot_map(
+        isdSubset, epsg::Int;
+        first_test::Bool=false,
+        horizontalalignment="auto",
+        zoomlevel=8,
+        tickspace_km=50.0, # km
+        )
     crs = cartopy.crs.epsg(epsg)
     
     # Create a Stamen terrain background instance.
@@ -27,8 +33,8 @@ function plot_map(isdSubset, epsg::Int; first_test::Bool=false, horizontalalignm
     ymax = ceil( maximum(isdSubset.Y_PRJ); digits=-5)
     ax.set_extent([xmin-10e3, xmax+10e3, ymin-10e3, ymax+10e3], crs=crs)
     
-    # Add the Stamen data at zoom level 8.
-    ax.add_image(stamen_terrain, 8)
+    # Add the Stamen data
+    ax.add_image(stamen_terrain, zoomlevel)
     
     # Add State lines
     ax.add_feature(cfeature.NaturalEarthFeature(
@@ -37,8 +43,8 @@ function plot_map(isdSubset, epsg::Int; first_test::Bool=false, horizontalalignm
 
     # Tick marks and axis labels
     fmt_km = matplotlib.ticker.FuncFormatter(py"""lambda x, p: format(x/1000, ",.0f")"""o)
-    ax.set_xticks(range(xmin; stop=xmax, step=50e3))
-    ax.set_yticks(range(ymin; stop=ymax, step=50e3))
+    ax.set_xticks(range(xmin; stop=xmax, step=tickspace_km*1e3))
+    ax.set_yticks(range(ymin; stop=ymax, step=tickspace_km*1e3))
     ax.xaxis.set_major_formatter(fmt_km)
     ax.yaxis.set_major_formatter(fmt_km)
     plt.xlabel("Eastings (km)")
