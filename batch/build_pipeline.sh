@@ -29,6 +29,8 @@ for ICAO in ${test_stations_string}; do
 
 done
 
+wait
+
 for ICAO in ${test_stations_string}; do
     # control the number of simultaneous processes
     (i=i%nbatch) ; ((i++==0)) && wait
@@ -51,9 +53,53 @@ done
 ksmoothmax=50
 epsilon=0.01
 
+wait
+
+compiledstandir=$(julia --project=batch batch/pipeline2.jl \
+    outputdir \
+    KBDL \
+    SExSE \
+    1 \
+    ./data \
+    ./data/outputs/compiledstan \
+    --seed=42 \
+    --ksmoothmax=Inf \
+    --epsilon=Inf
+)
+dvc run \
+    --name compilestan \
+    --force \
+    --wdir $ROOT \
+    --deps batch/pipeline2.jl \
+    --deps src/stan_impute.jl \
+    --outs ${compiledstandir} \
+    julia --project=batch batch/pipeline2.jl \
+        compilestan \
+        KBDL \
+        SExSE \
+        1 \
+        ./data \
+        ./data/outputs/compiledstan \
+        --seed=42 \
+        --ksmoothmax=Inf \
+        --epsilon=Inf
+
+wait 
 for ICAO in ${test_stations_string}; do
     for windownum in {1..3}; do
         # control the number of simultaneous processes
+        outputdir=$(julia --project=batch batch/pipeline2.jl \
+            outputdir \
+            $ICAO \
+            $GPmodel \
+            ${windownum} \
+            ./data \
+            ./data/outputs \
+            --seed=${windownum} \
+            # --crossval \
+            --ksmoothmax=$ksmoothmax \
+            --epsilon=$epsilon)
+        cp ${compiledstandir}/* ${outputdir}/*
         (i=i%nbatch) ; ((i++==0)) && wait
         dvc run \
             --name imputations_${ICAO}_${GPmodel}_${windownum} \
@@ -63,9 +109,11 @@ for ICAO in ${test_stations_string}; do
             --deps data/data2015 \
             --deps src/preprocessing.jl \
             --deps src/stan_impute.jl \
-            --deps data/outputs/fitted_kernel/mll/${GPmodel}/hyperparams_${GPmodel}_${ICAO}.json \
-            --outs data/outputs/stan_fit/mll/${GPmodel}/${ICAO} \
+            --deps data/outputs/predictions_from_nearby/mll/${GPmodel}/${ICAO} \
+            --deps $compiledstandir \
+            --outs ${outputdir} \
             julia --project=batch batch/pipeline2.jl \
+                impute \
                 $ICAO \
                 $GPmodel \
                 ${windownum} \
@@ -77,6 +125,5 @@ for ICAO in ${test_stations_string}; do
                 --epsilon=$epsilon &
     done
 done
-
 
 wait
