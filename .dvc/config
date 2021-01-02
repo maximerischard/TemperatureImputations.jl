@@ -1,0 +1,3 @@
+[cache]
+    type = symlink
+    protected = true
