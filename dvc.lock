@@ -31,8 +31,8 @@ kernelfit_KMOB_SExSE:
     size: 93806604
     nfiles: 627
   - path: src/preprocessing.jl
-    md5: 8c08ea5e01f5c477c90126e102dbb406
-    size: 3941
+    md5: 4c114b4114898e5938caf2695d685bb1
+    size: 3945
   outs:
   - path: data/outputs/fitted_kernel/mll/SExSE/hyperparams_SExSE_KMOB.json
     md5: c96547d8e1614b5a88070a89b98387b9
@@ -49,18 +49,19 @@ kernelfit_KINW_SExSE:
     size: 93806604
     nfiles: 627
   - path: src/preprocessing.jl
-    md5: 8c08ea5e01f5c477c90126e102dbb406
-    size: 3941
+    md5: 4c114b4114898e5938caf2695d685bb1
+    size: 3945
   outs:
   - path: data/outputs/fitted_kernel/mll/SExSE/hyperparams_SExSE_KINW.json
     md5: d43abfa5751a58b122553c5633aa48bf
     size: 617
 nearby_predictions_KINW_SExSE:
-  cmd: julia --project=batch batch/pipeline1.jl KINW SExSE ./data ./data/outputs --knearest=5
+  cmd: julia --project=batch batch/pipeline1.jl KINW SExSE ./data ./data/outputs data/outputs/fitted_kernel/mll/SExSE/hyperparams_SExSE_KINW.json
+    --knearest=5
   deps:
   - path: batch/pipeline1.jl
-    md5: 1c50e6dc217bc0384206f76c1d522eef
-    size: 4250
+    md5: fe5effd906f4b225cc73c72cac847c14
+    size: 3799
   - path: data/data2015
     md5: 7c4a70921b6fb9788ec1c9afc6c21240.dir
     size: 93806604
@@ -75,19 +76,20 @@ nearby_predictions_KINW_SExSE:
     md5: 4fbcdd03544779f70f50d3333df5ff67
     size: 3166
   - path: src/preprocessing.jl
-    md5: 8c08ea5e01f5c477c90126e102dbb406
-    size: 3941
+    md5: 4c114b4114898e5938caf2695d685bb1
+    size: 3945
   outs:
   - path: data/outputs/predictions_from_nearby/mll/SExSE/KINW
-    md5: 4d7b063f206175dab037346972a4757e.dir
+    md5: 4ef2a5aafbfa6aa86338467f81491f89.dir
     size: 1022545208
     nfiles: 13
 nearby_predictions_KMOB_SExSE:
-  cmd: julia --project=batch batch/pipeline1.jl KMOB SExSE ./data ./data/outputs --knearest=5
+  cmd: julia --project=batch batch/pipeline1.jl KMOB SExSE ./data ./data/outputs data/outputs/fitted_kernel/mll/SExSE/hyperparams_SExSE_KMOB.json
+    --knearest=5
   deps:
   - path: batch/pipeline1.jl
-    md5: 1c50e6dc217bc0384206f76c1d522eef
-    size: 4250
+    md5: fe5effd906f4b225cc73c72cac847c14
+    size: 3799
   - path: data/data2015
     md5: 7c4a70921b6fb9788ec1c9afc6c21240.dir
     size: 93806604
@@ -102,10 +104,35 @@ nearby_predictions_KMOB_SExSE:
     md5: 4fbcdd03544779f70f50d3333df5ff67
     size: 3166
   - path: src/preprocessing.jl
-    md5: 8c08ea5e01f5c477c90126e102dbb406
-    size: 3941
+    md5: 4c114b4114898e5938caf2695d685bb1
+    size: 3945
   outs:
   - path: data/outputs/predictions_from_nearby/mll/SExSE/KMOB
-    md5: 0d7ebdfac0dd6db94a50b438d747461f.dir
+    md5: 85688bf38ec52a956fe155c914030f00.dir
     size: 1516193720
     nfiles: 13
+compilestan:
+  cmd: julia --project=batch batch/pipeline2.jl compilestan KBDL SExSE 1 ./data ./data/outputs/compiledstan
+  deps:
+  - path: batch/pipeline2.jl
+    md5: 9ef0781ed7eece19c420bf540c1d3c9c
+    size: 4713
+  - path: src/stan_impute.jl
+    md5: 30f4f33415206c9f27e9249e302f1952
+    size: 5903
+  outs:
+  - path: data/outputs/compiledstan/hr_measure/mll/SExSE/17/KBDL/725080_14740_KBDL_2015-01-01_to_2015-01-15/imputation
+    md5: c46dc1933e764dedc4355019ac90c171
+    size: 1766400
+  - path: data/outputs/compiledstan/hr_measure/mll/SExSE/17/KBDL/725080_14740_KBDL_2015-01-01_to_2015-01-15/imputation.d
+    md5: 23c636095e15de40b5bd441187834fc3
+    size: 452195
+  - path: data/outputs/compiledstan/hr_measure/mll/SExSE/17/KBDL/725080_14740_KBDL_2015-01-01_to_2015-01-15/imputation.hpp
+    md5: 9d299168b7b4cdf059c6262d1ca315ee
+    size: 39931
+  - path: data/outputs/compiledstan/hr_measure/mll/SExSE/17/KBDL/725080_14740_KBDL_2015-01-01_to_2015-01-15/imputation.o
+    md5: ae70473557541d920ab22fe495349207
+    size: 573744
+  - path: data/outputs/compiledstan/hr_measure/mll/SExSE/17/KBDL/725080_14740_KBDL_2015-01-01_to_2015-01-15/imputation.stan
+    md5: e8d100dbf5903ba0b3dbd933cbf023d5
+    size: 2035

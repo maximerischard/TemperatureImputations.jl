@@ -32,7 +32,7 @@ stages:
         cache: false
   nearby_predictions_KINW_SExSE:
     cmd: julia --project=batch batch/pipeline1.jl KINW SExSE ./data ./data/outputs
-      --knearest=5
+      data/outputs/fitted_kernel/mll/SExSE/hyperparams_SExSE_KINW.json --knearest=5
     deps:
     - batch/pipeline1.jl
     - data/data2015
@@ -44,7 +44,7 @@ stages:
     - data/outputs/predictions_from_nearby/mll/SExSE/KINW
   nearby_predictions_KMOB_SExSE:
     cmd: julia --project=batch batch/pipeline1.jl KMOB SExSE ./data ./data/outputs
-      --knearest=5
+      data/outputs/fitted_kernel/mll/SExSE/hyperparams_SExSE_KMOB.json --knearest=5
     deps:
     - batch/pipeline1.jl
     - data/data2015
@@ -54,3 +54,15 @@ stages:
     - src/preprocessing.jl
     outs:
     - data/outputs/predictions_from_nearby/mll/SExSE/KMOB
+  compilestan:
+    cmd: julia --project=batch batch/pipeline2.jl compilestan KBDL SExSE 1 ./data
+      ./data/outputs/compiledstan
+    deps:
+    - batch/pipeline2.jl
+    - src/stan_impute.jl
+    outs:
+    - data/outputs/compiledstan/hr_measure/mll/SExSE/17/KBDL/725080_14740_KBDL_2015-01-01_to_2015-01-15/imputation
+    - data/outputs/compiledstan/hr_measure/mll/SExSE/17/KBDL/725080_14740_KBDL_2015-01-01_to_2015-01-15/imputation.d
+    - data/outputs/compiledstan/hr_measure/mll/SExSE/17/KBDL/725080_14740_KBDL_2015-01-01_to_2015-01-15/imputation.hpp
+    - data/outputs/compiledstan/hr_measure/mll/SExSE/17/KBDL/725080_14740_KBDL_2015-01-01_to_2015-01-15/imputation.o
+    - data/outputs/compiledstan/hr_measure/mll/SExSE/17/KBDL/725080_14740_KBDL_2015-01-01_to_2015-01-15/imputation.stan
