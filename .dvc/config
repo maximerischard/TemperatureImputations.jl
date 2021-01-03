@@ -6,4 +6,5 @@
 ['remote "upstream"']
     url = s3://maxime-dvc-cache/TemperatureImputations
     endpointurl = https://s3.eu-central-1.wasabisys.com
-    jobs = 2
+    jobs = 1
+    region = eu-central-1
