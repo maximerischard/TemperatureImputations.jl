@@ -75,7 +75,7 @@ end
 function imputation_chunks(; stan_days::Day)
     stan_windows = FittingWindow{Date}[]
 
-    stan_increment = Day(15-4)
+    stan_increment = stan_days - Day(4)
     firstday = Date(2015,1,1)
     lastday = Date(2015,12,31)
     windownum = 1
