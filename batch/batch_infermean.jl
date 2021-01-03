@@ -46,76 +46,9 @@ if verbose
 end
 
 
-module Batch
-    using ..TemperatureImputations
-    using DataFrames
-    using Dates
-    using Distributions
-    using PDMats
-    using LinearAlgebra
-    using Printf
-    ;
-    src_dir = dirname(pathof(TemperatureImputations))
-    include(joinpath(src_dir, "batch_diagnostics.jl"))
-    include(joinpath(src_dir, "infermean.jl"))
-end
 
+include("./BatchTemperatureImputations.jl")
 
-function get_day_durations(ts_min, ts_max, hr_measure::Hour)
-    first_measurement = DateTime(Date(ts_min)) + hr_measure
-    if first_measurement < ts_min
-        first_measurement += Day(1)
-    end
-    measurement_times = collect(first_measurement:Day(1):ts_max)
-    measurement_edges = [ts_min; measurement_times; ts_max]
-    durations_hours = diff(measurement_edges) ./ (convert(Millisecond, Hour(1)))
-    day_edges = TemperatureImputations.measurement_date.(measurement_edges, hr_measure)
-    @assert measurement_times[1] != ts_min # would need to think about this
-    @assert measurement_times[end] != ts_max # would need to think about this
-    # if measurement_times[1] == ts_min
-        # @show hr_measure
-        # @show ts_min
-        # @show duration_hours[1:5]
-        # @show measurement_edges[1:5]
-    # end
-    return durations_hours
-    # if measurement_times[end] == ts_max
-        # return durations_hours[1:end-1]
-    # else
-        # return durations_hours
-    # end
-end
-
-function get_meanTnTx(TnTx::DataFrame, hr_measure::Hour, ts_min::DateTime, ts_max::DateTime)
-    durations = get_day_durations(ts_min, ts_max, hr_measure)
-    # @show hr_measure, ts_min, ts_max, nrow(TnTx), length(durations)
-    total_duration = sum(durations)
-    return (mean(TnTx[:Tn], Weights(durations)) +
-            mean(TnTx[:Tx], Weights(durations))
-           ) / 2
-end
-
-function true_mean_day(hourly, hr_measure)
-    ts, temp = hourly[:ts], hourly[:temp]
-    temp_mid = midpoints(temp)
-    ts_mid, ts_diff = midpoints(ts), diff(ts)
-    ts_mid_day = TemperatureImputations.measurement_date.(ts_mid, hr_measure)
-    days = sort(unique(ts_mid_day))[1:end]
-    ndays = length(days)
-    means_by_day = Float64[]
-    day_duration = Float64[]
-    for iday in 1:ndays
-        day = days[iday]
-        sub = ts_mid_day .== day
-        ts_sub, diff_sub = ts_mid[sub], ts_diff[sub]
-        weights = Weights(diff_sub ./ Millisecond(1))
-        temp_sub = temp_mid[sub]
-        mean_temp = mean(temp_sub, weights)
-        push!(means_by_day, mean_temp)
-        push!(day_duration, sum(diff_sub) ./ convert(Millisecond, Hour(1)))
-    end
-    return days, means_by_day, day_duration
-end
 
 epsg = 3857 # Web Mercator (m)
 isdList = TemperatureImputations.read_isdList(; data_dir=data_dir, epsg=epsg)
@@ -149,7 +82,8 @@ for ICAO in ICAO_list
     hr_measure = Hour(17) # number between 0 and 24
     TnTx = TemperatureImputations.test_data(hourly_test, itest, hr_measure)
 
-    true_days, true_means_by_day, day_duration = true_mean_day(hourly_test, hr_measure)
+    true_days, true_means_by_day, day_duration = TemperatureImputations.get_means_by_day(
+            hourly_test[:temp], hourly_test[:ts], hr_measure)
     if verbose
         @show mean(true_means_by_day, Weights(day_duration))
     end
@@ -170,22 +104,24 @@ for ICAO in ICAO_list
         continue
     end
         
-    # if ICAO ∈ ["KBDL",]
-        # continue
-    # end
     if verbose
         @show ICAO
     end
-    imput_days, imput_day_means, day_cov, day_buffer, buffer_cov = Batch.daily_best(all_posteriors);
+    imput_days, imput_day_means, day_cov, day_buffer, buffer_cov = BatchTemperatureImputations.daily_best(all_posteriors);
     withimputations = 1:length(imput_days)
     @assert true_days[withimputations] == imput_days
 
 
     @assert length(imput_days) == length(true_days) # actually...
     ts_min, ts_max = extrema(hourly_test[:ts])
-    meanTnTx = get_meanTnTx(TnTx, hr_measure, ts_min, ts_max)
-    meanTnTx_by_hr = [get_meanTnTx(TemperatureImputations.test_data(hourly_test, itest, hr), hr, ts_min, ts_max)
-                      for hr in Hour(1):Hour(1):Hour(24)]
+    meanTnTx = BatchTemperatureImputations.get_meanTnTx(TnTx, hr_measure, ts_min, ts_max)
+    meanTnTx_by_hr = [
+        BatchTemperatureImputations.get_meanTnTx(
+            TemperatureImputations.test_data(hourly_test, itest, hr),
+            hr, ts_min, ts_max
+        )
+        for hr in Hour(1):Hour(1):Hour(24)
+    ]
     meanTnTx_min, meanTnTx_max = extrema(meanTnTx_by_hr)
     if verbose
         @show meanTnTx, meanTnTx_min, meanTnTx_max

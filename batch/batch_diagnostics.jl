@@ -1,5 +1,3 @@
-
-
 function subset(df, from, to; closed_start=true, closed_end=true)
     ts = df[:ts]
     return df[argsubset(ts,from,to;closed_start=closed_start,closed_end=closed_end),:]
@@ -16,45 +14,6 @@ function argsubset(ts, from, to; closed_start=true, closed_end=true)
         before_to = ts .< to
     end
     return after_from .& before_to
-end
-
-function add_diag!(Σ::PDMats.PDMat, a::Float64)
-    mat = Σ.mat
-    for i in 1:size(mat,1)
-        mat[i,i] += a
-    end
-    copyto!(Σ.chol.factors, mat)
-    # cholfact!(Σ.chol.factors, Symbol(Σ.chol.uplo))
-    cholesky!(Hermitian(Σ.chol.factors, Symbol(Σ.chol.uplo)))
-    @assert sumabs(mat .- Matrix(Σ.chol)) < 1e-8
-    return Σ
-end
-
-struct FittingWindow
-    start_date::Date
-    end_date::Date
-end
-struct WindowTime
-    start_time::DateTime
-    end_time::DateTime
-end
-
-#=function predictions_fname(usaf::Int, fw::FittingWindow)=#
-    #=return @sprintf("%d_%s_to_%s.jld", =#
-                    #=usaf, fw.start_date, fw.end_date)=#
-#=end=#
-function predictions_fname(usaf::Int, wban::Int, icao::String, fw::FittingWindow)
-     @sprintf("%d_%d_%s_%s_to_%s.jld", 
-        usaf, wban, icao,
-        Date(fw.start_date), Date(fw.end_date))
-end
-
-function get_nearby(fw::FittingWindow, GPmodel::AbstractString, usaf::Int, wban::Int, icao::String, saved_dir::String; crossval::Bool)
-    pred_dir = joinpath(saved_dir, "predictions_from_nearby", crossval ? "crossval" : "mll", GPmodel, icao)
-    pred_fname = predictions_fname(usaf, wban, icao, fw)
-    pred_fpath = joinpath(pred_dir, pred_fname)
-    nearby_pred = load(pred_fpath)["nearby_pred"]
-    return nearby_pred
 end
 
 function print_diagnostics(nearby::TemperatureImputations.NearbyPrediction,
@@ -89,14 +48,6 @@ function stan_dirname(usaf::Int, wban::Int, icao::String, fw::FittingWindow)
                     # Date(fw.start_date)-Day(0), Date(fw.end_date)-Day(0))
 end
 
-function t_inside_wt(t::DateTime, wt::WindowTime)
-    return wt.start_time <= t <= wt.end_time
-end
-function t_inside_fw(t::DateTime, fw::FittingWindow, hr_measure::Hour)
-    measure_day = TemperatureImputations.measurement_date(t, hr_measure)
-    in_window = fw.start_date <= measure_day <= fw.end_date-Day(1)
-    return in_window
-end
 
 function arg_test_fw(test::DataFrame, fw::FittingWindow, hr_measure::Hour)
     ts = test[:ts]
@@ -191,25 +142,6 @@ function +(diag1::ImputationDiagnostic,diag2::ImputationDiagnostic)
         )
 end
 
-"""
-    How much buffer time is there on either side of the window?
-"""
-function buffer(t::DateTime, wt::WindowTime)
-    start_diff = t - wt.start_time
-    end_diff = wt.end_time - t
-    return min(start_diff, end_diff)
-end
-""" 
-    Amongst a list of candidate windows `cand`, find the window that includes `wind`
-    with the largest buffer on either sides.
-"""
-function find_best_window(t::DateTime, cands::Vector{WindowTime})
-    inside_windows = t_inside_wt.(t, cands)
-    incl_wdows = cands[inside_windows]
-    buffers = [buffer(t, wt) for wt in incl_wdows]
-    imax = argmax(buffers)
-    return find(inside_windows)[imax]
-end
 
 function daily_best(all_posteriors)
     unique_days = Set{Date}()

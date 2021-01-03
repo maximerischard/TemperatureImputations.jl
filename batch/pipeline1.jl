@@ -4,7 +4,7 @@ doc = """
     * Save the predictive mean and covariance.
 
     Usage:
-        pipeline1.jl <ICAO> <model> <data_dir> <save_dir> [--knearest=<kn>] [--crossval]
+        pipeline1.jl <ICAO> <model> <data_dir> <save_dir> <kerneljson> [--knearest=<kn>] [--crossval]
 
     Options:
         -h --help        Show this screen.
@@ -35,6 +35,8 @@ k_nearest = parse(Int, arguments["--knearest"])
 @show k_nearest
 crossval = arguments["--crossval"]::Bool
 @show crossval
+kerneljson=arguments["<kerneljson>"]
+@show kerneljson
 
 global k_spatiotemporal
 global logNoise
@@ -60,10 +62,10 @@ else
     error(@sprintf("unknown model: %s", GPmodel))
 end
 
+include("BatchTemperatureImputations.jl")
+
 # load kernel hyperparameters from JSON file
-json_fname = @sprintf("hyperparams_%s_%s.json", GPmodel, ICAO) 
-json_filepath = json_filepath = joinpath(save_dir, "fitted_kernel", crossval ? "crossval" : "mll", GPmodel, json_fname)
-open(json_filepath, "r") do io
+open(kerneljson, "r") do io
     global output_dictionary = JSON.parse(io)
 end
 @assert output_dictionary["test_ICAO"] == ICAO
@@ -87,16 +89,7 @@ isd_nearest_and_test = TemperatureImputations.find_nearest(isd_wData, USAF, WBAN
 @time hourly_cat=TemperatureImputations.read_Stations(isd_nearest_and_test; data_dir=data_dir)
 itest=1 # first row of isd_nearest_and_test is the test station
 
-dt_start=DateTime(2015,1,1,0,0,0)
-mintime = DateTime(2015,1,1,0,0,0)
-maxtime = DateTime(2016,1,1,0,0,0)
-increm=(maxtime-mintime) / 15
-window=3*increm
-dt_start = mintime
-
-@time while dt_start < maxtime
-    global dt_start
-    dt_end=dt_start+window
+for fw in BatchTemperatureImputations.predict_from_nearby_chunks()
     if crossval
     	savemodel_dir = joinpath(save_dir, "predictions_from_nearby", "crossval", GPmodel, ICAO)
     else
@@ -105,23 +98,14 @@ dt_start = mintime
     if !isdir(savemodel_dir)
         mkpath(savemodel_dir)
     end
-    @show dt_start, dt_end
     GC.gc()
     @time nearby_pred = TemperatureImputations.predict_from_nearby(hourly_cat, isd_nearest_and_test, 
         k_spatiotemporal, logNoise,
-        itest, dt_start, dt_end)
-    save(joinpath(savemodel_dir,
-                 @sprintf("%d_%d_%s_%s_to_%s.jld", 
-                    USAF, 
-                    WBAN,
-                    ICAO,
-                    Date(dt_start), 
-                    Date(dt_end))), 
-        "nearby_pred", 
-        nearby_pred)
-    dt_start+=increm
-    if dt_end >= maximum(hourly_cat.ts)
-        break
-    end
+        itest, fw.start_date, fw.end_date)
+    fpath = joinpath(
+        savemodel_dir,
+        BatchTemperatureImputations.predictions_fname(;usaf=USAF, wban=WBAN, icao=ICAO, fw=fw)
+    )
+    save(fpath, "nearby_pred", nearby_pred)
     GC.gc()
 end

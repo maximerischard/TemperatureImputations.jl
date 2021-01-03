@@ -420,9 +420,9 @@ version = "1.0.0"
 
 [[JLD]]
 deps = ["FileIO", "HDF5", "Printf"]
-git-tree-sha1 = "1a87e91659fd7025fbeb0bb4db366a2e9dde39f6"
+git-tree-sha1 = "ba4227e46a3cdd2dd37505bfdb316b07111254ac"
 uuid = "4138dd39-2aa7-5051-a626-17a0bb65d9c8"
-version = "0.11.1"
+version = "0.12.0"
 
 [[JLLWrappers]]
 git-tree-sha1 = "04b49c556240b62d5a799e94c63d5fc14d3c07cd"
@@ -917,7 +917,7 @@ uuid = "bd369af6-aec1-5ad0-b16a-f7cc5008161c"
 version = "1.2.2"
 
 [[TemperatureImputations]]
-deps = ["CSV", "DataFrames", "Dates", "GaussianProcesses", "JLD", "LinearAlgebra", "LogDensityProblems", "MCMCChains", "NLopt", "Optim", "PDMats", "Printf", "Proj4", "StanBase", "StanSample", "Statistics"]
+deps = ["AxisArrays", "CSV", "DataFrames", "Dates", "GaussianProcesses", "LinearAlgebra", "LogDensityProblems", "MCMCChains", "NLopt", "Optim", "PDMats", "Printf", "Proj4", "StanBase", "StanSample", "Statistics"]
 path = ".."
 uuid = "3ecd16f4-a557-4f5c-bed7-042ea12fe1be"
 version = "0.1.0"

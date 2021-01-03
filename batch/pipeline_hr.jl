@@ -1,3 +1,4 @@
+# WARNING: THIS FILE IS OBSOLETE
 doc = """
     Impute hourly temperatures with the wrong measurement hour.
     The posterior based on nearby hourly temperatures only

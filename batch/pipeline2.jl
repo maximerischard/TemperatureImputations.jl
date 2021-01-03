@@ -12,27 +12,23 @@ doc = """
         --seed=<seed>  Random seed for Stan.  [default: -1]
         --ksmoothmax=<ksmoothmax>
         --epsilon=<epsilon>
+        --hr_measure_true=<hr>       [default: 17]
+        --hr_measure_impt=<hr>      [default: 17]
 """
 using DocOpt
 arguments = docopt(doc)
-using StanSample
-using Dates
+import StanSample, MCMCChains
+import Dates
 using Dates: Day, Hour, Date, DateTime
-using JLD
 using CSV
 import TemperatureImputations
-using LinearAlgebra
+import PDMats, LinearAlgebra # needed for JLD.load to work, see https://github.com/JuliaIO/JLD.jl/issues/216
 using DataFrames
 using Printf
 using Statistics
 
-function parse_if_not_empty(T, arg)
-    if arg != ""
-        return parse(T, arg)
-    else
-        return nothing
-    end
-end
+
+parse_if_not_empty(T, arg) = isnothing(arg) ? nothing : parse(T, arg)
 
 save_dir = arguments["<save_dir>"]
 save_dir = joinpath(save_dir)
@@ -42,10 +38,12 @@ data_dir = joinpath(data_dir)
 windownum = parse(Int, arguments["<windownum>"])
 ICAO = arguments["<ICAO>"]
 GPmodel = arguments["<model>"]
-seed = parse_if_not_empty(Int, arguments["--seed"])
+seed = parse(Int, arguments["--seed"])
 ksmoothmax = parse_if_not_empty(Float64, arguments["--ksmoothmax"])
-epsilon = p_if_not_emptyarse(Float64, arguments["--epsilon"])
+epsilon = parse_if_not_empty(Float64, arguments["--epsilon"])
 crossval = arguments["--crossval"]::Bool
+hr_measure_true = Hour(parse(Int, arguments["--hr_measure_true"]))
+hr_measure_impt = Hour(parse(Int, arguments["--hr_measure_impt"]))
 
 test_station_df = let
     epsg = 5072 # doesn't actually matter in this script
@@ -58,30 +56,22 @@ test_station=test_station_df[1,:]
 USAF = test_station.USAF
 WBAN = test_station.WBAN
 
-struct FittingWindow
-    start_date::DateTime
-    end_date::DateTime
-end
-function stan_dirname(usaf::Int, wban::Int, icao::String, fw::FittingWindow)
-    return @sprintf("%s/%d_%d_%s_%s_to_%s/", 
-                    icao, usaf, wban, icao, Date(fw.start_date)+Day(1), Date(fw.end_date))
-end
+include("BatchTemperatureImputations.jl")
 
-stan_days = Day(24)
-hr_measure = Hour(17)
-stan_increment = Day(14) # (24-14)/2 = 5 days of buffer
-janfirst = DateTime(2014,12,31,hr_measure.value,0,0)
-mintime = DateTime(2015,1,1,0,0,0)
-maxtime = DateTime(2016,1,1,0,0,0)
-stan_start = janfirst + (windownum-1)*stan_increment
-stan_end = stan_start + stan_days
-stan_window = FittingWindow(max(stan_start,mintime), min(stan_end,maxtime))
-stan_dir = abspath(joinpath(
-        save_dir, "stan_fit", 
-        crossval ? "crossval" : "mll",
-        GPmodel,
-        stan_dirname(USAF, WBAN, ICAO, stan_window)
-    ))
+stan_days = Day(15)
+stan_window = BatchTemperatureImputations.imputation_chunks(;stan_days=stan_days)[windownum]
+stan_dir = BatchTemperatureImputations.stan_dirpath(;
+    save_dir=save_dir,
+    crossval=crossval,
+    GPmodel=GPmodel,
+    hr_measure=hr_measure_impt,
+    usaf=USAF,
+    wban=WBAN,
+    icao=ICAO,
+    fw=stan_window)
+if !isdir(stan_dir)
+    mkpath(stan_dir)
+end
 if arguments["outputdir"]
     println(stan_dir)
     exit()
@@ -97,90 +87,41 @@ end
 TnTx = let
     hourly_test=TemperatureImputations.read_Stations(test_station_df; data_dir=data_dir)
     itest=1
-    TemperatureImputations.test_data(hourly_test, itest, hr_measure)
+    TnTx_true = TemperatureImputations.test_data(hourly_test, itest, hr_measure_true)
+    TnTx      = TemperatureImputations.test_data(hourly_test, itest, hr_measure_impt)
+    TnTx[!,:Tn] = TnTx_true.Tn # corrupt TnTx
+    TnTx[!,:Tx] = TnTx_true.Tx
+    TnTx
 end
+;
 
+nearby_windows = BatchTemperatureImputations.predict_from_nearby_chunks()
 
-function predictions_fname(usaf::Int, wban::Int, icao::String, fw::FittingWindow)
-     @sprintf("%d_%d_%s_%s_to_%s.jld", 
-        usaf, wban, icao,
-        Date(fw.start_date), Date(fw.end_date))
-end
-
-# copy-pasted from pipeline1.jl
-nearby_windows = FittingWindow[]
-increm=(maxtime-mintime) / 15
-dt_start = mintime
-window=3*increm
-while dt_start < maxtime
-	global dt_start
-    dt_end=dt_start+window
-    fwindow = FittingWindow(dt_start,dt_end)
-    push!(nearby_windows, fwindow)
-    dt_start+=increm
-    if dt_end >= maxtime
-        break
-    end
-end
-
-function overlap(a::FittingWindow, b::FittingWindow)
-	# conditions that imply the windows don't overlap at all:
-	a_after_b = a.start_date >= b.end_date
-	b_after_a = b.start_date >= a.end_date
-	return !(a_after_b || b_after_a)
-end
-"""
-    How much buffer time is there on either side of the window?
-"""
-function buffer(a::FittingWindow, b::FittingWindow)
-    start_diff = a.start_date - b.start_date
-    end_diff = b.end_date - a.end_date
-    return min(start_diff, end_diff) # worst of the two
-end
-""" 
-    Amongst a list of candidate windows `cand`, find the window that includes `wind`
-    with the largest buffer on either sides.
-"""
-function find_best_window(wind::FittingWindow, cands::Vector{FittingWindow})
-    incl_wdows = [fw for fw in cands if overlap(wind, fw)]
-    buffers = [buffer(wind, fw) for fw in incl_wdows]
-    imax = argmax(buffers) # maximum of minimum
-    best_window = incl_wdows[imax]
-    return best_window
-end
-
-
-best_window = find_best_window(stan_window, nearby_windows)
+stan_window_with_times = BatchTemperatureImputations.add_time_to_window(stan_window, hr_measure_impt)
+best_window = BatchTemperatureImputations.find_best_window(stan_window_with_times, nearby_windows)
 println("using nearby-predictions from: ", best_window)
 
-nearby_dir = joinpath(save_dir, "predictions_from_nearby", crossval ? "crossval" : "mll", GPmodel, ICAO)
-nearby_path =  joinpath(nearby_dir, predictions_fname(USAF, WBAN, ICAO, best_window))
-@show nearby_path
-nearby_pred=load(nearby_path)["nearby_pred"];
+nearby_pred = BatchTemperatureImputations.load_predictions(;
+    save_dir=save_dir,
+    crossval=crossval,
+    GPmodel=GPmodel,
+    icao=ICAO,
+    usaf=USAF,
+    wban=WBAN,
+    fw=best_window)
 
-start_date = Date(stan_window.start_date)+Day(1) # date of first measurement
-imputation_data, ts_window = TemperatureImputations.prep_data(nearby_pred, TnTx, start_date, hr_measure, stan_days; ksmoothmax=ksmoothmax, epsilon=epsilon)
+imputation_data, ts_window = TemperatureImputations.prep_data(
+    nearby_pred,
+    TnTx,
+    Date(stan_window.start_date),
+    hr_measure_impt,
+    stan_days;
+    ksmoothmax=ksmoothmax,
+    epsilon=epsilon
+)
 
-
-# for fname in readdir(joinpath(stan_dir, "tmp"))
-    # mv(joinpath(stan_dir, "tmp", fname), joinpath(stan_dir, fname); force=true)
-# end
-# rm(joinpath(stan_dir, "tmp"))
 
 CSV.write(joinpath(stan_dir,"timestamps.csv"), DataFrame(ts=ts_window), writeheader=false)
-
-for fname in ("imputation","imputation_build.log","imputation_run.log","imputation.hpp")
-    tmpdir = joinpath(save_dir, "tmp")
-    file_path = joinpath(tmpdir, fname)
-    if isfile(file_path)
-        cp(file_path, joinpath(stan_dir,fname), force=true)
-    else
-        println(file_path, "NOT FOUND")
-    end
-end
-if isfile(joinpath(stan_dir,"imputation"))
-    chmod(joinpath(stan_dir,"imputation"), 0o744)
-end
 
 @time rc = StanSample.stan_sample(imputation_model, data=imputation_data)
 @assert success(rc)
