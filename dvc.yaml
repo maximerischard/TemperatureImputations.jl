@@ -66,3 +66,433 @@ stages:
     - data/outputs/compiledstan/hr_measure/mll/SExSE/17/KBDL/725080_14740_KBDL_2015-01-01_to_2015-01-15/imputation.hpp
     - data/outputs/compiledstan/hr_measure/mll/SExSE/17/KBDL/725080_14740_KBDL_2015-01-01_to_2015-01-15/imputation.o
     - data/outputs/compiledstan/hr_measure/mll/SExSE/17/KBDL/725080_14740_KBDL_2015-01-01_to_2015-01-15/imputation.stan
+  kernelfit_KBDL_SExSE:
+    cmd: julia --project=batch batch/pipeline0_kernelfit.jl KBDL SExSE ./data ./data/outputs
+      --timelimit=Inf --knearest=5
+    deps:
+    - batch/pipeline0_kernelfit.jl
+    - data/data2015
+    - src/preprocessing.jl
+    outs:
+    - data/outputs/fitted_kernel/mll/SExSE/hyperparams_SExSE_KBDL.json:
+        cache: false
+  kernelfit_KCEF_SExSE:
+    cmd: julia --project=batch batch/pipeline0_kernelfit.jl KCEF SExSE ./data ./data/outputs
+      --timelimit=Inf --knearest=5
+    deps:
+    - batch/pipeline0_kernelfit.jl
+    - data/data2015
+    - src/preprocessing.jl
+    outs:
+    - data/outputs/fitted_kernel/mll/SExSE/hyperparams_SExSE_KCEF.json:
+        cache: false
+  kernelfit_KAUG_SExSE:
+    cmd: julia --project=batch batch/pipeline0_kernelfit.jl KAUG SExSE ./data ./data/outputs
+      --timelimit=Inf --knearest=5
+    deps:
+    - batch/pipeline0_kernelfit.jl
+    - data/data2015
+    - src/preprocessing.jl
+    outs:
+    - data/outputs/fitted_kernel/mll/SExSE/hyperparams_SExSE_KAUG.json:
+        cache: false
+  kernelfit_KFAT_SExSE:
+    cmd: julia --project=batch batch/pipeline0_kernelfit.jl KFAT SExSE ./data ./data/outputs
+      --timelimit=Inf --knearest=5
+    deps:
+    - batch/pipeline0_kernelfit.jl
+    - data/data2015
+    - src/preprocessing.jl
+    outs:
+    - data/outputs/fitted_kernel/mll/SExSE/hyperparams_SExSE_KFAT.json:
+        cache: false
+  kernelfit_KDSM_SExSE:
+    cmd: julia --project=batch batch/pipeline0_kernelfit.jl KDSM SExSE ./data ./data/outputs
+      --timelimit=Inf --knearest=5
+    deps:
+    - batch/pipeline0_kernelfit.jl
+    - data/data2015
+    - src/preprocessing.jl
+    outs:
+    - data/outputs/fitted_kernel/mll/SExSE/hyperparams_SExSE_KDSM.json:
+        cache: false
+  kernelfit_KICT_SExSE:
+    cmd: julia --project=batch batch/pipeline0_kernelfit.jl KICT SExSE ./data ./data/outputs
+      --timelimit=Inf --knearest=5
+    deps:
+    - batch/pipeline0_kernelfit.jl
+    - data/data2015
+    - src/preprocessing.jl
+    outs:
+    - data/outputs/fitted_kernel/mll/SExSE/hyperparams_SExSE_KICT.json:
+        cache: false
+  kernelfit_KIND_SExSE:
+    cmd: julia --project=batch batch/pipeline0_kernelfit.jl KIND SExSE ./data ./data/outputs
+      --timelimit=Inf --knearest=5
+    deps:
+    - batch/pipeline0_kernelfit.jl
+    - data/data2015
+    - src/preprocessing.jl
+    outs:
+    - data/outputs/fitted_kernel/mll/SExSE/hyperparams_SExSE_KIND.json:
+        cache: false
+  kernelfit_KLSE_SExSE:
+    cmd: julia --project=batch batch/pipeline0_kernelfit.jl KLSE SExSE ./data ./data/outputs
+      --timelimit=Inf --knearest=5
+    deps:
+    - batch/pipeline0_kernelfit.jl
+    - data/data2015
+    - src/preprocessing.jl
+    outs:
+    - data/outputs/fitted_kernel/mll/SExSE/hyperparams_SExSE_KLSE.json:
+        cache: false
+  kernelfit_KABE_SExSE:
+    cmd: julia --project=batch batch/pipeline0_kernelfit.jl KABE SExSE ./data ./data/outputs
+      --timelimit=Inf --knearest=5
+    deps:
+    - batch/pipeline0_kernelfit.jl
+    - data/data2015
+    - src/preprocessing.jl
+    outs:
+    - data/outputs/fitted_kernel/mll/SExSE/hyperparams_SExSE_KABE.json:
+        cache: false
+  kernelfit_KSPI_SExSE:
+    cmd: julia --project=batch batch/pipeline0_kernelfit.jl KSPI SExSE ./data ./data/outputs
+      --timelimit=Inf --knearest=5
+    deps:
+    - batch/pipeline0_kernelfit.jl
+    - data/data2015
+    - src/preprocessing.jl
+    outs:
+    - data/outputs/fitted_kernel/mll/SExSE/hyperparams_SExSE_KSPI.json:
+        cache: false
+  kernelfit_KSGF_SExSE:
+    cmd: julia --project=batch batch/pipeline0_kernelfit.jl KSGF SExSE ./data ./data/outputs
+      --timelimit=Inf --knearest=5
+    deps:
+    - batch/pipeline0_kernelfit.jl
+    - data/data2015
+    - src/preprocessing.jl
+    outs:
+    - data/outputs/fitted_kernel/mll/SExSE/hyperparams_SExSE_KSGF.json:
+        cache: false
+  kernelfit_KBHM_SExSE:
+    cmd: julia --project=batch batch/pipeline0_kernelfit.jl KBHM SExSE ./data ./data/outputs
+      --timelimit=Inf --knearest=5
+    deps:
+    - batch/pipeline0_kernelfit.jl
+    - data/data2015
+    - src/preprocessing.jl
+    outs:
+    - data/outputs/fitted_kernel/mll/SExSE/hyperparams_SExSE_KBHM.json:
+        cache: false
+  kernelfit_KCRW_SExSE:
+    cmd: julia --project=batch batch/pipeline0_kernelfit.jl KCRW SExSE ./data ./data/outputs
+      --timelimit=Inf --knearest=5
+    deps:
+    - batch/pipeline0_kernelfit.jl
+    - data/data2015
+    - src/preprocessing.jl
+    outs:
+    - data/outputs/fitted_kernel/mll/SExSE/hyperparams_SExSE_KCRW.json:
+        cache: false
+  kernelfit_KMWL_SExSE:
+    cmd: julia --project=batch batch/pipeline0_kernelfit.jl KMWL SExSE ./data ./data/outputs
+      --timelimit=Inf --knearest=5
+    deps:
+    - batch/pipeline0_kernelfit.jl
+    - data/data2015
+    - src/preprocessing.jl
+    outs:
+    - data/outputs/fitted_kernel/mll/SExSE/hyperparams_SExSE_KMWL.json:
+        cache: false
+  kernelfit_KABQ_SExSE:
+    cmd: julia --project=batch batch/pipeline0_kernelfit.jl KABQ SExSE ./data ./data/outputs
+      --timelimit=Inf --knearest=5
+    deps:
+    - batch/pipeline0_kernelfit.jl
+    - data/data2015
+    - src/preprocessing.jl
+    outs:
+    - data/outputs/fitted_kernel/mll/SExSE/hyperparams_SExSE_KABQ.json:
+        cache: false
+  kernelfit_KABR_SExSE:
+    cmd: julia --project=batch batch/pipeline0_kernelfit.jl KABR SExSE ./data ./data/outputs
+      --timelimit=Inf --knearest=5
+    deps:
+    - batch/pipeline0_kernelfit.jl
+    - data/data2015
+    - src/preprocessing.jl
+    outs:
+    - data/outputs/fitted_kernel/mll/SExSE/hyperparams_SExSE_KABR.json:
+        cache: false
+  kernelfit_KCMH_SExSE:
+    cmd: julia --project=batch batch/pipeline0_kernelfit.jl KCMH SExSE ./data ./data/outputs
+      --timelimit=Inf --knearest=5
+    deps:
+    - batch/pipeline0_kernelfit.jl
+    - data/data2015
+    - src/preprocessing.jl
+    outs:
+    - data/outputs/fitted_kernel/mll/SExSE/hyperparams_SExSE_KCMH.json:
+        cache: false
+  kernelfit_KGTF_SExSE:
+    cmd: julia --project=batch batch/pipeline0_kernelfit.jl KGTF SExSE ./data ./data/outputs
+      --timelimit=Inf --knearest=5
+    deps:
+    - batch/pipeline0_kernelfit.jl
+    - data/data2015
+    - src/preprocessing.jl
+    outs:
+    - data/outputs/fitted_kernel/mll/SExSE/hyperparams_SExSE_KGTF.json:
+        cache: false
+  kernelfit_KOKC_SExSE:
+    cmd: julia --project=batch batch/pipeline0_kernelfit.jl KOKC SExSE ./data ./data/outputs
+      --timelimit=Inf --knearest=5
+    deps:
+    - batch/pipeline0_kernelfit.jl
+    - data/data2015
+    - src/preprocessing.jl
+    outs:
+    - data/outputs/fitted_kernel/mll/SExSE/hyperparams_SExSE_KOKC.json:
+        cache: false
+  kernelfit_KDLH_SExSE:
+    cmd: julia --project=batch batch/pipeline0_kernelfit.jl KDLH SExSE ./data ./data/outputs
+      --timelimit=Inf --knearest=5
+    deps:
+    - batch/pipeline0_kernelfit.jl
+    - data/data2015
+    - src/preprocessing.jl
+    outs:
+    - data/outputs/fitted_kernel/mll/SExSE/hyperparams_SExSE_KDLH.json:
+        cache: false
+  kernelfit_KATL_SExSE:
+    cmd: julia --project=batch batch/pipeline0_kernelfit.jl KATL SExSE ./data ./data/outputs
+      --timelimit=Inf --knearest=5
+    deps:
+    - batch/pipeline0_kernelfit.jl
+    - data/data2015
+    - src/preprocessing.jl
+    outs:
+    - data/outputs/fitted_kernel/mll/SExSE/hyperparams_SExSE_KATL.json:
+        cache: false
+  kernelfit_KFYV_SExSE:
+    cmd: julia --project=batch batch/pipeline0_kernelfit.jl KFYV SExSE ./data ./data/outputs
+      --timelimit=Inf --knearest=5
+    deps:
+    - batch/pipeline0_kernelfit.jl
+    - data/data2015
+    - src/preprocessing.jl
+    outs:
+    - data/outputs/fitted_kernel/mll/SExSE/hyperparams_SExSE_KFYV.json:
+        cache: false
+  kernelfit_KLEX_SExSE:
+    cmd: julia --project=batch batch/pipeline0_kernelfit.jl KLEX SExSE ./data ./data/outputs
+      --timelimit=Inf --knearest=5
+    deps:
+    - batch/pipeline0_kernelfit.jl
+    - data/data2015
+    - src/preprocessing.jl
+    outs:
+    - data/outputs/fitted_kernel/mll/SExSE/hyperparams_SExSE_KLEX.json:
+        cache: false
+  kernelfit_KBNA_SExSE:
+    cmd: julia --project=batch batch/pipeline0_kernelfit.jl KBNA SExSE ./data ./data/outputs
+      --timelimit=Inf --knearest=5
+    deps:
+    - batch/pipeline0_kernelfit.jl
+    - data/data2015
+    - src/preprocessing.jl
+    outs:
+    - data/outputs/fitted_kernel/mll/SExSE/hyperparams_SExSE_KBNA.json:
+        cache: false
+  kernelfit_KCOS_SExSE:
+    cmd: julia --project=batch batch/pipeline0_kernelfit.jl KCOS SExSE ./data ./data/outputs
+      --timelimit=Inf --knearest=5
+    deps:
+    - batch/pipeline0_kernelfit.jl
+    - data/data2015
+    - src/preprocessing.jl
+    outs:
+    - data/outputs/fitted_kernel/mll/SExSE/hyperparams_SExSE_KCOS.json:
+        cache: false
+  kernelfit_KCAE_SExSE:
+    cmd: julia --project=batch batch/pipeline0_kernelfit.jl KCAE SExSE ./data ./data/outputs
+      --timelimit=Inf --knearest=5
+    deps:
+    - batch/pipeline0_kernelfit.jl
+    - data/data2015
+    - src/preprocessing.jl
+    outs:
+    - data/outputs/fitted_kernel/mll/SExSE/hyperparams_SExSE_KCAE.json:
+        cache: false
+  kernelfit_KROA_SExSE:
+    cmd: julia --project=batch batch/pipeline0_kernelfit.jl KROA SExSE ./data ./data/outputs
+      --timelimit=Inf --knearest=5
+    deps:
+    - batch/pipeline0_kernelfit.jl
+    - data/data2015
+    - src/preprocessing.jl
+    outs:
+    - data/outputs/fitted_kernel/mll/SExSE/hyperparams_SExSE_KROA.json:
+        cache: false
+  kernelfit_KTPH_SExSE:
+    cmd: julia --project=batch batch/pipeline0_kernelfit.jl KTPH SExSE ./data ./data/outputs
+      --timelimit=Inf --knearest=5
+    deps:
+    - batch/pipeline0_kernelfit.jl
+    - data/data2015
+    - src/preprocessing.jl
+    outs:
+    - data/outputs/fitted_kernel/mll/SExSE/hyperparams_SExSE_KTPH.json:
+        cache: false
+  kernelfit_KLBF_SExSE:
+    cmd: julia --project=batch batch/pipeline0_kernelfit.jl KLBF SExSE ./data ./data/outputs
+      --timelimit=Inf --knearest=5
+    deps:
+    - batch/pipeline0_kernelfit.jl
+    - data/data2015
+    - src/preprocessing.jl
+    outs:
+    - data/outputs/fitted_kernel/mll/SExSE/hyperparams_SExSE_KLBF.json:
+        cache: false
+  kernelfit_KSHV_SExSE:
+    cmd: julia --project=batch batch/pipeline0_kernelfit.jl KSHV SExSE ./data ./data/outputs
+      --timelimit=Inf --knearest=5
+    deps:
+    - batch/pipeline0_kernelfit.jl
+    - data/data2015
+    - src/preprocessing.jl
+    outs:
+    - data/outputs/fitted_kernel/mll/SExSE/hyperparams_SExSE_KSHV.json:
+        cache: false
+  kernelfit_KBIS_SExSE:
+    cmd: julia --project=batch batch/pipeline0_kernelfit.jl KBIS SExSE ./data ./data/outputs
+      --timelimit=Inf --knearest=5
+    deps:
+    - batch/pipeline0_kernelfit.jl
+    - data/data2015
+    - src/preprocessing.jl
+    outs:
+    - data/outputs/fitted_kernel/mll/SExSE/hyperparams_SExSE_KBIS.json:
+        cache: false
+  kernelfit_KMPV_SExSE:
+    cmd: julia --project=batch batch/pipeline0_kernelfit.jl KMPV SExSE ./data ./data/outputs
+      --timelimit=Inf --knearest=5
+    deps:
+    - batch/pipeline0_kernelfit.jl
+    - data/data2015
+    - src/preprocessing.jl
+    outs:
+    - data/outputs/fitted_kernel/mll/SExSE/hyperparams_SExSE_KMPV.json:
+        cache: false
+  kernelfit_KJAN_SExSE:
+    cmd: julia --project=batch batch/pipeline0_kernelfit.jl KJAN SExSE ./data ./data/outputs
+      --timelimit=Inf --knearest=5
+    deps:
+    - batch/pipeline0_kernelfit.jl
+    - data/data2015
+    - src/preprocessing.jl
+    outs:
+    - data/outputs/fitted_kernel/mll/SExSE/hyperparams_SExSE_KJAN.json:
+        cache: false
+  kernelfit_KRDU_SExSE:
+    cmd: julia --project=batch batch/pipeline0_kernelfit.jl KRDU SExSE ./data ./data/outputs
+      --timelimit=Inf --knearest=5
+    deps:
+    - batch/pipeline0_kernelfit.jl
+    - data/data2015
+    - src/preprocessing.jl
+    outs:
+    - data/outputs/fitted_kernel/mll/SExSE/hyperparams_SExSE_KRDU.json:
+        cache: false
+  kernelfit_KPIH_SExSE:
+    cmd: julia --project=batch batch/pipeline0_kernelfit.jl KPIH SExSE ./data ./data/outputs
+      --timelimit=Inf --knearest=5
+    deps:
+    - batch/pipeline0_kernelfit.jl
+    - data/data2015
+    - src/preprocessing.jl
+    outs:
+    - data/outputs/fitted_kernel/mll/SExSE/hyperparams_SExSE_KPIH.json:
+        cache: false
+  kernelfit_KPVD_SExSE:
+    cmd: julia --project=batch batch/pipeline0_kernelfit.jl KPVD SExSE ./data ./data/outputs
+      --timelimit=Inf --knearest=5
+    deps:
+    - batch/pipeline0_kernelfit.jl
+    - data/data2015
+    - src/preprocessing.jl
+    outs:
+    - data/outputs/fitted_kernel/mll/SExSE/hyperparams_SExSE_KPVD.json:
+        cache: false
+  kernelfit_KSYR_SExSE:
+    cmd: julia --project=batch batch/pipeline0_kernelfit.jl KSYR SExSE ./data ./data/outputs
+      --timelimit=Inf --knearest=5
+    deps:
+    - batch/pipeline0_kernelfit.jl
+    - data/data2015
+    - src/preprocessing.jl
+    outs:
+    - data/outputs/fitted_kernel/mll/SExSE/hyperparams_SExSE_KSYR.json:
+        cache: false
+  kernelfit_KEUG_SExSE:
+    cmd: julia --project=batch batch/pipeline0_kernelfit.jl KEUG SExSE ./data ./data/outputs
+      --timelimit=Inf --knearest=5
+    deps:
+    - batch/pipeline0_kernelfit.jl
+    - data/data2015
+    - src/preprocessing.jl
+    outs:
+    - data/outputs/fitted_kernel/mll/SExSE/hyperparams_SExSE_KEUG.json:
+        cache: false
+  kernelfit_KSEA_SExSE:
+    cmd: julia --project=batch batch/pipeline0_kernelfit.jl KSEA SExSE ./data ./data/outputs
+      --timelimit=Inf --knearest=5
+    deps:
+    - batch/pipeline0_kernelfit.jl
+    - data/data2015
+    - src/preprocessing.jl
+    outs:
+    - data/outputs/fitted_kernel/mll/SExSE/hyperparams_SExSE_KSEA.json:
+        cache: false
+  kernelfit_KSLC_SExSE:
+    cmd: julia --project=batch batch/pipeline0_kernelfit.jl KSLC SExSE ./data ./data/outputs
+      --timelimit=Inf --knearest=5
+    deps:
+    - batch/pipeline0_kernelfit.jl
+    - data/data2015
+    - src/preprocessing.jl
+    outs:
+    - data/outputs/fitted_kernel/mll/SExSE/hyperparams_SExSE_KSLC.json:
+        cache: false
+  kernelfit_KPLN_SExSE:
+    cmd: julia --project=batch batch/pipeline0_kernelfit.jl KPLN SExSE ./data ./data/outputs
+      --timelimit=Inf --knearest=5
+    deps:
+    - batch/pipeline0_kernelfit.jl
+    - data/data2015
+    - src/preprocessing.jl
+    outs:
+    - data/outputs/fitted_kernel/mll/SExSE/hyperparams_SExSE_KPLN.json:
+        cache: false
+  kernelfit_KBWI_SExSE:
+    cmd: julia --project=batch batch/pipeline0_kernelfit.jl KBWI SExSE ./data ./data/outputs
+      --timelimit=Inf --knearest=5
+    deps:
+    - batch/pipeline0_kernelfit.jl
+    - data/data2015
+    - src/preprocessing.jl
+    outs:
+    - data/outputs/fitted_kernel/mll/SExSE/hyperparams_SExSE_KBWI.json:
+        cache: false
+  kernelfit_KJAX_SExSE:
+    cmd: julia --project=batch batch/pipeline0_kernelfit.jl KJAX SExSE ./data ./data/outputs
+      --timelimit=Inf --knearest=5
+    deps:
+    - batch/pipeline0_kernelfit.jl
+    - data/data2015
+    - src/preprocessing.jl
+    outs:
+    - data/outputs/fitted_kernel/mll/SExSE/hyperparams_SExSE_KJAX.json:
+        cache: false
