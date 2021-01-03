@@ -58,7 +58,7 @@ WBAN = test_station.WBAN
 
 include("BatchTemperatureImputations.jl")
 
-stan_days = Day(15)
+stan_days = Day(10)
 stan_window = BatchTemperatureImputations.imputation_chunks(;stan_days=stan_days)[windownum]
 stan_dir = BatchTemperatureImputations.stan_dirpath(;
     save_dir=save_dir,

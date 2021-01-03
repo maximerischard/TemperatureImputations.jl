@@ -2,20 +2,21 @@
 # exit when any command fails
 set -e
 
-ROOT=$(grealpath "$(dirname $0)/..")
+ROOT=$(realpath "$(dirname $0)/..")
 test_stations_path="${ROOT}/data/test_stations.csv"
-test_stations_string=$(cat ${test_stations_path} | cut -d ',' -f6 | tail -n +2 | head -n 2)
+test_stations_string=$(cat ${test_stations_path} | cut -d ',' -f6 | tail -n +2)
 echo ${test_stations_string}
 
-nbatch=2
+nbatch=32
 
 GPmodel="SExSE"
 for ICAO in ${test_stations_string}; do
+    echo "ICAO parameter fitting: " $ICAO
     # control the number of simultaneous processes
     # https://unix.stackexchange.com/questions/103920/parallelize-a-bash-for-loop
-    (i=i%nbatch) ; ((i++==0)) && wait
+    ((i++%nbatch==0)) && wait
+    sleep $(echo "${RANDOM}/32767/4+2" | bc -l) # sleep for a random time between 0 and 0.25s
 
-    echo "ICAO parameter fitting: " $ICAO
 # echo $test_stations | xargs -I {} \
     dvc run \
         --name kernelfit_${ICAO}_${GPmodel} \
@@ -28,7 +29,6 @@ for ICAO in ${test_stations_string}; do
         julia --project=batch batch/pipeline0_kernelfit.jl ${ICAO} ${GPmodel} \
             ./data ./data/outputs --timelimit=Inf --knearest=5 \
             & # do in parallel
-
 done
 
 wait
@@ -37,7 +37,9 @@ echo "--- predict from nearby ---"
 for ICAO in ${test_stations_string}; do
     # control the number of simultaneous processes
     echo "ICAO predict from nearby: " $ICAO
-    (i=i%nbatch) ; ((i++==0)) && wait
+    ((i++%nbatch==0)) && wait
+    sleep $(echo "${RANDOM}/32767/4+2" | bc -l) # sleep for a random time between 0 and 0.25s
+
     kerneljson="data/outputs/fitted_kernel/mll/${GPmodel}/hyperparams_${GPmodel}_${ICAO}.json"
     dvc run \
         --name nearby_predictions_${ICAO}_${GPmodel} \
@@ -105,7 +107,9 @@ for ICAO in ${test_stations_string}; do
             ./data/outputs
             )
         cp -R ${compiledstandir}/* ${outputdir}/
-        (i=i%nbatch) ; ((i++==0)) && wait
+        ((i++%nbatch==0)) && wait
+        sleep $(echo "${RANDOM}/32767/4+2" | bc -l) # sleep for a random time between 0 and 0.25s
+
         dvc run \
             --name imputations_${ICAO}_${GPmodel}_${windownum} \
             --force \
@@ -115,6 +119,7 @@ for ICAO in ${test_stations_string}; do
             --deps src/preprocessing.jl \
             --deps src/stan_impute.jl \
             --deps data/outputs/predictions_from_nearby/mll/${GPmodel}/${ICAO} \
+            --deps batch/batch_chunks.jl \
             --deps "${compiledstandir}/imputation.stan" \
             --deps "${compiledstandir}/imputation.o" \
             --deps "${compiledstandir}/imputation.hpp" \
