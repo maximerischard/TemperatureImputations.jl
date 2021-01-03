@@ -1,0 +1,5 @@
+outs:
+- md5: 2db76f9b0e87626bf42b8a9c718bcd9f.dir
+  size: 1477661
+  nfiles: 8
+  path: cb_2017_us_state_5m
