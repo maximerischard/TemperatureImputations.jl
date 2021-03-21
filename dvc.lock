@@ -1333,3 +1333,31 @@ stages:
     - path: data/outputs/fitted_kernel/mll/SExSE/hyperparams_SExSE_KINW.json
       md5: 3b85571d5b4628e8f8e4e95744999cc0
       size: 619
+  nearby_predictions_SExSE@KINW:
+    cmd: julia --project=batch batch/pipeline1.jl KINW SExSE ./data ./data/outputs
+      data/outputs/fitted_kernel/mll/SExSE/hyperparams_SExSE_KINW.json --knearest=5
+    deps:
+    - path: batch/pipeline1.jl
+      md5: fe5effd906f4b225cc73c72cac847c14
+      size: 3799
+    - path: data/data2015
+      md5: 7c4a70921b6fb9788ec1c9afc6c21240.dir
+      size: 93806604
+      nfiles: 627
+    - path: data/outputs/fitted_kernel/mll/SExSE/hyperparams_SExSE_KINW.json
+      md5: 3b85571d5b4628e8f8e4e95744999cc0
+      size: 619
+    - path: src/GPrealisations.jl
+      md5: 76228e81f931d56323b9698ebecb121a
+      size: 10327
+    - path: src/predict_from_nearby.jl
+      md5: 4fbcdd03544779f70f50d3333df5ff67
+      size: 3166
+    - path: src/preprocessing.jl
+      md5: 4c114b4114898e5938caf2695d685bb1
+      size: 3945
+    outs:
+    - path: data/outputs/predictions_from_nearby/mll/SExSE/KINW
+      md5: a1855b41f380907ab2ecfaec42763cf3.dir
+      size: 1022545208
+      nfiles: 13
