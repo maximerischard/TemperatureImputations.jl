@@ -1,13 +1,14 @@
 doc = """
 
     Usage:
-        choose_test_stations.jl <data_dir> <outputfile> --epsg=<epsg> --maxgap=<maxgap_hours>
+        test_stations.jl choose <data_dir> <outputfile> --epsg=<epsg> --maxgap=<maxgap_hours>
+        test_stations.jl tojson <csvfile> <outputfile>
 """
 using DocOpt: docopt
 
 import Shapefile
 import Proj4
-import CSV
+import CSV, JSON
 using DataFrames
 using Dates: Hour, Millisecond
 
@@ -20,24 +21,34 @@ using GeoInterface: coordinates
 function main()
     arguments = docopt(doc)
     @show arguments
-    epsg = parse(Int, arguments["--epsg"])
-    maxgap_hours = parse(Float64, arguments["--maxgap"])
-    data_dir = arguments["<data_dir>"]
     outputfile = arguments["<outputfile>"]
 
-    isdList = TemperatureImputations.read_isdList(; data_dir=data_dir, epsg=epsg)
-    isd_wData = TemperatureImputations.stations_with_data(isdList; data_dir=data_dir)
+    if arguments["choose"]
+        epsg = parse(Int, arguments["--epsg"])
+        maxgap_hours = parse(Float64, arguments["--maxgap"])
+        data_dir = arguments["<data_dir>"]
 
-    isd_smallgap = filter_stations_with_small_gaps(isd_wData, data_dir, maxgap_hours)
+        isdList = TemperatureImputations.read_isdList(; data_dir=data_dir, epsg=epsg)
+        isd_wData = TemperatureImputations.stations_with_data(isdList; data_dir=data_dir)
 
-    states_shapefile_path = joinpath(data_dir,"cb_2017_us_state_5m","cb_2017_us_state_5m.shp")
-    states_shapefile = open(states_shapefile_path, "r") do io
-        read(io, Shapefile.Handle)
+        isd_smallgap = filter_stations_with_small_gaps(isd_wData, data_dir, maxgap_hours)
+
+        states_shapefile_path = joinpath(data_dir,"cb_2017_us_state_5m","cb_2017_us_state_5m.shp")
+        states_shapefile = open(states_shapefile_path, "r") do io
+            read(io, Shapefile.Handle)
+        end
+        inearcentroids = get_stations_near_centroids(isd_smallgap, states_shapefile, epsg)
+        test_stations = isd_smallgap[inearcentroids,:]
+        CSV.write(joinpath(outputfile), test_stations)
+        println("Test stations written to: ", outputfile)
+    elseif arguments["tojson"]
+        csvfile = arguments["<csvfile>"]
+        test_stations = CSV.read(csvfile, DataFrame)
+        json_dict = Dict("ICAO" => test_stations.ICAO)
+        open(joinpath(outputfile), "w") do io
+            JSON.print(io, json_dict)
+        end
     end
-    inearcentroids = get_stations_near_centroids(isd_smallgap, states_shapefile, epsg)
-    test_stations = isd_smallgap[inearcentroids,:]
-    CSV.write(joinpath(outputfile), test_stations)
-    println("Test stations written to: ", outputfile)
 end
 
 function filter_stations_with_small_gaps(isd_stations, data_dir::String, maxgap::Float64)
