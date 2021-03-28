@@ -33,6 +33,30 @@ stages:
       outs:
       - data/outputs/fitted_kernel/mll/SExSE/hyperparams_SExSE_${item}.json:
           cache: false
+  kernelfit_matern:
+    foreach: ${ICAO} # from batch/test_stations.json
+    do:
+      cmd: julia --project=batch batch/pipeline0_kernelfit.jl ${item} matern ./data ./data/outputs
+        --timelimit=Inf --knearest=5
+      deps:
+      - batch/pipeline0_kernelfit.jl
+      - data/data2015
+      - src/preprocessing.jl
+      outs:
+      - data/outputs/fitted_kernel/mll/matern/hyperparams_matern_${item}.json:
+          cache: false
+  kernelfit_matern_crossval:
+    foreach: ${ICAO} # from batch/test_stations.json
+    do:
+      cmd: julia --project=batch batch/pipeline0_kernelfit.jl ${item} matern ./data ./data/outputs
+        --timelimit=Inf --knearest=5 --crossval
+      deps:
+      - batch/pipeline0_kernelfit.jl
+      - data/data2015
+      - src/preprocessing.jl
+      outs:
+      - data/outputs/fitted_kernel/crossval/matern/hyperparams_matern_${item}.json:
+          cache: false
   nearby_predictions_SExSE:
     foreach: ${ICAO}
     do:
@@ -47,13 +71,27 @@ stages:
       - src/preprocessing.jl
       outs:
       - data/outputs/predictions_from_nearby/mll/SExSE/${item}
-  # compilestan:
-    # cmd: julia --project=batch batch/pipeline2.jl compilestan KBDL SExSE 1 ./data
-      # ./data/outputs/compiledstan
-    # deps:
-    # - batch/pipeline2.jl
-    # - src/stan_impute.jl
-    # outs:
-    # - data/outputs/compiledstan/hr_measure/mll/SExSE/17/KBDL/725080_14740_KBDL_2015-01-01_to_2015-01-10/imputation
-    # - data/outputs/compiledstan/hr_measure/mll/SExSE/17/KBDL/725080_14740_KBDL_2015-01-01_to_2015-01-10/imputation.hpp
-    # - data/outputs/compiledstan/hr_measure/mll/SExSE/17/KBDL/725080_14740_KBDL_2015-01-01_to_2015-01-10/imputation.stan
+  compilestan:
+    cmd: julia --project=batch batch/pipeline2.jl compilestan ./data/outputs/compiledstan
+    deps:
+    - batch/pipeline2.jl
+    - src/stan_impute.jl
+    outs:
+    - data/outputs/compiledstan/imputation
+    - data/outputs/compiledstan/imputation.hpp
+    - data/outputs/compiledstan/imputation.stan
+  impute_SExSE:
+    foreach: ${ICAO_stanwindows} # from batch/test_stations.json
+    do:
+      cmd: 
+      - cp -R ./data/outputs/compiledstan/* ./data/outputs/imputations/mll/SExSE/hr17/${item.ICAO}/
+      - julia --project=batch --procs 4 batch/pipeline2.jl impute ${item.ICAO} SExSE ${item.windownum} ./data ./data/outputs/imputations/mll/SExSE/hr17/${item.ICAO}/ --ksmoothmax=50 --epsilon=0.01 --seed=${item.windownum} --hr_measure_true=17 --hr_measure_impt=17 --stan_days=10
+      deps:
+      - batch/pipeline2.jl
+      - src/stan_impute.jl
+      outs:
+      - data/outputs/imputations/mll/SExSE/hr17/${item.ICAO}/window${item.windownum}/imputation_1.data.R
+      - data/outputs/imputations/mll/SExSE/hr17/${item.ICAO}/window${item.windownum}/imputation_samples_1.csv
+      - data/outputs/imputations/mll/SExSE/hr17/${item.ICAO}/window${item.windownum}/imputation_samples_2.csv
+      - data/outputs/imputations/mll/SExSE/hr17/${item.ICAO}/window${item.windownum}/imputation_samples_3.csv
+      - data/outputs/imputations/mll/SExSE/hr17/${item.ICAO}/window${item.windownum}/imputation_samples_4.csv
