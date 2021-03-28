@@ -109,7 +109,7 @@ function get_imputation_model(; pdir=pwd(), seed::Int)
                 num_warmup=1000,
                 num_samples=1000,
                 thin=1),
-            tmpdir=pdir)
+            tmpdir=abspath(pdir))
     return stanmodel
 end
 
