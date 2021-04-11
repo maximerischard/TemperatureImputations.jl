@@ -44,7 +44,14 @@ function main()
     elseif arguments["tojson"]
         csvfile = arguments["<csvfile>"]
         test_stations = CSV.read(csvfile, DataFrame)
-        json_dict = Dict("ICAO" => test_stations.ICAO)
+        ICAO_stanwindows = Dict{String,Any}[]
+        for icao in test_stations.ICAO
+            for windownum in 1:90
+                push!(ICAO_stanwindows, Dict("ICAO" => icao, "windownum" => windownum))
+            end
+        end
+        json_dict = Dict("ICAO" => test_stations.ICAO,
+                         "ICAO_stanwindows" => ICAO_stanwindows)
         open(joinpath(outputfile), "w") do io
             JSON.print(io, json_dict)
         end
