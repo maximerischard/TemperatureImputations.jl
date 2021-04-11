@@ -17,29 +17,32 @@ function predictions_fname(;usaf::Int, wban::Int, icao::String, fw::FittingWindo
         usaf, wban, icao,
         Date(fw.start_date), Date(fw.end_date))
 end
+function load_predictions(nearby_dir::String, usaf::Int, wban::Int, icao::String, fw::FittingWindow)
+    nearby_fname = predictions_fname(;usaf=usaf, wban=wban, icao=icao, fw=fw)
+    nearby_path = joinpath(nearby_dir, nearby_fname)
+    return load(nearby_path)["nearby_pred"]
+end
 function load_predictions(;save_dir::String, crossval::Bool, GPmodel::String, icao::String,
                            usaf::Int, wban::Int, fw::FittingWindow)
     nearby_dir = predictions_dirpath(;save_dir=save_dir, crossval=crossval, GPmodel=GPmodel, icao=icao)
-    nearby_fname = predictions_fname(;usaf=usaf, wban=wban, icao=icao, fw=fw)
-    nearby_path = joinpath(nearby_dir, nearby_fname)
-    load(nearby_path)["nearby_pred"]
+    return load_predictions(nearby_dir, usaf, wban, icao, fw)
 end
 
-function stan_dirpath(
-        ;save_dir::String, crossval::Bool, GPmodel::String,
-         hr_measure::Hour, usaf::Int, wban::Int, icao::String, fw::FittingWindow)
-    return joinpath(
-            save_dir,
-            "hr_measure",
-            crossval ? "crossval" : "mll",
-            GPmodel,
-            string(Int(hr_measure.value)), 
-            icao,
-            @sprintf("%d_%d_%s_%s_to_%s/", 
-                     usaf, wban, icao, Date(fw.start_date), Date(fw.end_date)
-                     )
-    ) |> abspath
-end
+# function stan_dirpath(
+        # ;save_dir::String, crossval::Bool, GPmodel::String,
+         # hr_measure::Hour, usaf::Int, wban::Int, icao::String, fw::FittingWindow)
+    # return joinpath(
+            # save_dir,
+            # "hr_measure",
+            # crossval ? "crossval" : "mll",
+            # GPmodel,
+            # string(Int(hr_measure.value)), 
+            # icao,
+            # @sprintf("%d_%d_%s_%s_to_%s/", 
+                     # usaf, wban, icao, Date(fw.start_date), Date(fw.end_date)
+                     # )
+    # ) |> abspath
+# end
 
 
 function get_nearby(fw::FittingWindow, GPmodel::AbstractString, usaf::Int, wban::Int, icao::String, saved_dir::String; crossval::Bool)
