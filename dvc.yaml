@@ -84,14 +84,16 @@ stages:
     foreach: ${ICAO_stanwindows} # from batch/test_stations.json
     do:
       cmd: 
+      - mkdir -p ./data/outputs/imputations/mll/SExSE/hr17/${item.ICAO}/window${item.windownum}
       - cp -R ./data/outputs/compiledstan/* ./data/outputs/imputations/mll/SExSE/hr17/${item.ICAO}/
-      - julia --project=batch --procs 4 batch/pipeline2.jl impute ${item.ICAO} SExSE ${item.windownum} ./data ./data/outputs/imputations/mll/SExSE/hr17/${item.ICAO}/ --ksmoothmax=50 --epsilon=0.01 --seed=${item.windownum} --hr_measure_true=17 --hr_measure_impt=17 --stan_days=10
+      - julia --project=batch --threads 4 batch/pipeline2.jl impute ${item.ICAO} SExSE ${item.windownum} ./data ./data/outputs/predictions_from_nearby/mll/SExSE/${item.ICAO} ./data/outputs/imputations/mll/SExSE/hr17/${item.ICAO}/window${item.windownum} --ksmoothmax=30 --epsilon=0.05 --seed=${item.windownum} --hr_measure_true=17 --hr_measure_impt=17 --stan_days=10
       deps:
+      - data/outputs/predictions_from_nearby/mll/SExSE/${item.ICAO}
       - batch/pipeline2.jl
       - src/stan_impute.jl
       outs:
-      - data/outputs/imputations/mll/SExSE/hr17/${item.ICAO}/window${item.windownum}/imputation_1.data.R
-      - data/outputs/imputations/mll/SExSE/hr17/${item.ICAO}/window${item.windownum}/imputation_samples_1.csv
-      - data/outputs/imputations/mll/SExSE/hr17/${item.ICAO}/window${item.windownum}/imputation_samples_2.csv
-      - data/outputs/imputations/mll/SExSE/hr17/${item.ICAO}/window${item.windownum}/imputation_samples_3.csv
-      - data/outputs/imputations/mll/SExSE/hr17/${item.ICAO}/window${item.windownum}/imputation_samples_4.csv
+      - data/outputs/imputations/mll/SExSE/hr17/${item.ICAO}/window${item.windownum}/imputation_data_1.R
+      - data/outputs/imputations/mll/SExSE/hr17/${item.ICAO}/window${item.windownum}/imputation_chain_1.csv
+      - data/outputs/imputations/mll/SExSE/hr17/${item.ICAO}/window${item.windownum}/imputation_chain_2.csv
+      - data/outputs/imputations/mll/SExSE/hr17/${item.ICAO}/window${item.windownum}/imputation_chain_3.csv
+      - data/outputs/imputations/mll/SExSE/hr17/${item.ICAO}/window${item.windownum}/imputation_chain_4.csv
