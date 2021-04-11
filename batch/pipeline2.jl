@@ -7,7 +7,7 @@ doc = """
 
     Usage:
         pipeline2.jl compilestan <stan_dir>
-        pipeline2.jl impute <ICAO> <model> <windownum> <data_dir> <stan_dir> [options] [--crossval]
+        pipeline2.jl impute <ICAO> <model> <windownum> <data_dir> <nearby_dir> <stan_dir> [options] [--crossval]
 
     Options:
         --seed=<seed>  Random seed for Stan.  [default: -1]
@@ -35,11 +35,12 @@ function parse_args()
     stan_dir = arguments["<stan_dir>"]
     stan_dir = joinpath(stan_dir)
     if !isdir(stan_dir)
-        mkdir(stan_dir)
+        mkpath(stan_dir)
     end
     @assert isdir(stan_dir)
     data_dir = arguments["<data_dir>"]
     data_dir = isnothing(data_dir) ? nothing : joinpath(data_dir)
+    nearby_dir = arguments["<nearby_dir>"]
     windownum = parse_if_not_empty(Int, arguments["<windownum>"])
     ICAO = arguments["<ICAO>"]
     GPmodel = arguments["<model>"]
@@ -58,6 +59,7 @@ function parse_args()
     end
     return (stan_dir=stan_dir,
             data_dir=data_dir,
+            nearby_dir=nearby_dir,
             windownum=windownum,
             ICAO=ICAO,
             GPmodel=GPmodel,
@@ -88,7 +90,7 @@ function main()
     WBAN = test_station.WBAN
 
 
-    stan_window = BatchTemperatureImputations.imputation_chunks(;stan_days=args.stan_days)[windownum]
+    stan_window = BatchTemperatureImputations.imputation_chunks(;stan_days=args.stan_days)[args.windownum]
     stan_dir = args.stan_dir
     # stan_dir = BatchTemperatureImputations.stan_dirpath(;
         # save_dir=save_dir,
@@ -120,14 +122,7 @@ function main()
     best_window = BatchTemperatureImputations.find_best_window(stan_window_with_times, nearby_windows)
     println("using nearby-predictions from: ", best_window)
 
-    nearby_pred = BatchTemperatureImputations.load_predictions(;
-        save_dir=save_dir,
-        crossval=crossval,
-        GPmodel=GPmodel,
-        icao=args.ICAO,
-        usaf=USAF,
-        wban=WBAN,
-        fw=best_window)
+    nearby_pred = BatchTemperatureImputations.load_predictions(args.nearby_dir, USAF, WBAN, args.ICAO, best_window)
 
     imputation_data, ts_window = TemperatureImputations.prep_data(
         nearby_pred,
