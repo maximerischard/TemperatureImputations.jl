@@ -46,7 +46,7 @@ function main()
         test_stations = CSV.read(csvfile, DataFrame)
         ICAO_stanwindows = Dict{String,Any}[]
         for icao in test_stations.ICAO
-            for windownum in 1:90
+            for windownum in 1:61
                 push!(ICAO_stanwindows, Dict("ICAO" => icao, "windownum" => windownum))
             end
         end
