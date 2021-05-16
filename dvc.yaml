@@ -21,6 +21,20 @@ stages:
     outs:
       - batch/test_stations.json:
           cache: false
+  kernelfit_diurnal:
+    foreach: ${ICAO} # from batch/test_stations.json
+    do:
+      cmd: julia --project=batch batch/pipeline0_kernelfit.jl ${item} diurnal ./data ./data/outputs
+        --timelimit=Inf --knearest=5
+      deps:
+      - batch/pipeline0_kernelfit.jl
+      - data/data2015
+      - src/preprocessing.jl
+      - src/covariance.jl
+      - src/fitted_kernel.jl
+      outs:
+      - data/outputs/fitted_kernel/mll/diurnal/hyperparams_diurnal_${item}.json:
+          cache: false
   kernelfit_SExSE:
     foreach: ${ICAO} # from batch/test_stations.json
     do:
