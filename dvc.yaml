@@ -30,6 +30,8 @@ stages:
       - batch/pipeline0_kernelfit.jl
       - data/data2015
       - src/preprocessing.jl
+      - src/covariance.jl
+      - src/fitted_kernel.jl
       outs:
       - data/outputs/fitted_kernel/mll/SExSE/hyperparams_SExSE_${item}.json:
           cache: false
@@ -42,6 +44,8 @@ stages:
       - batch/pipeline0_kernelfit.jl
       - data/data2015
       - src/preprocessing.jl
+      - src/covariance.jl
+      - src/fitted_kernel.jl
       outs:
       - data/outputs/fitted_kernel/mll/matern/hyperparams_matern_${item}.json:
           cache: false
@@ -54,6 +58,8 @@ stages:
       - batch/pipeline0_kernelfit.jl
       - data/data2015
       - src/preprocessing.jl
+      - src/covariance.jl
+      - src/fitted_kernel.jl
       outs:
       - data/outputs/fitted_kernel/crossval/matern/hyperparams_matern_${item}.json:
           cache: false
