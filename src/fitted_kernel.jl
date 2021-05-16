@@ -164,8 +164,8 @@ end
 
 function kernel_sptemp_diurnal(;kmean::Bool)
     k_time = SEIso(0.0,0.0)
-    k_spatial = SEIso(log(DEFAULT_LENGTHSCALE), log(1.0))
-    k_periodic = Periodic(log(1.0), -1.0, log(24.0))
+    k_spatial = Mat32Iso(log(DEFAULT_LENGTHSCALE), log(1.0))
+    k_periodic = Periodic(log(1.0), log(3.0), log(24.0))
     k_diurndecay = SEIso(log(DEFAULT_LENGTHSCALE), 0.0)
     k_spatiotemporal = kprod(k_time, k_spatial) + 
                        kprod(fix(k_periodic, :lp), k_diurndecay)
