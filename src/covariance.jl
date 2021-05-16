@@ -54,6 +54,7 @@ function optim_kernel(k_spatiotemporal::Kernel, logNoise_init::Float64,
         converged = ret ∈ (:SUCCESS, :FTOL_REACHED, :XTOL_REACHED)
     elseif method == :Optim
         opt_out = TemperatureImputations.optimize!(reals; domean=false, kern=true, noise=true,
+                                      method=Optim.LBFGS(linesearch=Optim.BackTracking()),
                                       options=Optim.Options(;x_tol=x_tol, f_tol=f_tol, kwargs...)
                                      )
         min_hyp = Optim.minimizer(opt_out)
