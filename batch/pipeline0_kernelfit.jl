@@ -42,7 +42,9 @@ elseif GPmodel=="free_var"
 elseif GPmodel=="sumprod"
     k_spatiotemporal,logNoise = TemperatureImputations.fitted_sptemp_sumprod(;kmean=true)
 elseif GPmodel=="SExSE"
-    k_spatiotemporal,logNoise = TemperatureImputations.fitted_sptemp_SExSE(;kmean=true)
+    kdict = TemperatureImputations.kernel_sptemp_SExSE(;kmean=true)
+    k_spatiotemporal = kdict[:spatiotemporal]
+    logNoise = -1.0
 elseif GPmodel=="diurnal"
     k_spatiotemporal,logNoise = TemperatureImputations.fitted_sptemp_diurnal(;kmean=true)
 elseif GPmodel=="simpler"
