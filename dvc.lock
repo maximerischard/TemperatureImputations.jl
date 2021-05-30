@@ -81,8 +81,8 @@ stages:
     cmd: julia --project=batch batch/pipeline2.jl compilestan ./data/outputs/compiledstan
     deps:
     - path: batch/pipeline2.jl
-      md5: 738c7af6d8f3177d1d4d385b76f1d173
-      size: 5456
+      md5: 1049deb7b40b7bff45bef5e7664650de
+      size: 5439
     - path: src/stan_impute.jl
       md5: bae220ecd8fa17005a3f85643892199a
       size: 5912
@@ -1323,9 +1323,9 @@ stages:
       md5: b35c4df90c9d2fb6482735de42af8a4a
       size: 5279
     - path: data/data2015
-      md5: 7c4a70921b6fb9788ec1c9afc6c21240.dir
-      size: 93806604
-      nfiles: 627
+      md5: 5c19851788f2f4f20477d9bcf48432f6.dir
+      size: 93773641
+      nfiles: 316
     - path: src/covariance.jl
       md5: 533afb75c153649ed92cb17f537dc6fd
       size: 4402
@@ -1372,19 +1372,25 @@ stages:
       --timelimit=Inf --knearest=5
     deps:
     - path: batch/pipeline0_kernelfit.jl
-      md5: 36303fbf2646520d89f45d038dcea8e7
-      size: 5233
+      md5: b35c4df90c9d2fb6482735de42af8a4a
+      size: 5279
     - path: data/data2015
-      md5: 7c4a70921b6fb9788ec1c9afc6c21240.dir
-      size: 93806604
-      nfiles: 627
+      md5: 5c19851788f2f4f20477d9bcf48432f6.dir
+      size: 93773641
+      nfiles: 316
+    - path: src/covariance.jl
+      md5: 533afb75c153649ed92cb17f537dc6fd
+      size: 4402
+    - path: src/fitted_kernel.jl
+      md5: 6a89cb6d300cdc7611dad1cb1c888492
+      size: 10779
     - path: src/preprocessing.jl
       md5: 4c114b4114898e5938caf2695d685bb1
       size: 3945
     outs:
     - path: data/outputs/fitted_kernel/mll/SExSE/hyperparams_SExSE_KFSD.json
-      md5: 2613566b02d8006f50cf3535adbf8d41
-      size: 617
+      md5: 2d6c63258d73f9fd92b22f5e59fb52dc
+      size: 615
   nearby_predictions_SExSE@KFSD:
     cmd: julia --project=batch batch/pipeline1.jl KFSD SExSE ./data ./data/outputs
       data/outputs/fitted_kernel/mll/SExSE/hyperparams_SExSE_KFSD.json --knearest=5
@@ -1470,19 +1476,25 @@ stages:
       --timelimit=Inf --knearest=5
     deps:
     - path: batch/pipeline0_kernelfit.jl
-      md5: 36303fbf2646520d89f45d038dcea8e7
-      size: 5233
+      md5: b35c4df90c9d2fb6482735de42af8a4a
+      size: 5279
     - path: data/data2015
-      md5: 7c4a70921b6fb9788ec1c9afc6c21240.dir
-      size: 93806604
-      nfiles: 627
+      md5: 5c19851788f2f4f20477d9bcf48432f6.dir
+      size: 93773641
+      nfiles: 316
+    - path: src/covariance.jl
+      md5: 533afb75c153649ed92cb17f537dc6fd
+      size: 4402
+    - path: src/fitted_kernel.jl
+      md5: 6a89cb6d300cdc7611dad1cb1c888492
+      size: 10779
     - path: src/preprocessing.jl
       md5: 4c114b4114898e5938caf2695d685bb1
       size: 3945
     outs:
     - path: data/outputs/fitted_kernel/mll/SExSE/hyperparams_SExSE_KBDL.json
-      md5: 34e60e84761caa30c7d91526de6dbfa1
-      size: 617
+      md5: 17cbe61011e911c0329cd10aa0b5f4f3
+      size: 616
   nearby_predictions_SExSE@KBDL:
     cmd: julia --project=batch batch/pipeline1.jl KBDL SExSE ./data ./data/outputs
       data/outputs/fitted_kernel/mll/SExSE/hyperparams_SExSE_KBDL.json --knearest=5
@@ -1519,9 +1531,9 @@ stages:
       md5: b35c4df90c9d2fb6482735de42af8a4a
       size: 5279
     - path: data/data2015
-      md5: 7c4a70921b6fb9788ec1c9afc6c21240.dir
-      size: 93806604
-      nfiles: 627
+      md5: 5c19851788f2f4f20477d9bcf48432f6.dir
+      size: 93773641
+      nfiles: 316
     - path: src/covariance.jl
       md5: 533afb75c153649ed92cb17f537dc6fd
       size: 4402
@@ -1571,9 +1583,9 @@ stages:
       md5: b35c4df90c9d2fb6482735de42af8a4a
       size: 5279
     - path: data/data2015
-      md5: 7c4a70921b6fb9788ec1c9afc6c21240.dir
-      size: 93806604
-      nfiles: 627
+      md5: 5c19851788f2f4f20477d9bcf48432f6.dir
+      size: 93773641
+      nfiles: 316
     - path: src/covariance.jl
       md5: 533afb75c153649ed92cb17f537dc6fd
       size: 4402
@@ -1675,9 +1687,9 @@ stages:
       md5: b35c4df90c9d2fb6482735de42af8a4a
       size: 5279
     - path: data/data2015
-      md5: 7c4a70921b6fb9788ec1c9afc6c21240.dir
-      size: 93806604
-      nfiles: 627
+      md5: 5c19851788f2f4f20477d9bcf48432f6.dir
+      size: 93773641
+      nfiles: 316
     - path: src/covariance.jl
       md5: 533afb75c153649ed92cb17f537dc6fd
       size: 4402
@@ -1724,19 +1736,25 @@ stages:
       --timelimit=Inf --knearest=5
     deps:
     - path: batch/pipeline0_kernelfit.jl
-      md5: 36303fbf2646520d89f45d038dcea8e7
-      size: 5233
+      md5: b35c4df90c9d2fb6482735de42af8a4a
+      size: 5279
     - path: data/data2015
-      md5: 7c4a70921b6fb9788ec1c9afc6c21240.dir
-      size: 93806604
-      nfiles: 627
+      md5: 5c19851788f2f4f20477d9bcf48432f6.dir
+      size: 93773641
+      nfiles: 316
+    - path: src/covariance.jl
+      md5: 533afb75c153649ed92cb17f537dc6fd
+      size: 4402
+    - path: src/fitted_kernel.jl
+      md5: 6a89cb6d300cdc7611dad1cb1c888492
+      size: 10779
     - path: src/preprocessing.jl
       md5: 4c114b4114898e5938caf2695d685bb1
       size: 3945
     outs:
     - path: data/outputs/fitted_kernel/mll/SExSE/hyperparams_SExSE_KDSM.json
-      md5: 5bb6ec690ffff73bd0b20df41f6cb55a
-      size: 617
+      md5: 12fb3dcea7f5504012aa89c673ef9b44
+      size: 615
   nearby_predictions_SExSE@KDSM:
     cmd: julia --project=batch batch/pipeline1.jl KDSM SExSE ./data ./data/outputs
       data/outputs/fitted_kernel/mll/SExSE/hyperparams_SExSE_KDSM.json --knearest=5
@@ -1773,9 +1791,9 @@ stages:
       md5: b35c4df90c9d2fb6482735de42af8a4a
       size: 5279
     - path: data/data2015
-      md5: 7c4a70921b6fb9788ec1c9afc6c21240.dir
-      size: 93806604
-      nfiles: 627
+      md5: 5c19851788f2f4f20477d9bcf48432f6.dir
+      size: 93773641
+      nfiles: 316
     - path: src/covariance.jl
       md5: 533afb75c153649ed92cb17f537dc6fd
       size: 4402
@@ -1825,9 +1843,9 @@ stages:
       md5: b35c4df90c9d2fb6482735de42af8a4a
       size: 5279
     - path: data/data2015
-      md5: 7c4a70921b6fb9788ec1c9afc6c21240.dir
-      size: 93806604
-      nfiles: 627
+      md5: 5c19851788f2f4f20477d9bcf48432f6.dir
+      size: 93773641
+      nfiles: 316
     - path: src/covariance.jl
       md5: 533afb75c153649ed92cb17f537dc6fd
       size: 4402
@@ -1877,9 +1895,9 @@ stages:
       md5: b35c4df90c9d2fb6482735de42af8a4a
       size: 5279
     - path: data/data2015
-      md5: 7c4a70921b6fb9788ec1c9afc6c21240.dir
-      size: 93806604
-      nfiles: 627
+      md5: 5c19851788f2f4f20477d9bcf48432f6.dir
+      size: 93773641
+      nfiles: 316
     - path: src/covariance.jl
       md5: 533afb75c153649ed92cb17f537dc6fd
       size: 4402
@@ -1929,9 +1947,9 @@ stages:
       md5: b35c4df90c9d2fb6482735de42af8a4a
       size: 5279
     - path: data/data2015
-      md5: 7c4a70921b6fb9788ec1c9afc6c21240.dir
-      size: 93806604
-      nfiles: 627
+      md5: 5c19851788f2f4f20477d9bcf48432f6.dir
+      size: 93773641
+      nfiles: 316
     - path: src/covariance.jl
       md5: 533afb75c153649ed92cb17f537dc6fd
       size: 4402
@@ -1953,11 +1971,11 @@ stages:
       md5: fe5effd906f4b225cc73c72cac847c14
       size: 3799
     - path: data/data2015
-      md5: 7c4a70921b6fb9788ec1c9afc6c21240.dir
-      size: 93806604
-      nfiles: 627
+      md5: 5c19851788f2f4f20477d9bcf48432f6.dir
+      size: 93773641
+      nfiles: 316
     - path: data/outputs/fitted_kernel/mll/SExSE/hyperparams_SExSE_KMOB.json
-      md5: 332654af53c38cb95d090debc1d507fb
+      md5: e2899204abfa48fdc3f1d3716cce6424
       size: 616
     - path: src/GPrealisations.jl
       md5: 76228e81f931d56323b9698ebecb121a
@@ -1970,7 +1988,7 @@ stages:
       size: 3945
     outs:
     - path: data/outputs/predictions_from_nearby/mll/SExSE/KMOB
-      md5: fe718aae783bb3ad9e252036938333d2.dir
+      md5: 7a436816e31a8d5934fabc5551096848.dir
       size: 1516193720
       nfiles: 13
   kernelfit_SExSE@KCHA:
@@ -1981,9 +1999,9 @@ stages:
       md5: b35c4df90c9d2fb6482735de42af8a4a
       size: 5279
     - path: data/data2015
-      md5: 7c4a70921b6fb9788ec1c9afc6c21240.dir
-      size: 93806604
-      nfiles: 627
+      md5: 5c19851788f2f4f20477d9bcf48432f6.dir
+      size: 93773641
+      nfiles: 316
     - path: src/covariance.jl
       md5: 533afb75c153649ed92cb17f537dc6fd
       size: 4402
@@ -2033,9 +2051,9 @@ stages:
       md5: b35c4df90c9d2fb6482735de42af8a4a
       size: 5279
     - path: data/data2015
-      md5: 7c4a70921b6fb9788ec1c9afc6c21240.dir
-      size: 93806604
-      nfiles: 627
+      md5: 5c19851788f2f4f20477d9bcf48432f6.dir
+      size: 93773641
+      nfiles: 316
     - path: src/covariance.jl
       md5: 533afb75c153649ed92cb17f537dc6fd
       size: 4402
@@ -2085,9 +2103,9 @@ stages:
       md5: b35c4df90c9d2fb6482735de42af8a4a
       size: 5279
     - path: data/data2015
-      md5: 7c4a70921b6fb9788ec1c9afc6c21240.dir
-      size: 93806604
-      nfiles: 627
+      md5: 5c19851788f2f4f20477d9bcf48432f6.dir
+      size: 93773641
+      nfiles: 316
     - path: src/covariance.jl
       md5: 533afb75c153649ed92cb17f537dc6fd
       size: 4402
@@ -2134,19 +2152,25 @@ stages:
       --timelimit=Inf --knearest=5
     deps:
     - path: batch/pipeline0_kernelfit.jl
-      md5: 36303fbf2646520d89f45d038dcea8e7
-      size: 5233
+      md5: b35c4df90c9d2fb6482735de42af8a4a
+      size: 5279
     - path: data/data2015
-      md5: 7c4a70921b6fb9788ec1c9afc6c21240.dir
-      size: 93806604
-      nfiles: 627
+      md5: 5c19851788f2f4f20477d9bcf48432f6.dir
+      size: 93773641
+      nfiles: 316
+    - path: src/covariance.jl
+      md5: 533afb75c153649ed92cb17f537dc6fd
+      size: 4402
+    - path: src/fitted_kernel.jl
+      md5: 6a89cb6d300cdc7611dad1cb1c888492
+      size: 10779
     - path: src/preprocessing.jl
       md5: 4c114b4114898e5938caf2695d685bb1
       size: 3945
     outs:
     - path: data/outputs/fitted_kernel/mll/SExSE/hyperparams_SExSE_KEVV.json
-      md5: 635e8ff9e96638b3388d39ef61bb369e
-      size: 615
+      md5: 0d7b329208e9fb371f9e74e1322acf87
+      size: 617
   nearby_predictions_SExSE@KEVV:
     cmd: julia --project=batch batch/pipeline1.jl KEVV SExSE ./data ./data/outputs
       data/outputs/fitted_kernel/mll/SExSE/hyperparams_SExSE_KEVV.json --knearest=5
@@ -2183,9 +2207,9 @@ stages:
       md5: b35c4df90c9d2fb6482735de42af8a4a
       size: 5279
     - path: data/data2015
-      md5: 7c4a70921b6fb9788ec1c9afc6c21240.dir
-      size: 93806604
-      nfiles: 627
+      md5: 5c19851788f2f4f20477d9bcf48432f6.dir
+      size: 93773641
+      nfiles: 316
     - path: src/covariance.jl
       md5: 533afb75c153649ed92cb17f537dc6fd
       size: 4402
@@ -2235,9 +2259,9 @@ stages:
       md5: b35c4df90c9d2fb6482735de42af8a4a
       size: 5279
     - path: data/data2015
-      md5: 7c4a70921b6fb9788ec1c9afc6c21240.dir
-      size: 93806604
-      nfiles: 627
+      md5: 5c19851788f2f4f20477d9bcf48432f6.dir
+      size: 93773641
+      nfiles: 316
     - path: src/covariance.jl
       md5: 533afb75c153649ed92cb17f537dc6fd
       size: 4402
@@ -2339,9 +2363,9 @@ stages:
       md5: b35c4df90c9d2fb6482735de42af8a4a
       size: 5279
     - path: data/data2015
-      md5: 7c4a70921b6fb9788ec1c9afc6c21240.dir
-      size: 93806604
-      nfiles: 627
+      md5: 5c19851788f2f4f20477d9bcf48432f6.dir
+      size: 93773641
+      nfiles: 316
     - path: src/covariance.jl
       md5: 533afb75c153649ed92cb17f537dc6fd
       size: 4402
@@ -2443,9 +2467,9 @@ stages:
       md5: b35c4df90c9d2fb6482735de42af8a4a
       size: 5279
     - path: data/data2015
-      md5: 7c4a70921b6fb9788ec1c9afc6c21240.dir
-      size: 93806604
-      nfiles: 627
+      md5: 5c19851788f2f4f20477d9bcf48432f6.dir
+      size: 93773641
+      nfiles: 316
     - path: src/covariance.jl
       md5: 533afb75c153649ed92cb17f537dc6fd
       size: 4402
@@ -2492,19 +2516,25 @@ stages:
       --timelimit=Inf --knearest=5
     deps:
     - path: batch/pipeline0_kernelfit.jl
-      md5: 36303fbf2646520d89f45d038dcea8e7
-      size: 5233
+      md5: b35c4df90c9d2fb6482735de42af8a4a
+      size: 5279
     - path: data/data2015
-      md5: 7c4a70921b6fb9788ec1c9afc6c21240.dir
-      size: 93806604
-      nfiles: 627
+      md5: 5c19851788f2f4f20477d9bcf48432f6.dir
+      size: 93773641
+      nfiles: 316
+    - path: src/covariance.jl
+      md5: 533afb75c153649ed92cb17f537dc6fd
+      size: 4402
+    - path: src/fitted_kernel.jl
+      md5: 6a89cb6d300cdc7611dad1cb1c888492
+      size: 10779
     - path: src/preprocessing.jl
       md5: 4c114b4114898e5938caf2695d685bb1
       size: 3945
     outs:
     - path: data/outputs/fitted_kernel/mll/SExSE/hyperparams_SExSE_KBOS.json
-      md5: ca66487e3e01cf008bd408543c7e045b
-      size: 617
+      md5: 1c9e574cfa1197461bbb303181a7c11a
+      size: 614
   nearby_predictions_SExSE@KBOS:
     cmd: julia --project=batch batch/pipeline1.jl KBOS SExSE ./data ./data/outputs
       data/outputs/fitted_kernel/mll/SExSE/hyperparams_SExSE_KBOS.json --knearest=5
@@ -2541,9 +2571,9 @@ stages:
       md5: b35c4df90c9d2fb6482735de42af8a4a
       size: 5279
     - path: data/data2015
-      md5: 7c4a70921b6fb9788ec1c9afc6c21240.dir
-      size: 93806604
-      nfiles: 627
+      md5: 5c19851788f2f4f20477d9bcf48432f6.dir
+      size: 93773641
+      nfiles: 316
     - path: src/covariance.jl
       md5: 533afb75c153649ed92cb17f537dc6fd
       size: 4402
@@ -2590,19 +2620,25 @@ stages:
       --timelimit=Inf --knearest=5
     deps:
     - path: batch/pipeline0_kernelfit.jl
-      md5: 36303fbf2646520d89f45d038dcea8e7
-      size: 5233
+      md5: b35c4df90c9d2fb6482735de42af8a4a
+      size: 5279
     - path: data/data2015
-      md5: 7c4a70921b6fb9788ec1c9afc6c21240.dir
-      size: 93806604
-      nfiles: 627
+      md5: 5c19851788f2f4f20477d9bcf48432f6.dir
+      size: 93773641
+      nfiles: 316
+    - path: src/covariance.jl
+      md5: 533afb75c153649ed92cb17f537dc6fd
+      size: 4402
+    - path: src/fitted_kernel.jl
+      md5: 6a89cb6d300cdc7611dad1cb1c888492
+      size: 10779
     - path: src/preprocessing.jl
       md5: 4c114b4114898e5938caf2695d685bb1
       size: 3945
     outs:
     - path: data/outputs/fitted_kernel/mll/SExSE/hyperparams_SExSE_KPHL.json
-      md5: b8a387c6eb4bfb5e23d182eaa7b31545
-      size: 615
+      md5: 649a84916cc4a571b6c2be923ce589e2
+      size: 613
   nearby_predictions_SExSE@KPHL:
     cmd: julia --project=batch batch/pipeline1.jl KPHL SExSE ./data ./data/outputs
       data/outputs/fitted_kernel/mll/SExSE/hyperparams_SExSE_KPHL.json --knearest=5
@@ -2639,9 +2675,9 @@ stages:
       md5: b35c4df90c9d2fb6482735de42af8a4a
       size: 5279
     - path: data/data2015
-      md5: 7c4a70921b6fb9788ec1c9afc6c21240.dir
-      size: 93806604
-      nfiles: 627
+      md5: 5c19851788f2f4f20477d9bcf48432f6.dir
+      size: 93773641
+      nfiles: 316
     - path: src/covariance.jl
       md5: 533afb75c153649ed92cb17f537dc6fd
       size: 4402
@@ -2691,9 +2727,9 @@ stages:
       md5: b35c4df90c9d2fb6482735de42af8a4a
       size: 5279
     - path: data/data2015
-      md5: 7c4a70921b6fb9788ec1c9afc6c21240.dir
-      size: 93806604
-      nfiles: 627
+      md5: 5c19851788f2f4f20477d9bcf48432f6.dir
+      size: 93773641
+      nfiles: 316
     - path: src/covariance.jl
       md5: 533afb75c153649ed92cb17f537dc6fd
       size: 4402
@@ -2795,9 +2831,9 @@ stages:
       md5: b35c4df90c9d2fb6482735de42af8a4a
       size: 5279
     - path: data/data2015
-      md5: 7c4a70921b6fb9788ec1c9afc6c21240.dir
-      size: 93806604
-      nfiles: 627
+      md5: 5c19851788f2f4f20477d9bcf48432f6.dir
+      size: 93773641
+      nfiles: 316
     - path: src/covariance.jl
       md5: 533afb75c153649ed92cb17f537dc6fd
       size: 4402
@@ -2847,9 +2883,9 @@ stages:
       md5: b35c4df90c9d2fb6482735de42af8a4a
       size: 5279
     - path: data/data2015
-      md5: 7c4a70921b6fb9788ec1c9afc6c21240.dir
-      size: 93806604
-      nfiles: 627
+      md5: 5c19851788f2f4f20477d9bcf48432f6.dir
+      size: 93773641
+      nfiles: 316
     - path: src/covariance.jl
       md5: 533afb75c153649ed92cb17f537dc6fd
       size: 4402
@@ -2951,9 +2987,9 @@ stages:
       md5: b35c4df90c9d2fb6482735de42af8a4a
       size: 5279
     - path: data/data2015
-      md5: 7c4a70921b6fb9788ec1c9afc6c21240.dir
-      size: 93806604
-      nfiles: 627
+      md5: 5c19851788f2f4f20477d9bcf48432f6.dir
+      size: 93773641
+      nfiles: 316
     - path: src/covariance.jl
       md5: 533afb75c153649ed92cb17f537dc6fd
       size: 4402
@@ -3055,9 +3091,9 @@ stages:
       md5: b35c4df90c9d2fb6482735de42af8a4a
       size: 5279
     - path: data/data2015
-      md5: 7c4a70921b6fb9788ec1c9afc6c21240.dir
-      size: 93806604
-      nfiles: 627
+      md5: 5c19851788f2f4f20477d9bcf48432f6.dir
+      size: 93773641
+      nfiles: 316
     - path: src/covariance.jl
       md5: 533afb75c153649ed92cb17f537dc6fd
       size: 4402
@@ -3107,9 +3143,9 @@ stages:
       md5: b35c4df90c9d2fb6482735de42af8a4a
       size: 5279
     - path: data/data2015
-      md5: 7c4a70921b6fb9788ec1c9afc6c21240.dir
-      size: 93806604
-      nfiles: 627
+      md5: 5c19851788f2f4f20477d9bcf48432f6.dir
+      size: 93773641
+      nfiles: 316
     - path: src/covariance.jl
       md5: 533afb75c153649ed92cb17f537dc6fd
       size: 4402
@@ -3208,19 +3244,25 @@ stages:
       --timelimit=Inf --knearest=5
     deps:
     - path: batch/pipeline0_kernelfit.jl
-      md5: 36303fbf2646520d89f45d038dcea8e7
-      size: 5233
+      md5: b35c4df90c9d2fb6482735de42af8a4a
+      size: 5279
     - path: data/data2015
-      md5: 7c4a70921b6fb9788ec1c9afc6c21240.dir
-      size: 93806604
-      nfiles: 627
+      md5: 5c19851788f2f4f20477d9bcf48432f6.dir
+      size: 93773641
+      nfiles: 316
+    - path: src/covariance.jl
+      md5: 533afb75c153649ed92cb17f537dc6fd
+      size: 4402
+    - path: src/fitted_kernel.jl
+      md5: 6a89cb6d300cdc7611dad1cb1c888492
+      size: 10779
     - path: src/preprocessing.jl
       md5: 4c114b4114898e5938caf2695d685bb1
       size: 3945
     outs:
     - path: data/outputs/fitted_kernel/mll/SExSE/hyperparams_SExSE_KCRW.json
-      md5: c38d7486c6e7c321dab8c20fa05ca70b
-      size: 615
+      md5: 22e821dd76541cd13b5ba092c1d20809
+      size: 613
   nearby_predictions_SExSE@KCRW:
     cmd: julia --project=batch batch/pipeline1.jl KCRW SExSE ./data ./data/outputs
       data/outputs/fitted_kernel/mll/SExSE/hyperparams_SExSE_KCRW.json --knearest=5
@@ -3257,9 +3299,9 @@ stages:
       md5: b35c4df90c9d2fb6482735de42af8a4a
       size: 5279
     - path: data/data2015
-      md5: 7c4a70921b6fb9788ec1c9afc6c21240.dir
-      size: 93806604
-      nfiles: 627
+      md5: 5c19851788f2f4f20477d9bcf48432f6.dir
+      size: 93773641
+      nfiles: 316
     - path: src/covariance.jl
       md5: 533afb75c153649ed92cb17f537dc6fd
       size: 4402
@@ -3309,9 +3351,9 @@ stages:
       md5: b35c4df90c9d2fb6482735de42af8a4a
       size: 5279
     - path: data/data2015
-      md5: 7c4a70921b6fb9788ec1c9afc6c21240.dir
-      size: 93806604
-      nfiles: 627
+      md5: 5c19851788f2f4f20477d9bcf48432f6.dir
+      size: 93773641
+      nfiles: 316
     - path: src/covariance.jl
       md5: 533afb75c153649ed92cb17f537dc6fd
       size: 4402
@@ -3361,9 +3403,9 @@ stages:
       md5: b35c4df90c9d2fb6482735de42af8a4a
       size: 5279
     - path: data/data2015
-      md5: 7c4a70921b6fb9788ec1c9afc6c21240.dir
-      size: 93806604
-      nfiles: 627
+      md5: 5c19851788f2f4f20477d9bcf48432f6.dir
+      size: 93773641
+      nfiles: 316
     - path: src/covariance.jl
       md5: 533afb75c153649ed92cb17f537dc6fd
       size: 4402
@@ -3413,9 +3455,9 @@ stages:
       md5: b35c4df90c9d2fb6482735de42af8a4a
       size: 5279
     - path: data/data2015
-      md5: 7c4a70921b6fb9788ec1c9afc6c21240.dir
-      size: 93806604
-      nfiles: 627
+      md5: 5c19851788f2f4f20477d9bcf48432f6.dir
+      size: 93773641
+      nfiles: 316
     - path: src/covariance.jl
       md5: 533afb75c153649ed92cb17f537dc6fd
       size: 4402
@@ -3465,9 +3507,9 @@ stages:
       md5: b35c4df90c9d2fb6482735de42af8a4a
       size: 5279
     - path: data/data2015
-      md5: 7c4a70921b6fb9788ec1c9afc6c21240.dir
-      size: 93806604
-      nfiles: 627
+      md5: 5c19851788f2f4f20477d9bcf48432f6.dir
+      size: 93773641
+      nfiles: 316
     - path: src/covariance.jl
       md5: 533afb75c153649ed92cb17f537dc6fd
       size: 4402
@@ -3517,9 +3559,9 @@ stages:
       md5: b35c4df90c9d2fb6482735de42af8a4a
       size: 5279
     - path: data/data2015
-      md5: 7c4a70921b6fb9788ec1c9afc6c21240.dir
-      size: 93806604
-      nfiles: 627
+      md5: 5c19851788f2f4f20477d9bcf48432f6.dir
+      size: 93773641
+      nfiles: 316
     - path: src/covariance.jl
       md5: 533afb75c153649ed92cb17f537dc6fd
       size: 4402
@@ -3668,39 +3710,51 @@ stages:
       size: 3196009
   impute_SExSE@1:
     cmd:
-    - mkdir -p ./data/outputs/imputations/mll/SExSE/hr17/KINW/window2
-    - cp -R ./data/outputs/compiledstan/* ./data/outputs/imputations/mll/SExSE/hr17/KINW/
-    - julia --project=batch --threads 4 batch/pipeline2.jl impute KINW SExSE 2 ./data
-      ./data/outputs/predictions_from_nearby/mll/SExSE/KINW ./data/outputs/imputations/mll/SExSE/hr17/KINW/window2
+    - mkdir -p ./data/outputs/imputations/mll/SExSE/hr17/KMOB/window2
+    - cp -R ./data/outputs/compiledstan/* ./data/outputs/imputations/mll/SExSE/hr17/KMOB/
+    - julia --project=batch --threads 4 batch/pipeline2.jl impute KMOB SExSE 2 ./data
+      ./data/outputs/predictions_from_nearby/mll/SExSE/KMOB ./data/outputs/imputations/mll/SExSE/hr17/KMOB/window2
       --ksmoothmax=30 --epsilon=0.05 --seed=2 --hr_measure_true=17 --hr_measure_impt=17
       --stan_days=10
     deps:
     - path: batch/pipeline2.jl
       md5: 1049deb7b40b7bff45bef5e7664650de
       size: 5439
-    - path: data/outputs/predictions_from_nearby/mll/SExSE/KINW
-      md5: a1855b41f380907ab2ecfaec42763cf3.dir
-      size: 1022545208
+    - path: data/outputs/compiledstan/imputation
+      md5: f29437d96bf911e8ff2da84c7d5bb2da
+      size: 1619272
+    - path: data/outputs/compiledstan/imputation.hpp
+      md5: 175c805559226d2a54deba6320a8d2bb
+      size: 40383
+    - path: data/outputs/compiledstan/imputation.stan
+      md5: e8d100dbf5903ba0b3dbd933cbf023d5
+      size: 2035
+    - path: data/outputs/predictions_from_nearby/mll/SExSE/KMOB
+      md5: 7a436816e31a8d5934fabc5551096848.dir
+      size: 1516193720
       nfiles: 13
     - path: src/stan_impute.jl
       md5: bae220ecd8fa17005a3f85643892199a
       size: 5912
     outs:
-    - path: data/outputs/imputations/mll/SExSE/hr17/KINW/window2/imputation_chain_1.csv
-      md5: 1139e59867bfc6d9ddffb7d259a2e2c7
-      size: 6664650
-    - path: data/outputs/imputations/mll/SExSE/hr17/KINW/window2/imputation_chain_2.csv
-      md5: d19c3b3bd05f5f7044648ad12b793b43
-      size: 6666617
-    - path: data/outputs/imputations/mll/SExSE/hr17/KINW/window2/imputation_chain_3.csv
-      md5: aca6766f8978fb800bedfe92c4265eea
-      size: 6664954
-    - path: data/outputs/imputations/mll/SExSE/hr17/KINW/window2/imputation_chain_4.csv
-      md5: e75960d8952f8f9b371d6d80bb9b8158
-      size: 6666457
-    - path: data/outputs/imputations/mll/SExSE/hr17/KINW/window2/imputation_data_1.R
-      md5: 7aa02678013e571adf08c43fc1699732
-      size: 4544180
+    - path: data/outputs/imputations/mll/SExSE/hr17/KMOB/window2/imputation_chain_1.csv
+      md5: 84a91648159416d3a8ccd5ceaafb2325
+      size: 6047711
+    - path: data/outputs/imputations/mll/SExSE/hr17/KMOB/window2/imputation_chain_2.csv
+      md5: d6a798dbe05ddf0be5125ff3733a1e68
+      size: 6049354
+    - path: data/outputs/imputations/mll/SExSE/hr17/KMOB/window2/imputation_chain_3.csv
+      md5: e5a62af9bca1eb832a2a25aeaf888c6c
+      size: 6048234
+    - path: data/outputs/imputations/mll/SExSE/hr17/KMOB/window2/imputation_chain_4.csv
+      md5: 4e0ed17f5a0bfe6b73e357da9370684a
+      size: 6049232
+    - path: data/outputs/imputations/mll/SExSE/hr17/KMOB/window2/imputation_data_1.R
+      md5: 8143c225b9029fb7ef11a51112f4c2f5
+      size: 3729619
+    - path: data/outputs/imputations/mll/SExSE/hr17/KMOB/window2/timestamps.csv
+      md5: efaf52d06cb8409128e9b7228e9c49d8
+      size: 7414
   impute_SExSE@0:
     cmd:
     - mkdir -p ./data/outputs/imputations/mll/SExSE/hr17/KMOB/window1
@@ -37488,3 +37542,1083 @@ stages:
     - path: data/outputs/fitted_kernel/mll/matern/hyperparams_matern_KFYV.json
       md5: 9b4697677315ca61f25d237c5e42eb57
       size: 961
+  kernelfit_diurnal@KBDL:
+    cmd: julia --project=batch batch/pipeline0_kernelfit.jl KBDL diurnal ./data ./data/outputs
+      --timelimit=Inf --knearest=5
+    deps:
+    - path: batch/pipeline0_kernelfit.jl
+      md5: b35c4df90c9d2fb6482735de42af8a4a
+      size: 5279
+    - path: data/data2015
+      md5: 5c19851788f2f4f20477d9bcf48432f6.dir
+      size: 93773641
+      nfiles: 316
+    - path: src/covariance.jl
+      md5: 533afb75c153649ed92cb17f537dc6fd
+      size: 4402
+    - path: src/fitted_kernel.jl
+      md5: 6a89cb6d300cdc7611dad1cb1c888492
+      size: 10779
+    - path: src/preprocessing.jl
+      md5: 4c114b4114898e5938caf2695d685bb1
+      size: 3945
+    outs:
+    - path: data/outputs/fitted_kernel/mll/diurnal/hyperparams_diurnal_KBDL.json
+      md5: 5c018bc52a5ad8e7ecf77027f055bdeb
+      size: 703
+  kernelfit_diurnal@KINW:
+    cmd: julia --project=batch batch/pipeline0_kernelfit.jl KINW diurnal ./data ./data/outputs
+      --timelimit=Inf --knearest=5
+    deps:
+    - path: batch/pipeline0_kernelfit.jl
+      md5: b35c4df90c9d2fb6482735de42af8a4a
+      size: 5279
+    - path: data/data2015
+      md5: 5c19851788f2f4f20477d9bcf48432f6.dir
+      size: 93773641
+      nfiles: 316
+    - path: src/covariance.jl
+      md5: 533afb75c153649ed92cb17f537dc6fd
+      size: 4402
+    - path: src/fitted_kernel.jl
+      md5: 6a89cb6d300cdc7611dad1cb1c888492
+      size: 10779
+    - path: src/preprocessing.jl
+      md5: 4c114b4114898e5938caf2695d685bb1
+      size: 3945
+    outs:
+    - path: data/outputs/fitted_kernel/mll/diurnal/hyperparams_diurnal_KINW.json
+      md5: 593878a10b195d2e60e740e9a4110233
+      size: 703
+  kernelfit_diurnal@KSAN:
+    cmd: julia --project=batch batch/pipeline0_kernelfit.jl KSAN diurnal ./data ./data/outputs
+      --timelimit=Inf --knearest=5
+    deps:
+    - path: batch/pipeline0_kernelfit.jl
+      md5: b35c4df90c9d2fb6482735de42af8a4a
+      size: 5279
+    - path: data/data2015
+      md5: 5c19851788f2f4f20477d9bcf48432f6.dir
+      size: 93773641
+      nfiles: 316
+    - path: src/covariance.jl
+      md5: 533afb75c153649ed92cb17f537dc6fd
+      size: 4402
+    - path: src/fitted_kernel.jl
+      md5: 6a89cb6d300cdc7611dad1cb1c888492
+      size: 10779
+    - path: src/preprocessing.jl
+      md5: 4c114b4114898e5938caf2695d685bb1
+      size: 3945
+    outs:
+    - path: data/outputs/fitted_kernel/mll/diurnal/hyperparams_diurnal_KSAN.json
+      md5: 7155e7649e306e5f65058da57684eeec
+      size: 703
+  kernelfit_diurnal@KABQ:
+    cmd: julia --project=batch batch/pipeline0_kernelfit.jl KABQ diurnal ./data ./data/outputs
+      --timelimit=Inf --knearest=5
+    deps:
+    - path: batch/pipeline0_kernelfit.jl
+      md5: b35c4df90c9d2fb6482735de42af8a4a
+      size: 5279
+    - path: data/data2015
+      md5: 5c19851788f2f4f20477d9bcf48432f6.dir
+      size: 93773641
+      nfiles: 316
+    - path: src/covariance.jl
+      md5: 533afb75c153649ed92cb17f537dc6fd
+      size: 4402
+    - path: src/fitted_kernel.jl
+      md5: 6a89cb6d300cdc7611dad1cb1c888492
+      size: 10779
+    - path: src/preprocessing.jl
+      md5: 4c114b4114898e5938caf2695d685bb1
+      size: 3945
+    outs:
+    - path: data/outputs/fitted_kernel/mll/diurnal/hyperparams_diurnal_KABQ.json
+      md5: 99570ee4dba1aa50760c94a1f40fc095
+      size: 704
+  kernelfit_diurnal@KBIL:
+    cmd: julia --project=batch batch/pipeline0_kernelfit.jl KBIL diurnal ./data ./data/outputs
+      --timelimit=Inf --knearest=5
+    deps:
+    - path: batch/pipeline0_kernelfit.jl
+      md5: b35c4df90c9d2fb6482735de42af8a4a
+      size: 5279
+    - path: data/data2015
+      md5: 5c19851788f2f4f20477d9bcf48432f6.dir
+      size: 93773641
+      nfiles: 316
+    - path: src/covariance.jl
+      md5: 533afb75c153649ed92cb17f537dc6fd
+      size: 4402
+    - path: src/fitted_kernel.jl
+      md5: 6a89cb6d300cdc7611dad1cb1c888492
+      size: 10779
+    - path: src/preprocessing.jl
+      md5: 4c114b4114898e5938caf2695d685bb1
+      size: 3945
+    outs:
+    - path: data/outputs/fitted_kernel/mll/diurnal/hyperparams_diurnal_KBIL.json
+      md5: 1b0162a4fc297c7718cae8949c7aacb8
+      size: 706
+  kernelfit_diurnal@KDSM:
+    cmd: julia --project=batch batch/pipeline0_kernelfit.jl KDSM diurnal ./data ./data/outputs
+      --timelimit=Inf --knearest=5
+    deps:
+    - path: batch/pipeline0_kernelfit.jl
+      md5: b35c4df90c9d2fb6482735de42af8a4a
+      size: 5279
+    - path: data/data2015
+      md5: 5c19851788f2f4f20477d9bcf48432f6.dir
+      size: 93773641
+      nfiles: 316
+    - path: src/covariance.jl
+      md5: 533afb75c153649ed92cb17f537dc6fd
+      size: 4402
+    - path: src/fitted_kernel.jl
+      md5: 6a89cb6d300cdc7611dad1cb1c888492
+      size: 10779
+    - path: src/preprocessing.jl
+      md5: 4c114b4114898e5938caf2695d685bb1
+      size: 3945
+    outs:
+    - path: data/outputs/fitted_kernel/mll/diurnal/hyperparams_diurnal_KDSM.json
+      md5: 3efa64f4ae760fc8d40f6e362993ac69
+      size: 703
+  kernelfit_diurnal@KFYV:
+    cmd: julia --project=batch batch/pipeline0_kernelfit.jl KFYV diurnal ./data ./data/outputs
+      --timelimit=Inf --knearest=5
+    deps:
+    - path: batch/pipeline0_kernelfit.jl
+      md5: b35c4df90c9d2fb6482735de42af8a4a
+      size: 5279
+    - path: data/data2015
+      md5: 5c19851788f2f4f20477d9bcf48432f6.dir
+      size: 93773641
+      nfiles: 316
+    - path: src/covariance.jl
+      md5: 533afb75c153649ed92cb17f537dc6fd
+      size: 4402
+    - path: src/fitted_kernel.jl
+      md5: 6a89cb6d300cdc7611dad1cb1c888492
+      size: 10779
+    - path: src/preprocessing.jl
+      md5: 4c114b4114898e5938caf2695d685bb1
+      size: 3945
+    outs:
+    - path: data/outputs/fitted_kernel/mll/diurnal/hyperparams_diurnal_KFYV.json
+      md5: e51c1e3911adc2dde9d5ffdf33f4b008
+      size: 701
+  kernelfit_diurnal@KCMH:
+    cmd: julia --project=batch batch/pipeline0_kernelfit.jl KCMH diurnal ./data ./data/outputs
+      --timelimit=Inf --knearest=5
+    deps:
+    - path: batch/pipeline0_kernelfit.jl
+      md5: b35c4df90c9d2fb6482735de42af8a4a
+      size: 5279
+    - path: data/data2015
+      md5: 5c19851788f2f4f20477d9bcf48432f6.dir
+      size: 93773641
+      nfiles: 316
+    - path: src/covariance.jl
+      md5: 533afb75c153649ed92cb17f537dc6fd
+      size: 4402
+    - path: src/fitted_kernel.jl
+      md5: 6a89cb6d300cdc7611dad1cb1c888492
+      size: 10779
+    - path: src/preprocessing.jl
+      md5: 4c114b4114898e5938caf2695d685bb1
+      size: 3945
+    outs:
+    - path: data/outputs/fitted_kernel/mll/diurnal/hyperparams_diurnal_KCMH.json
+      md5: 8188c5265a2199165f899863f8dd79f9
+      size: 703
+  kernelfit_diurnal@KJFK:
+    cmd: julia --project=batch batch/pipeline0_kernelfit.jl KJFK diurnal ./data ./data/outputs
+      --timelimit=Inf --knearest=5
+    deps:
+    - path: batch/pipeline0_kernelfit.jl
+      md5: b35c4df90c9d2fb6482735de42af8a4a
+      size: 5279
+    - path: data/data2015
+      md5: 5c19851788f2f4f20477d9bcf48432f6.dir
+      size: 93773641
+      nfiles: 316
+    - path: src/covariance.jl
+      md5: 533afb75c153649ed92cb17f537dc6fd
+      size: 4402
+    - path: src/fitted_kernel.jl
+      md5: 6a89cb6d300cdc7611dad1cb1c888492
+      size: 10779
+    - path: src/preprocessing.jl
+      md5: 4c114b4114898e5938caf2695d685bb1
+      size: 3945
+    outs:
+    - path: data/outputs/fitted_kernel/mll/diurnal/hyperparams_diurnal_KJFK.json
+      md5: 397ee451c23cc82db65fe8da45561418
+      size: 704
+  kernelfit_diurnal@KSPI:
+    cmd: julia --project=batch batch/pipeline0_kernelfit.jl KSPI diurnal ./data ./data/outputs
+      --timelimit=Inf --knearest=5
+    deps:
+    - path: batch/pipeline0_kernelfit.jl
+      md5: b35c4df90c9d2fb6482735de42af8a4a
+      size: 5279
+    - path: data/data2015
+      md5: 5c19851788f2f4f20477d9bcf48432f6.dir
+      size: 93773641
+      nfiles: 316
+    - path: src/covariance.jl
+      md5: 533afb75c153649ed92cb17f537dc6fd
+      size: 4402
+    - path: src/fitted_kernel.jl
+      md5: 6a89cb6d300cdc7611dad1cb1c888492
+      size: 10779
+    - path: src/preprocessing.jl
+      md5: 4c114b4114898e5938caf2695d685bb1
+      size: 3945
+    outs:
+    - path: data/outputs/fitted_kernel/mll/diurnal/hyperparams_diurnal_KSPI.json
+      md5: d762b6bcff0b2dedbb48b10fbe3c4b6b
+      size: 702
+  kernelfit_diurnal@KCDC:
+    cmd: julia --project=batch batch/pipeline0_kernelfit.jl KCDC diurnal ./data ./data/outputs
+      --timelimit=Inf --knearest=5
+    deps:
+    - path: batch/pipeline0_kernelfit.jl
+      md5: b35c4df90c9d2fb6482735de42af8a4a
+      size: 5279
+    - path: data/data2015
+      md5: 5c19851788f2f4f20477d9bcf48432f6.dir
+      size: 93773641
+      nfiles: 316
+    - path: src/covariance.jl
+      md5: 533afb75c153649ed92cb17f537dc6fd
+      size: 4402
+    - path: src/fitted_kernel.jl
+      md5: 6a89cb6d300cdc7611dad1cb1c888492
+      size: 10779
+    - path: src/preprocessing.jl
+      md5: 4c114b4114898e5938caf2695d685bb1
+      size: 3945
+    outs:
+    - path: data/outputs/fitted_kernel/mll/diurnal/hyperparams_diurnal_KCDC.json
+      md5: 4576a2da40ddf4f9a7bf11dfbcfaf3cf
+      size: 702
+  kernelfit_diurnal@KBKE:
+    cmd: julia --project=batch batch/pipeline0_kernelfit.jl KBKE diurnal ./data ./data/outputs
+      --timelimit=Inf --knearest=5
+    deps:
+    - path: batch/pipeline0_kernelfit.jl
+      md5: b35c4df90c9d2fb6482735de42af8a4a
+      size: 5279
+    - path: data/data2015
+      md5: 5c19851788f2f4f20477d9bcf48432f6.dir
+      size: 93773641
+      nfiles: 316
+    - path: src/covariance.jl
+      md5: 533afb75c153649ed92cb17f537dc6fd
+      size: 4402
+    - path: src/fitted_kernel.jl
+      md5: 6a89cb6d300cdc7611dad1cb1c888492
+      size: 10779
+    - path: src/preprocessing.jl
+      md5: 4c114b4114898e5938caf2695d685bb1
+      size: 3945
+    outs:
+    - path: data/outputs/fitted_kernel/mll/diurnal/hyperparams_diurnal_KBKE.json
+      md5: 6e5b37ceb3fb6e6a0d0a160a8809fb10
+      size: 703
+  kernelfit_diurnal@KCHA:
+    cmd: julia --project=batch batch/pipeline0_kernelfit.jl KCHA diurnal ./data ./data/outputs
+      --timelimit=Inf --knearest=5
+    deps:
+    - path: batch/pipeline0_kernelfit.jl
+      md5: b35c4df90c9d2fb6482735de42af8a4a
+      size: 5279
+    - path: data/data2015
+      md5: 5c19851788f2f4f20477d9bcf48432f6.dir
+      size: 93773641
+      nfiles: 316
+    - path: src/covariance.jl
+      md5: 533afb75c153649ed92cb17f537dc6fd
+      size: 4402
+    - path: src/fitted_kernel.jl
+      md5: 6a89cb6d300cdc7611dad1cb1c888492
+      size: 10779
+    - path: src/preprocessing.jl
+      md5: 4c114b4114898e5938caf2695d685bb1
+      size: 3945
+    outs:
+    - path: data/outputs/fitted_kernel/mll/diurnal/hyperparams_diurnal_KCHA.json
+      md5: 740fdc5ed277d09b4ca7bfe1d45cc93f
+      size: 702
+  kernelfit_diurnal@KLEX:
+    cmd: julia --project=batch batch/pipeline0_kernelfit.jl KLEX diurnal ./data ./data/outputs
+      --timelimit=Inf --knearest=5
+    deps:
+    - path: batch/pipeline0_kernelfit.jl
+      md5: b35c4df90c9d2fb6482735de42af8a4a
+      size: 5279
+    - path: data/data2015
+      md5: 5c19851788f2f4f20477d9bcf48432f6.dir
+      size: 93773641
+      nfiles: 316
+    - path: src/covariance.jl
+      md5: 533afb75c153649ed92cb17f537dc6fd
+      size: 4402
+    - path: src/fitted_kernel.jl
+      md5: 6a89cb6d300cdc7611dad1cb1c888492
+      size: 10779
+    - path: src/preprocessing.jl
+      md5: 4c114b4114898e5938caf2695d685bb1
+      size: 3945
+    outs:
+    - path: data/outputs/fitted_kernel/mll/diurnal/hyperparams_diurnal_KLEX.json
+      md5: 75e96546e382b87b913da4b97f979e35
+      size: 703
+  kernelfit_diurnal@KDTW:
+    cmd: julia --project=batch batch/pipeline0_kernelfit.jl KDTW diurnal ./data ./data/outputs
+      --timelimit=Inf --knearest=5
+    deps:
+    - path: batch/pipeline0_kernelfit.jl
+      md5: b35c4df90c9d2fb6482735de42af8a4a
+      size: 5279
+    - path: data/data2015
+      md5: 5c19851788f2f4f20477d9bcf48432f6.dir
+      size: 93773641
+      nfiles: 316
+    - path: src/covariance.jl
+      md5: 533afb75c153649ed92cb17f537dc6fd
+      size: 4402
+    - path: src/fitted_kernel.jl
+      md5: 6a89cb6d300cdc7611dad1cb1c888492
+      size: 10779
+    - path: src/preprocessing.jl
+      md5: 4c114b4114898e5938caf2695d685bb1
+      size: 3945
+    outs:
+    - path: data/outputs/fitted_kernel/mll/diurnal/hyperparams_diurnal_KDTW.json
+      md5: 1d2108710c18565b0b0b31091388a7e3
+      size: 703
+  kernelfit_diurnal@KBWI:
+    cmd: julia --project=batch batch/pipeline0_kernelfit.jl KBWI diurnal ./data ./data/outputs
+      --timelimit=Inf --knearest=5
+    deps:
+    - path: batch/pipeline0_kernelfit.jl
+      md5: b35c4df90c9d2fb6482735de42af8a4a
+      size: 5279
+    - path: data/data2015
+      md5: 5c19851788f2f4f20477d9bcf48432f6.dir
+      size: 93773641
+      nfiles: 316
+    - path: src/covariance.jl
+      md5: 533afb75c153649ed92cb17f537dc6fd
+      size: 4402
+    - path: src/fitted_kernel.jl
+      md5: 6a89cb6d300cdc7611dad1cb1c888492
+      size: 10779
+    - path: src/preprocessing.jl
+      md5: 4c114b4114898e5938caf2695d685bb1
+      size: 3945
+    outs:
+    - path: data/outputs/fitted_kernel/mll/diurnal/hyperparams_diurnal_KBWI.json
+      md5: f34e6de8c1bba45392fedf895604f6c7
+      size: 704
+  kernelfit_diurnal@KMEI:
+    cmd: julia --project=batch batch/pipeline0_kernelfit.jl KMEI diurnal ./data ./data/outputs
+      --timelimit=Inf --knearest=5
+    deps:
+    - path: batch/pipeline0_kernelfit.jl
+      md5: b35c4df90c9d2fb6482735de42af8a4a
+      size: 5279
+    - path: data/data2015
+      md5: 5c19851788f2f4f20477d9bcf48432f6.dir
+      size: 93773641
+      nfiles: 316
+    - path: src/covariance.jl
+      md5: 533afb75c153649ed92cb17f537dc6fd
+      size: 4402
+    - path: src/fitted_kernel.jl
+      md5: 6a89cb6d300cdc7611dad1cb1c888492
+      size: 10779
+    - path: src/preprocessing.jl
+      md5: 4c114b4114898e5938caf2695d685bb1
+      size: 3945
+    outs:
+    - path: data/outputs/fitted_kernel/mll/diurnal/hyperparams_diurnal_KMEI.json
+      md5: 52deca30d12244c035ffaa4013ed92ab
+      size: 702
+  kernelfit_matern_crossval@KFYV:
+    cmd: julia --project=batch batch/pipeline0_kernelfit.jl KFYV matern ./data ./data/outputs
+      --timelimit=Inf --knearest=5 --crossval
+    deps:
+    - path: batch/pipeline0_kernelfit.jl
+      md5: b35c4df90c9d2fb6482735de42af8a4a
+      size: 5279
+    - path: data/data2015
+      md5: 7c4a70921b6fb9788ec1c9afc6c21240.dir
+      size: 93806604
+      nfiles: 627
+    - path: src/covariance.jl
+      md5: 533afb75c153649ed92cb17f537dc6fd
+      size: 4402
+    - path: src/fitted_kernel.jl
+      md5: 6a89cb6d300cdc7611dad1cb1c888492
+      size: 10779
+    - path: src/preprocessing.jl
+      md5: 4c114b4114898e5938caf2695d685bb1
+      size: 3945
+    outs:
+    - path: data/outputs/fitted_kernel/crossval/matern/hyperparams_matern_KFYV.json
+      md5: f92a75c7d2faf704574c8029e9daeb25
+      size: 957
+  kernelfit_diurnal@KFSD:
+    cmd: julia --project=batch batch/pipeline0_kernelfit.jl KFSD diurnal ./data ./data/outputs
+      --timelimit=Inf --knearest=5
+    deps:
+    - path: batch/pipeline0_kernelfit.jl
+      md5: b35c4df90c9d2fb6482735de42af8a4a
+      size: 5279
+    - path: data/data2015
+      md5: 5c19851788f2f4f20477d9bcf48432f6.dir
+      size: 93773641
+      nfiles: 316
+    - path: src/covariance.jl
+      md5: 533afb75c153649ed92cb17f537dc6fd
+      size: 4402
+    - path: src/fitted_kernel.jl
+      md5: 6a89cb6d300cdc7611dad1cb1c888492
+      size: 10779
+    - path: src/preprocessing.jl
+      md5: 4c114b4114898e5938caf2695d685bb1
+      size: 3945
+    outs:
+    - path: data/outputs/fitted_kernel/mll/diurnal/hyperparams_diurnal_KFSD.json
+      md5: f3dca12f83e12264bfa34bbd31254be2
+      size: 702
+  kernelfit_diurnal@KEVV:
+    cmd: julia --project=batch batch/pipeline0_kernelfit.jl KEVV diurnal ./data ./data/outputs
+      --timelimit=Inf --knearest=5
+    deps:
+    - path: batch/pipeline0_kernelfit.jl
+      md5: b35c4df90c9d2fb6482735de42af8a4a
+      size: 5279
+    - path: data/data2015
+      md5: 5c19851788f2f4f20477d9bcf48432f6.dir
+      size: 93773641
+      nfiles: 316
+    - path: src/covariance.jl
+      md5: 533afb75c153649ed92cb17f537dc6fd
+      size: 4402
+    - path: src/fitted_kernel.jl
+      md5: 6a89cb6d300cdc7611dad1cb1c888492
+      size: 10779
+    - path: src/preprocessing.jl
+      md5: 4c114b4114898e5938caf2695d685bb1
+      size: 3945
+    outs:
+    - path: data/outputs/fitted_kernel/mll/diurnal/hyperparams_diurnal_KEVV.json
+      md5: b0c3f4b2ec00841263b932e4c8fdbe01
+      size: 702
+  kernelfit_diurnal@KLAS:
+    cmd: julia --project=batch batch/pipeline0_kernelfit.jl KLAS diurnal ./data ./data/outputs
+      --timelimit=Inf --knearest=5
+    deps:
+    - path: batch/pipeline0_kernelfit.jl
+      md5: b35c4df90c9d2fb6482735de42af8a4a
+      size: 5279
+    - path: data/data2015
+      md5: 7c4a70921b6fb9788ec1c9afc6c21240.dir
+      size: 93806604
+      nfiles: 627
+    - path: src/covariance.jl
+      md5: 533afb75c153649ed92cb17f537dc6fd
+      size: 4402
+    - path: src/fitted_kernel.jl
+      md5: 6a89cb6d300cdc7611dad1cb1c888492
+      size: 10779
+    - path: src/preprocessing.jl
+      md5: 4c114b4114898e5938caf2695d685bb1
+      size: 3945
+    outs:
+    - path: data/outputs/fitted_kernel/mll/diurnal/hyperparams_diurnal_KLAS.json
+      md5: 4e0910d9da82cc23480483482ce02e4c
+      size: 705
+  kernelfit_diurnal@KCRW:
+    cmd: julia --project=batch batch/pipeline0_kernelfit.jl KCRW diurnal ./data ./data/outputs
+      --timelimit=Inf --knearest=5
+    deps:
+    - path: batch/pipeline0_kernelfit.jl
+      md5: b35c4df90c9d2fb6482735de42af8a4a
+      size: 5279
+    - path: data/data2015
+      md5: 5c19851788f2f4f20477d9bcf48432f6.dir
+      size: 93773641
+      nfiles: 316
+    - path: src/covariance.jl
+      md5: 533afb75c153649ed92cb17f537dc6fd
+      size: 4402
+    - path: src/fitted_kernel.jl
+      md5: 6a89cb6d300cdc7611dad1cb1c888492
+      size: 10779
+    - path: src/preprocessing.jl
+      md5: 4c114b4114898e5938caf2695d685bb1
+      size: 3945
+    outs:
+    - path: data/outputs/fitted_kernel/mll/diurnal/hyperparams_diurnal_KCRW.json
+      md5: 059d2d076be530867de522b7bf96a024
+      size: 703
+  kernelfit_diurnal@KPVD:
+    cmd: julia --project=batch batch/pipeline0_kernelfit.jl KPVD diurnal ./data ./data/outputs
+      --timelimit=Inf --knearest=5
+    deps:
+    - path: batch/pipeline0_kernelfit.jl
+      md5: b35c4df90c9d2fb6482735de42af8a4a
+      size: 5279
+    - path: data/data2015
+      md5: 7c4a70921b6fb9788ec1c9afc6c21240.dir
+      size: 93806604
+      nfiles: 627
+    - path: src/covariance.jl
+      md5: 533afb75c153649ed92cb17f537dc6fd
+      size: 4402
+    - path: src/fitted_kernel.jl
+      md5: 6a89cb6d300cdc7611dad1cb1c888492
+      size: 10779
+    - path: src/preprocessing.jl
+      md5: 4c114b4114898e5938caf2695d685bb1
+      size: 3945
+    outs:
+    - path: data/outputs/fitted_kernel/mll/diurnal/hyperparams_diurnal_KPVD.json
+      md5: dd223ec061937f697a2a4e34f2a122ba
+      size: 702
+  kernelfit_diurnal@KBOS:
+    cmd: julia --project=batch batch/pipeline0_kernelfit.jl KBOS diurnal ./data ./data/outputs
+      --timelimit=Inf --knearest=5
+    deps:
+    - path: batch/pipeline0_kernelfit.jl
+      md5: b35c4df90c9d2fb6482735de42af8a4a
+      size: 5279
+    - path: data/data2015
+      md5: 5c19851788f2f4f20477d9bcf48432f6.dir
+      size: 93773641
+      nfiles: 316
+    - path: src/covariance.jl
+      md5: 533afb75c153649ed92cb17f537dc6fd
+      size: 4402
+    - path: src/fitted_kernel.jl
+      md5: 6a89cb6d300cdc7611dad1cb1c888492
+      size: 10779
+    - path: src/preprocessing.jl
+      md5: 4c114b4114898e5938caf2695d685bb1
+      size: 3945
+    outs:
+    - path: data/outputs/fitted_kernel/mll/diurnal/hyperparams_diurnal_KBOS.json
+      md5: 34e8afa32af750dcae812cd13458e8ca
+      size: 702
+  kernelfit_diurnal@KFAR:
+    cmd: julia --project=batch batch/pipeline0_kernelfit.jl KFAR diurnal ./data ./data/outputs
+      --timelimit=Inf --knearest=5
+    deps:
+    - path: batch/pipeline0_kernelfit.jl
+      md5: b35c4df90c9d2fb6482735de42af8a4a
+      size: 5279
+    - path: data/data2015
+      md5: 5c19851788f2f4f20477d9bcf48432f6.dir
+      size: 93773641
+      nfiles: 316
+    - path: src/covariance.jl
+      md5: 533afb75c153649ed92cb17f537dc6fd
+      size: 4402
+    - path: src/fitted_kernel.jl
+      md5: 6a89cb6d300cdc7611dad1cb1c888492
+      size: 10779
+    - path: src/preprocessing.jl
+      md5: 4c114b4114898e5938caf2695d685bb1
+      size: 3945
+    outs:
+    - path: data/outputs/fitted_kernel/mll/diurnal/hyperparams_diurnal_KFAR.json
+      md5: f9cd6b2a50bf02be18cbe0b1552eaded
+      size: 705
+  kernelfit_diurnal@KMOB:
+    cmd: julia --project=batch batch/pipeline0_kernelfit.jl KMOB diurnal ./data ./data/outputs
+      --timelimit=Inf --knearest=5
+    deps:
+    - path: batch/pipeline0_kernelfit.jl
+      md5: b35c4df90c9d2fb6482735de42af8a4a
+      size: 5279
+    - path: data/data2015
+      md5: 5c19851788f2f4f20477d9bcf48432f6.dir
+      size: 93773641
+      nfiles: 316
+    - path: src/covariance.jl
+      md5: 533afb75c153649ed92cb17f537dc6fd
+      size: 4402
+    - path: src/fitted_kernel.jl
+      md5: 6a89cb6d300cdc7611dad1cb1c888492
+      size: 10779
+    - path: src/preprocessing.jl
+      md5: 4c114b4114898e5938caf2695d685bb1
+      size: 3945
+    outs:
+    - path: data/outputs/fitted_kernel/mll/diurnal/hyperparams_diurnal_KMOB.json
+      md5: e71363b70fdbc90bc60c90262a0937e1
+      size: 699
+  kernelfit_diurnal@KCEW:
+    cmd: julia --project=batch batch/pipeline0_kernelfit.jl KCEW diurnal ./data ./data/outputs
+      --timelimit=Inf --knearest=5
+    deps:
+    - path: batch/pipeline0_kernelfit.jl
+      md5: b35c4df90c9d2fb6482735de42af8a4a
+      size: 5279
+    - path: data/data2015
+      md5: 5c19851788f2f4f20477d9bcf48432f6.dir
+      size: 93773641
+      nfiles: 316
+    - path: src/covariance.jl
+      md5: 533afb75c153649ed92cb17f537dc6fd
+      size: 4402
+    - path: src/fitted_kernel.jl
+      md5: 6a89cb6d300cdc7611dad1cb1c888492
+      size: 10779
+    - path: src/preprocessing.jl
+      md5: 4c114b4114898e5938caf2695d685bb1
+      size: 3945
+    outs:
+    - path: data/outputs/fitted_kernel/mll/diurnal/hyperparams_diurnal_KCEW.json
+      md5: bd304b7599f67ce7c03373e7535919bb
+      size: 699
+  kernelfit_diurnal@KAGS:
+    cmd: julia --project=batch batch/pipeline0_kernelfit.jl KAGS diurnal ./data ./data/outputs
+      --timelimit=Inf --knearest=5
+    deps:
+    - path: batch/pipeline0_kernelfit.jl
+      md5: b35c4df90c9d2fb6482735de42af8a4a
+      size: 5279
+    - path: data/data2015
+      md5: 5c19851788f2f4f20477d9bcf48432f6.dir
+      size: 93773641
+      nfiles: 316
+    - path: src/covariance.jl
+      md5: 533afb75c153649ed92cb17f537dc6fd
+      size: 4402
+    - path: src/fitted_kernel.jl
+      md5: 6a89cb6d300cdc7611dad1cb1c888492
+      size: 10779
+    - path: src/preprocessing.jl
+      md5: 4c114b4114898e5938caf2695d685bb1
+      size: 3945
+    outs:
+    - path: data/outputs/fitted_kernel/mll/diurnal/hyperparams_diurnal_KAGS.json
+      md5: 4c9a202c92d9d0b29df6fae3f9a35511
+      size: 699
+  kernelfit_diurnal@KPWM:
+    cmd: julia --project=batch batch/pipeline0_kernelfit.jl KPWM diurnal ./data ./data/outputs
+      --timelimit=Inf --knearest=5
+    deps:
+    - path: batch/pipeline0_kernelfit.jl
+      md5: b35c4df90c9d2fb6482735de42af8a4a
+      size: 5279
+    - path: data/data2015
+      md5: 5c19851788f2f4f20477d9bcf48432f6.dir
+      size: 93773641
+      nfiles: 316
+    - path: src/covariance.jl
+      md5: 533afb75c153649ed92cb17f537dc6fd
+      size: 4402
+    - path: src/fitted_kernel.jl
+      md5: 6a89cb6d300cdc7611dad1cb1c888492
+      size: 10779
+    - path: src/preprocessing.jl
+      md5: 4c114b4114898e5938caf2695d685bb1
+      size: 3945
+    outs:
+    - path: data/outputs/fitted_kernel/mll/diurnal/hyperparams_diurnal_KPWM.json
+      md5: f5dcb257b7c5b577d3bdb2a591482034
+      size: 705
+  kernelfit_diurnal@KCAE:
+    cmd: julia --project=batch batch/pipeline0_kernelfit.jl KCAE diurnal ./data ./data/outputs
+      --timelimit=Inf --knearest=5
+    deps:
+    - path: batch/pipeline0_kernelfit.jl
+      md5: b35c4df90c9d2fb6482735de42af8a4a
+      size: 5279
+    - path: data/data2015
+      md5: 7c4a70921b6fb9788ec1c9afc6c21240.dir
+      size: 93806604
+      nfiles: 627
+    - path: src/covariance.jl
+      md5: 533afb75c153649ed92cb17f537dc6fd
+      size: 4402
+    - path: src/fitted_kernel.jl
+      md5: 6a89cb6d300cdc7611dad1cb1c888492
+      size: 10779
+    - path: src/preprocessing.jl
+      md5: 4c114b4114898e5938caf2695d685bb1
+      size: 3945
+    outs:
+    - path: data/outputs/fitted_kernel/mll/diurnal/hyperparams_diurnal_KCAE.json
+      md5: 9a756de8ffc53b6bc6d1047dd365235a
+      size: 697
+  kernelfit_diurnal@KLFK:
+    cmd: julia --project=batch batch/pipeline0_kernelfit.jl KLFK diurnal ./data ./data/outputs
+      --timelimit=Inf --knearest=5
+    deps:
+    - path: batch/pipeline0_kernelfit.jl
+      md5: b35c4df90c9d2fb6482735de42af8a4a
+      size: 5279
+    - path: data/data2015
+      md5: 5c19851788f2f4f20477d9bcf48432f6.dir
+      size: 93773641
+      nfiles: 316
+    - path: src/covariance.jl
+      md5: 533afb75c153649ed92cb17f537dc6fd
+      size: 4402
+    - path: src/fitted_kernel.jl
+      md5: 6a89cb6d300cdc7611dad1cb1c888492
+      size: 10779
+    - path: src/preprocessing.jl
+      md5: 4c114b4114898e5938caf2695d685bb1
+      size: 3945
+    outs:
+    - path: data/outputs/fitted_kernel/mll/diurnal/hyperparams_diurnal_KLFK.json
+      md5: 8360a9d4faaa7d489deba1ade0a2475e
+      size: 701
+  kernelfit_diurnal@KOMA:
+    cmd: julia --project=batch batch/pipeline0_kernelfit.jl KOMA diurnal ./data ./data/outputs
+      --timelimit=Inf --knearest=5
+    deps:
+    - path: batch/pipeline0_kernelfit.jl
+      md5: b35c4df90c9d2fb6482735de42af8a4a
+      size: 5279
+    - path: data/data2015
+      md5: 5c19851788f2f4f20477d9bcf48432f6.dir
+      size: 93773641
+      nfiles: 316
+    - path: src/covariance.jl
+      md5: 533afb75c153649ed92cb17f537dc6fd
+      size: 4402
+    - path: src/fitted_kernel.jl
+      md5: 6a89cb6d300cdc7611dad1cb1c888492
+      size: 10779
+    - path: src/preprocessing.jl
+      md5: 4c114b4114898e5938caf2695d685bb1
+      size: 3945
+    outs:
+    - path: data/outputs/fitted_kernel/mll/diurnal/hyperparams_diurnal_KOMA.json
+      md5: fc73b4a191c0b19fad986a0aa1bf4081
+      size: 701
+  kernelfit_diurnal@KMSP:
+    cmd: julia --project=batch batch/pipeline0_kernelfit.jl KMSP diurnal ./data ./data/outputs
+      --timelimit=Inf --knearest=5
+    deps:
+    - path: batch/pipeline0_kernelfit.jl
+      md5: b35c4df90c9d2fb6482735de42af8a4a
+      size: 5279
+    - path: data/data2015
+      md5: 5c19851788f2f4f20477d9bcf48432f6.dir
+      size: 93773641
+      nfiles: 316
+    - path: src/covariance.jl
+      md5: 533afb75c153649ed92cb17f537dc6fd
+      size: 4402
+    - path: src/fitted_kernel.jl
+      md5: 6a89cb6d300cdc7611dad1cb1c888492
+      size: 10779
+    - path: src/preprocessing.jl
+      md5: 4c114b4114898e5938caf2695d685bb1
+      size: 3945
+    outs:
+    - path: data/outputs/fitted_kernel/mll/diurnal/hyperparams_diurnal_KMSP.json
+      md5: 08f35bb745c232ba70fc95ef4c82e3d8
+      size: 703
+  kernelfit_diurnal@KRIC:
+    cmd: julia --project=batch batch/pipeline0_kernelfit.jl KRIC diurnal ./data ./data/outputs
+      --timelimit=Inf --knearest=5
+    deps:
+    - path: batch/pipeline0_kernelfit.jl
+      md5: b35c4df90c9d2fb6482735de42af8a4a
+      size: 5279
+    - path: data/data2015
+      md5: 5c19851788f2f4f20477d9bcf48432f6.dir
+      size: 93773641
+      nfiles: 316
+    - path: src/covariance.jl
+      md5: 533afb75c153649ed92cb17f537dc6fd
+      size: 4402
+    - path: src/fitted_kernel.jl
+      md5: 6a89cb6d300cdc7611dad1cb1c888492
+      size: 10779
+    - path: src/preprocessing.jl
+      md5: 4c114b4114898e5938caf2695d685bb1
+      size: 3945
+    outs:
+    - path: data/outputs/fitted_kernel/mll/diurnal/hyperparams_diurnal_KRIC.json
+      md5: 90b45d57a24def82cb0277238f0b09d0
+      size: 703
+  kernelfit_diurnal@KPIH:
+    cmd: julia --project=batch batch/pipeline0_kernelfit.jl KPIH diurnal ./data ./data/outputs
+      --timelimit=Inf --knearest=5
+    deps:
+    - path: batch/pipeline0_kernelfit.jl
+      md5: b35c4df90c9d2fb6482735de42af8a4a
+      size: 5279
+    - path: data/data2015
+      md5: 7c4a70921b6fb9788ec1c9afc6c21240.dir
+      size: 93806604
+      nfiles: 627
+    - path: src/covariance.jl
+      md5: 533afb75c153649ed92cb17f537dc6fd
+      size: 4402
+    - path: src/fitted_kernel.jl
+      md5: 6a89cb6d300cdc7611dad1cb1c888492
+      size: 10779
+    - path: src/preprocessing.jl
+      md5: 4c114b4114898e5938caf2695d685bb1
+      size: 3945
+    outs:
+    - path: data/outputs/fitted_kernel/mll/diurnal/hyperparams_diurnal_KPIH.json
+      md5: 20bafb511d546bedd1dfc98277af8803
+      size: 704
+  kernelfit_diurnal@KICT:
+    cmd: julia --project=batch batch/pipeline0_kernelfit.jl KICT diurnal ./data ./data/outputs
+      --timelimit=Inf --knearest=5
+    deps:
+    - path: batch/pipeline0_kernelfit.jl
+      md5: b35c4df90c9d2fb6482735de42af8a4a
+      size: 5279
+    - path: data/data2015
+      md5: 5c19851788f2f4f20477d9bcf48432f6.dir
+      size: 93773641
+      nfiles: 316
+    - path: src/covariance.jl
+      md5: 533afb75c153649ed92cb17f537dc6fd
+      size: 4402
+    - path: src/fitted_kernel.jl
+      md5: 6a89cb6d300cdc7611dad1cb1c888492
+      size: 10779
+    - path: src/preprocessing.jl
+      md5: 4c114b4114898e5938caf2695d685bb1
+      size: 3945
+    outs:
+    - path: data/outputs/fitted_kernel/mll/diurnal/hyperparams_diurnal_KICT.json
+      md5: 5075ba0114a29e0f009983c900bea907
+      size: 700
+  kernelfit_diurnal@KMKE:
+    cmd: julia --project=batch batch/pipeline0_kernelfit.jl KMKE diurnal ./data ./data/outputs
+      --timelimit=Inf --knearest=5
+    deps:
+    - path: batch/pipeline0_kernelfit.jl
+      md5: b35c4df90c9d2fb6482735de42af8a4a
+      size: 5279
+    - path: data/data2015
+      md5: 5c19851788f2f4f20477d9bcf48432f6.dir
+      size: 93773641
+      nfiles: 316
+    - path: src/covariance.jl
+      md5: 533afb75c153649ed92cb17f537dc6fd
+      size: 4402
+    - path: src/fitted_kernel.jl
+      md5: 6a89cb6d300cdc7611dad1cb1c888492
+      size: 10779
+    - path: src/preprocessing.jl
+      md5: 4c114b4114898e5938caf2695d685bb1
+      size: 3945
+    outs:
+    - path: data/outputs/fitted_kernel/mll/diurnal/hyperparams_diurnal_KMKE.json
+      md5: 20446b246364779c10dd75cd5ab7bb51
+      size: 703
+  kernelfit_diurnal@KSHV:
+    cmd: julia --project=batch batch/pipeline0_kernelfit.jl KSHV diurnal ./data ./data/outputs
+      --timelimit=Inf --knearest=5
+    deps:
+    - path: batch/pipeline0_kernelfit.jl
+      md5: b35c4df90c9d2fb6482735de42af8a4a
+      size: 5279
+    - path: data/data2015
+      md5: 7c4a70921b6fb9788ec1c9afc6c21240.dir
+      size: 93806604
+      nfiles: 627
+    - path: src/covariance.jl
+      md5: 533afb75c153649ed92cb17f537dc6fd
+      size: 4402
+    - path: src/fitted_kernel.jl
+      md5: 6a89cb6d300cdc7611dad1cb1c888492
+      size: 10779
+    - path: src/preprocessing.jl
+      md5: 4c114b4114898e5938caf2695d685bb1
+      size: 3945
+    outs:
+    - path: data/outputs/fitted_kernel/mll/diurnal/hyperparams_diurnal_KSHV.json
+      md5: 3507d1ed90049db52141ea9a62f57987
+      size: 703
+  kernelfit_diurnal@KRDU:
+    cmd: julia --project=batch batch/pipeline0_kernelfit.jl KRDU diurnal ./data ./data/outputs
+      --timelimit=Inf --knearest=5
+    deps:
+    - path: batch/pipeline0_kernelfit.jl
+      md5: b35c4df90c9d2fb6482735de42af8a4a
+      size: 5279
+    - path: data/data2015
+      md5: 5c19851788f2f4f20477d9bcf48432f6.dir
+      size: 93773641
+      nfiles: 316
+    - path: src/covariance.jl
+      md5: 533afb75c153649ed92cb17f537dc6fd
+      size: 4402
+    - path: src/fitted_kernel.jl
+      md5: 6a89cb6d300cdc7611dad1cb1c888492
+      size: 10779
+    - path: src/preprocessing.jl
+      md5: 4c114b4114898e5938caf2695d685bb1
+      size: 3945
+    outs:
+    - path: data/outputs/fitted_kernel/mll/diurnal/hyperparams_diurnal_KRDU.json
+      md5: d8b2b14a3dbfa9a763cd19d91d9062cb
+      size: 704
+  kernelfit_diurnal@KMPV:
+    cmd: julia --project=batch batch/pipeline0_kernelfit.jl KMPV diurnal ./data ./data/outputs
+      --timelimit=Inf --knearest=5
+    deps:
+    - path: batch/pipeline0_kernelfit.jl
+      md5: b35c4df90c9d2fb6482735de42af8a4a
+      size: 5279
+    - path: data/data2015
+      md5: 7c4a70921b6fb9788ec1c9afc6c21240.dir
+      size: 93806604
+      nfiles: 627
+    - path: src/covariance.jl
+      md5: 533afb75c153649ed92cb17f537dc6fd
+      size: 4402
+    - path: src/fitted_kernel.jl
+      md5: 6a89cb6d300cdc7611dad1cb1c888492
+      size: 10779
+    - path: src/preprocessing.jl
+      md5: 4c114b4114898e5938caf2695d685bb1
+      size: 3945
+    outs:
+    - path: data/outputs/fitted_kernel/mll/diurnal/hyperparams_diurnal_KMPV.json
+      md5: 276ca83a37aca611fea04d106d522376
+      size: 700
+  kernelfit_diurnal@KSGF:
+    cmd: julia --project=batch batch/pipeline0_kernelfit.jl KSGF diurnal ./data ./data/outputs
+      --timelimit=Inf --knearest=5
+    deps:
+    - path: batch/pipeline0_kernelfit.jl
+      md5: b35c4df90c9d2fb6482735de42af8a4a
+      size: 5279
+    - path: data/data2015
+      md5: 5c19851788f2f4f20477d9bcf48432f6.dir
+      size: 93773641
+      nfiles: 316
+    - path: src/covariance.jl
+      md5: 533afb75c153649ed92cb17f537dc6fd
+      size: 4402
+    - path: src/fitted_kernel.jl
+      md5: 6a89cb6d300cdc7611dad1cb1c888492
+      size: 10779
+    - path: src/preprocessing.jl
+      md5: 4c114b4114898e5938caf2695d685bb1
+      size: 3945
+    outs:
+    - path: data/outputs/fitted_kernel/mll/diurnal/hyperparams_diurnal_KSGF.json
+      md5: 8d9874b042201e160876dc2c534ab6e3
+      size: 700
+  kernelfit_diurnal@KPUB:
+    cmd: julia --project=batch batch/pipeline0_kernelfit.jl KPUB diurnal ./data ./data/outputs
+      --timelimit=Inf --knearest=5
+    deps:
+    - path: batch/pipeline0_kernelfit.jl
+      md5: b35c4df90c9d2fb6482735de42af8a4a
+      size: 5279
+    - path: data/data2015
+      md5: 5c19851788f2f4f20477d9bcf48432f6.dir
+      size: 93773641
+      nfiles: 316
+    - path: src/covariance.jl
+      md5: 533afb75c153649ed92cb17f537dc6fd
+      size: 4402
+    - path: src/fitted_kernel.jl
+      md5: 6a89cb6d300cdc7611dad1cb1c888492
+      size: 10779
+    - path: src/preprocessing.jl
+      md5: 4c114b4114898e5938caf2695d685bb1
+      size: 3945
+    outs:
+    - path: data/outputs/fitted_kernel/mll/diurnal/hyperparams_diurnal_KPUB.json
+      md5: 35df88ce4dcc0f406566bc6d5c7b0355
+      size: 703
+  kernelfit_diurnal@KPHL:
+    cmd: julia --project=batch batch/pipeline0_kernelfit.jl KPHL diurnal ./data ./data/outputs
+      --timelimit=Inf --knearest=5
+    deps:
+    - path: batch/pipeline0_kernelfit.jl
+      md5: b35c4df90c9d2fb6482735de42af8a4a
+      size: 5279
+    - path: data/data2015
+      md5: 5c19851788f2f4f20477d9bcf48432f6.dir
+      size: 93773641
+      nfiles: 316
+    - path: src/covariance.jl
+      md5: 533afb75c153649ed92cb17f537dc6fd
+      size: 4402
+    - path: src/fitted_kernel.jl
+      md5: 6a89cb6d300cdc7611dad1cb1c888492
+      size: 10779
+    - path: src/preprocessing.jl
+      md5: 4c114b4114898e5938caf2695d685bb1
+      size: 3945
+    outs:
+    - path: data/outputs/fitted_kernel/mll/diurnal/hyperparams_diurnal_KPHL.json
+      md5: 3fac38fd6f6744e1bd92c80a1c9eaa3d
+      size: 700
+  kernelfit_diurnal@KTUL:
+    cmd: julia --project=batch batch/pipeline0_kernelfit.jl KTUL diurnal ./data ./data/outputs
+      --timelimit=Inf --knearest=5
+    deps:
+    - path: batch/pipeline0_kernelfit.jl
+      md5: b35c4df90c9d2fb6482735de42af8a4a
+      size: 5279
+    - path: data/data2015
+      md5: 5c19851788f2f4f20477d9bcf48432f6.dir
+      size: 93773641
+      nfiles: 316
+    - path: src/covariance.jl
+      md5: 533afb75c153649ed92cb17f537dc6fd
+      size: 4402
+    - path: src/fitted_kernel.jl
+      md5: 6a89cb6d300cdc7611dad1cb1c888492
+      size: 10779
+    - path: src/preprocessing.jl
+      md5: 4c114b4114898e5938caf2695d685bb1
+      size: 3945
+    outs:
+    - path: data/outputs/fitted_kernel/mll/diurnal/hyperparams_diurnal_KTUL.json
+      md5: 825fd2f3f4afd163404f02cb6e92e44b
+      size: 705
+  kernelfit_diurnal@KSEA:
+    cmd: julia --project=batch batch/pipeline0_kernelfit.jl KSEA diurnal ./data ./data/outputs
+      --timelimit=Inf --knearest=5
+    deps:
+    - path: batch/pipeline0_kernelfit.jl
+      md5: b35c4df90c9d2fb6482735de42af8a4a
+      size: 5279
+    - path: data/data2015
+      md5: 5c19851788f2f4f20477d9bcf48432f6.dir
+      size: 93773641
+      nfiles: 316
+    - path: src/covariance.jl
+      md5: 533afb75c153649ed92cb17f537dc6fd
+      size: 4402
+    - path: src/fitted_kernel.jl
+      md5: 6a89cb6d300cdc7611dad1cb1c888492
+      size: 10779
+    - path: src/preprocessing.jl
+      md5: 4c114b4114898e5938caf2695d685bb1
+      size: 3945
+    outs:
+    - path: data/outputs/fitted_kernel/mll/diurnal/hyperparams_diurnal_KSEA.json
+      md5: 3ae9bffa22d6d3e66c2c32160126229c
+      size: 701
