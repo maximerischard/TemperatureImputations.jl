@@ -91,6 +91,20 @@ stages:
       - src/preprocessing.jl
       outs:
       - data/outputs/predictions_from_nearby/mll/SExSE/${item}
+  nearby_predictions_diurnal:
+    foreach: ${ICAO}
+    do:
+      cmd: julia --project=batch batch/pipeline1.jl ${item} diurnal ./data ./data/outputs
+        data/outputs/fitted_kernel/mll/diurnal/hyperparams_diurnal_${item}.json --knearest=5
+      deps:
+      - batch/pipeline1.jl
+      - data/data2015
+      - data/outputs/fitted_kernel/mll/diurnal/hyperparams_diurnal_${item}.json
+      - src/GPrealisations.jl
+      - src/predict_from_nearby.jl
+      - src/preprocessing.jl
+      outs:
+      - data/outputs/predictions_from_nearby/mll/diurnal/${item}
   compilestan:
     cmd: julia --project=batch batch/pipeline2.jl compilestan ./data/outputs/compiledstan
     deps:
