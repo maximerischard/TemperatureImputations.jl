@@ -125,9 +125,13 @@ stages:
       - data/outputs/predictions_from_nearby/mll/SExSE/${item.ICAO}
       - batch/pipeline2.jl
       - src/stan_impute.jl
+      - data/outputs/compiledstan/imputation
+      - data/outputs/compiledstan/imputation.hpp
+      - data/outputs/compiledstan/imputation.stan
       outs:
       - data/outputs/imputations/mll/SExSE/hr17/${item.ICAO}/window${item.windownum}/imputation_data_1.R
       - data/outputs/imputations/mll/SExSE/hr17/${item.ICAO}/window${item.windownum}/imputation_chain_1.csv
       - data/outputs/imputations/mll/SExSE/hr17/${item.ICAO}/window${item.windownum}/imputation_chain_2.csv
       - data/outputs/imputations/mll/SExSE/hr17/${item.ICAO}/window${item.windownum}/imputation_chain_3.csv
       - data/outputs/imputations/mll/SExSE/hr17/${item.ICAO}/window${item.windownum}/imputation_chain_4.csv
+      - data/outputs/imputations/mll/SExSE/hr17/${item.ICAO}/window${item.windownum}/timestamps.csv
