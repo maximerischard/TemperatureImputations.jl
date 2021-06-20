@@ -1767,8 +1767,8 @@ stages:
       size: 93773641
       nfiles: 316
     - path: data/outputs/fitted_kernel/mll/SExSE/hyperparams_SExSE_KDSM.json
-      md5: 5bb6ec690ffff73bd0b20df41f6cb55a
-      size: 617
+      md5: 12fb3dcea7f5504012aa89c673ef9b44
+      size: 615
     - path: src/GPrealisations.jl
       md5: 76228e81f931d56323b9698ebecb121a
       size: 10327
@@ -1780,7 +1780,7 @@ stages:
       size: 3945
     outs:
     - path: data/outputs/predictions_from_nearby/mll/SExSE/KDSM
-      md5: fc5c0778854a5cf0067de0852bdcbb83.dir
+      md5: a18b9633b5805026277024e647b5745c.dir
       size: 1213784984
       nfiles: 13
   kernelfit_SExSE@KPWM:
@@ -1819,7 +1819,7 @@ stages:
       size: 93773641
       nfiles: 316
     - path: data/outputs/fitted_kernel/mll/SExSE/hyperparams_SExSE_KPWM.json
-      md5: 8750099c1b74eb798a4de94374fd4242
+      md5: b0f29929ec181464edc39b7a91b7dc0d
       size: 617
     - path: src/GPrealisations.jl
       md5: 76228e81f931d56323b9698ebecb121a
@@ -1832,7 +1832,7 @@ stages:
       size: 3945
     outs:
     - path: data/outputs/predictions_from_nearby/mll/SExSE/KPWM
-      md5: 317ce3443b1f817c9448664f1f25aa0c.dir
+      md5: 384ee8ccf939488830ad88a0be942473.dir
       size: 1613049720
       nfiles: 13
   kernelfit_SExSE@KSEA:
@@ -2339,8 +2339,8 @@ stages:
       size: 93773641
       nfiles: 316
     - path: data/outputs/fitted_kernel/mll/SExSE/hyperparams_SExSE_KPIH.json
-      md5: a2ee8a2cfb1fc9ea1e4b991b32b83248
-      size: 618
+      md5: 8258873d05c37ffe51e18ed232efe96b
+      size: 617
     - path: src/GPrealisations.jl
       md5: 76228e81f931d56323b9698ebecb121a
       size: 10327
@@ -2352,7 +2352,7 @@ stages:
       size: 3945
     outs:
     - path: data/outputs/predictions_from_nearby/mll/SExSE/KPIH
-      md5: cace8b5836fbda7a401d47a2d5e159c1.dir
+      md5: 8fac17be2751144f42a60165448bedbb.dir
       size: 1057680280
       nfiles: 13
   kernelfit_SExSE@KLEX:
@@ -2443,8 +2443,8 @@ stages:
       size: 93773641
       nfiles: 316
     - path: data/outputs/fitted_kernel/mll/SExSE/hyperparams_SExSE_KLAS.json
-      md5: d8f878200140d36296a021e81455ebbf
-      size: 617
+      md5: cf034d3de3a55a0514b6f9780706b67f
+      size: 616
     - path: src/GPrealisations.jl
       md5: 76228e81f931d56323b9698ebecb121a
       size: 10327
@@ -2456,7 +2456,7 @@ stages:
       size: 3945
     outs:
     - path: data/outputs/predictions_from_nearby/mll/SExSE/KLAS
-      md5: 47b889ea0facb3e6c61890074db1c6df.dir
+      md5: b537832d7ed298d5ecaad782ecd2968d.dir
       size: 926350904
       nfiles: 13
   kernelfit_SExSE@KRDU:
@@ -16942,39 +16942,83 @@ stages:
       size: 954
   impute_SExSE@1446:
     cmd:
-    - mkdir -p ./data/outputs/imputations/mll/SExSE/hr17/KDSM/window44
-    - cp -R ./data/outputs/compiledstan/* ./data/outputs/imputations/mll/SExSE/hr17/KDSM/
+    - echo "./data/outputs/imputations/mll/SExSE/hr17/KDSM/window44" > outputdir.tmp
+    - mkdir -p $(cat outputdir.tmp)
+    - cp -RL ./data/outputs/compiledstan/* $(cat outputdir.tmp)
+    - chmod ug+x $(cat outputdir.tmp)/imputation
+    - chmod ug+x $(cat outputdir.tmp)/imputation.hpp
+    - ls -l $(cat outputdir.tmp)
     - julia --project=batch --threads 4 batch/pipeline2.jl impute KDSM SExSE 44 ./data
-      ./data/outputs/predictions_from_nearby/mll/SExSE/KDSM ./data/outputs/imputations/mll/SExSE/hr17/KDSM/window44
-      --ksmoothmax=30 --epsilon=0.05 --seed=44 --hr_measure_true=17 --hr_measure_impt=17
-      --stan_days=10
+      ./data/outputs/predictions_from_nearby/mll/SExSE/KDSM $(cat outputdir.tmp) --ksmoothmax=30
+      --epsilon=0.05 --seed=44 --hr_measure_true=17 --hr_measure_impt=17 --stan_days=10
+    - grep -v ' seconds' $(cat outputdir.tmp)/imputation_chain_1.csv > $(cat outputdir.tmp)/tmp.csv
+    - mv $(cat outputdir.tmp)/tmp.csv $(cat outputdir.tmp)/imputation_chain_1.csv
+    - grep -v ' seconds' $(cat outputdir.tmp)/imputation_chain_2.csv > $(cat outputdir.tmp)/tmp.csv
+    - mv $(cat outputdir.tmp)/tmp.csv $(cat outputdir.tmp)/imputation_chain_2.csv
+    - grep -v ' seconds' $(cat outputdir.tmp)/imputation_chain_3.csv > $(cat outputdir.tmp)/tmp.csv
+    - mv $(cat outputdir.tmp)/tmp.csv $(cat outputdir.tmp)/imputation_chain_3.csv
+    - grep -v ' seconds' $(cat outputdir.tmp)/imputation_chain_4.csv > $(cat outputdir.tmp)/tmp.csv
+    - mv $(cat outputdir.tmp)/tmp.csv $(cat outputdir.tmp)/imputation_chain_4.csv
+    - rm outputdir.tmp
     deps:
     - path: batch/pipeline2.jl
       md5: 1049deb7b40b7bff45bef5e7664650de
       size: 5439
+    - path: data/outputs/compiledstan/imputation
+      md5: f29437d96bf911e8ff2da84c7d5bb2da
+      size: 1619272
+    - path: data/outputs/compiledstan/imputation.hpp
+      md5: 175c805559226d2a54deba6320a8d2bb
+      size: 40383
+    - path: data/outputs/compiledstan/imputation.stan
+      md5: e8d100dbf5903ba0b3dbd933cbf023d5
+      size: 2035
     - path: data/outputs/predictions_from_nearby/mll/SExSE/KDSM
-      md5: fc5c0778854a5cf0067de0852bdcbb83.dir
+      md5: a18b9633b5805026277024e647b5745c.dir
       size: 1213784984
       nfiles: 13
     - path: src/stan_impute.jl
       md5: bae220ecd8fa17005a3f85643892199a
       size: 5912
     outs:
+    - path: data/outputs/imputations/mll/SExSE/hr17/KDSM/window44/imputation
+      md5: f29437d96bf911e8ff2da84c7d5bb2da
+      size: 1619272
+      isexec: true
+    - path: data/outputs/imputations/mll/SExSE/hr17/KDSM/window44/imputation.hpp
+      md5: 175c805559226d2a54deba6320a8d2bb
+      size: 40383
+      isexec: true
+    - path: data/outputs/imputations/mll/SExSE/hr17/KDSM/window44/imputation.stan
+      md5: e8d100dbf5903ba0b3dbd933cbf023d5
+      size: 2035
     - path: data/outputs/imputations/mll/SExSE/hr17/KDSM/window44/imputation_chain_1.csv
-      md5: 9cf3fb023a5c26566699971ca9a75f62
-      size: 5782741
+      md5: bfb1e94edc8a598874d822ffab23319c
+      size: 5781542
     - path: data/outputs/imputations/mll/SExSE/hr17/KDSM/window44/imputation_chain_2.csv
-      md5: 08dce7c7e2263543ea4fd7fae3bba9f0
-      size: 5782728
+      md5: b5e3195432183c0831769e20d730beb0
+      size: 5783309
     - path: data/outputs/imputations/mll/SExSE/hr17/KDSM/window44/imputation_chain_3.csv
-      md5: 06c4afffb7a8803741733e1212a622a4
-      size: 5782870
+      md5: b6d6a98e8dc125bf913f61998c1447f8
+      size: 5782670
     - path: data/outputs/imputations/mll/SExSE/hr17/KDSM/window44/imputation_chain_4.csv
-      md5: 27ec93c701e99dbe27b60db0b1e187a7
-      size: 5783120
+      md5: cc5d240747c71c5b3e503bffc7758626
+      size: 5781891
     - path: data/outputs/imputations/mll/SExSE/hr17/KDSM/window44/imputation_data_1.R
-      md5: 9f722f3b65b9609e5df4ec6ec2a616da
-      size: 3582417
+      md5: 87ff5548a99a87b29bf02a5bd45ff3ea
+      size: 3582479
+    - path: data/outputs/imputations/mll/SExSE/hr17/KDSM/window44/imputation_data_2.R
+      md5: 87ff5548a99a87b29bf02a5bd45ff3ea
+      size: 3582479
+    - path: data/outputs/imputations/mll/SExSE/hr17/KDSM/window44/imputation_data_3.R
+      md5: 87ff5548a99a87b29bf02a5bd45ff3ea
+      size: 3582479
+    - path: data/outputs/imputations/mll/SExSE/hr17/KDSM/window44/imputation_data_4.R
+      md5: 87ff5548a99a87b29bf02a5bd45ff3ea
+      size: 3582479
+    - path: data/outputs/imputations/mll/SExSE/hr17/KDSM/window44/timestamps.csv
+      md5: 0abbf5de7a03176b801a2e49fec940a3
+      size: 7238
   impute_SExSE@2564:
     cmd:
     - mkdir -p ./data/outputs/imputations/mll/SExSE/hr17/KSHV/window3
@@ -38654,3 +38698,321 @@ stages:
     - path: data/outputs/fitted_kernel/mll/diurnal/hyperparams_diurnal_KSEA.json
       md5: 3ae9bffa22d6d3e66c2c32160126229c
       size: 701
+  impute_SExSE@2416:
+    cmd:
+    - echo "./data/outputs/imputations/mll/SExSE/hr17/KPIH/window38" > outputdir.tmp
+    - mkdir -p $(cat outputdir.tmp)
+    - cp -RL ./data/outputs/compiledstan/* $(cat outputdir.tmp)
+    - chmod ug+x $(cat outputdir.tmp)/imputation
+    - chmod ug+x $(cat outputdir.tmp)/imputation.hpp
+    - ls -l $(cat outputdir.tmp)
+    - julia --project=batch --threads 4 batch/pipeline2.jl impute KPIH SExSE 38 ./data
+      ./data/outputs/predictions_from_nearby/mll/SExSE/KPIH $(cat outputdir.tmp) --ksmoothmax=30
+      --epsilon=0.05 --seed=38 --hr_measure_true=17 --hr_measure_impt=17 --stan_days=10
+    - grep -v ' seconds' $(cat outputdir.tmp)/imputation_chain_1.csv > $(cat outputdir.tmp)/tmp.csv
+    - mv $(cat outputdir.tmp)/tmp.csv $(cat outputdir.tmp)/imputation_chain_1.csv
+    - grep -v ' seconds' $(cat outputdir.tmp)/imputation_chain_2.csv > $(cat outputdir.tmp)/tmp.csv
+    - mv $(cat outputdir.tmp)/tmp.csv $(cat outputdir.tmp)/imputation_chain_2.csv
+    - grep -v ' seconds' $(cat outputdir.tmp)/imputation_chain_3.csv > $(cat outputdir.tmp)/tmp.csv
+    - mv $(cat outputdir.tmp)/tmp.csv $(cat outputdir.tmp)/imputation_chain_3.csv
+    - grep -v ' seconds' $(cat outputdir.tmp)/imputation_chain_4.csv > $(cat outputdir.tmp)/tmp.csv
+    - mv $(cat outputdir.tmp)/tmp.csv $(cat outputdir.tmp)/imputation_chain_4.csv
+    - rm outputdir.tmp
+    deps:
+    - path: batch/pipeline2.jl
+      md5: 1049deb7b40b7bff45bef5e7664650de
+      size: 5439
+    - path: data/outputs/compiledstan/imputation
+      md5: f29437d96bf911e8ff2da84c7d5bb2da
+      size: 1619272
+    - path: data/outputs/compiledstan/imputation.hpp
+      md5: 175c805559226d2a54deba6320a8d2bb
+      size: 40383
+    - path: data/outputs/compiledstan/imputation.stan
+      md5: e8d100dbf5903ba0b3dbd933cbf023d5
+      size: 2035
+    - path: data/outputs/predictions_from_nearby/mll/SExSE/KPIH
+      md5: 8fac17be2751144f42a60165448bedbb.dir
+      size: 1057680280
+      nfiles: 13
+    - path: src/stan_impute.jl
+      md5: bae220ecd8fa17005a3f85643892199a
+      size: 5912
+    outs:
+    - path: data/outputs/imputations/mll/SExSE/hr17/KPIH/window38/imputation
+      md5: f29437d96bf911e8ff2da84c7d5bb2da
+      size: 1619272
+      isexec: true
+    - path: data/outputs/imputations/mll/SExSE/hr17/KPIH/window38/imputation.hpp
+      md5: 175c805559226d2a54deba6320a8d2bb
+      size: 40383
+      isexec: true
+    - path: data/outputs/imputations/mll/SExSE/hr17/KPIH/window38/imputation.stan
+      md5: e8d100dbf5903ba0b3dbd933cbf023d5
+      size: 2035
+    - path: data/outputs/imputations/mll/SExSE/hr17/KPIH/window38/imputation_chain_1.csv
+      md5: 90dfbcf5984a84f78c21860a240b314e
+      size: 5134947
+    - path: data/outputs/imputations/mll/SExSE/hr17/KPIH/window38/imputation_chain_2.csv
+      md5: 20a5556d390d1c42d37ff3aee23acc1f
+      size: 5136255
+    - path: data/outputs/imputations/mll/SExSE/hr17/KPIH/window38/imputation_chain_3.csv
+      md5: a1492ddec225fa5d7b6fb05dde93ec63
+      size: 5135846
+    - path: data/outputs/imputations/mll/SExSE/hr17/KPIH/window38/imputation_chain_4.csv
+      md5: 44b49d19746a7945825e01d47eccdd0b
+      size: 5135505
+    - path: data/outputs/imputations/mll/SExSE/hr17/KPIH/window38/imputation_data_1.R
+      md5: 2e6bdba7c9c082bb3555b40e2d2dd6d3
+      size: 2724947
+    - path: data/outputs/imputations/mll/SExSE/hr17/KPIH/window38/imputation_data_2.R
+      md5: 2e6bdba7c9c082bb3555b40e2d2dd6d3
+      size: 2724947
+    - path: data/outputs/imputations/mll/SExSE/hr17/KPIH/window38/imputation_data_3.R
+      md5: 2e6bdba7c9c082bb3555b40e2d2dd6d3
+      size: 2724947
+    - path: data/outputs/imputations/mll/SExSE/hr17/KPIH/window38/imputation_data_4.R
+      md5: 2e6bdba7c9c082bb3555b40e2d2dd6d3
+      size: 2724947
+    - path: data/outputs/imputations/mll/SExSE/hr17/KPIH/window38/timestamps.csv
+      md5: a766d95ed4c7f2700b831ab6a0d9793d
+      size: 6336
+  impute_SExSE@2444:
+    cmd:
+    - echo "./data/outputs/imputations/mll/SExSE/hr17/KLAS/window5" > outputdir.tmp
+    - mkdir -p $(cat outputdir.tmp)
+    - cp -RL ./data/outputs/compiledstan/* $(cat outputdir.tmp)
+    - chmod ug+x $(cat outputdir.tmp)/imputation
+    - chmod ug+x $(cat outputdir.tmp)/imputation.hpp
+    - ls -l $(cat outputdir.tmp)
+    - julia --project=batch --threads 4 batch/pipeline2.jl impute KLAS SExSE 5 ./data
+      ./data/outputs/predictions_from_nearby/mll/SExSE/KLAS $(cat outputdir.tmp) --ksmoothmax=30
+      --epsilon=0.05 --seed=5 --hr_measure_true=17 --hr_measure_impt=17 --stan_days=10
+    - grep -v ' seconds' $(cat outputdir.tmp)/imputation_chain_1.csv > $(cat outputdir.tmp)/tmp.csv
+    - mv $(cat outputdir.tmp)/tmp.csv $(cat outputdir.tmp)/imputation_chain_1.csv
+    - grep -v ' seconds' $(cat outputdir.tmp)/imputation_chain_2.csv > $(cat outputdir.tmp)/tmp.csv
+    - mv $(cat outputdir.tmp)/tmp.csv $(cat outputdir.tmp)/imputation_chain_2.csv
+    - grep -v ' seconds' $(cat outputdir.tmp)/imputation_chain_3.csv > $(cat outputdir.tmp)/tmp.csv
+    - mv $(cat outputdir.tmp)/tmp.csv $(cat outputdir.tmp)/imputation_chain_3.csv
+    - grep -v ' seconds' $(cat outputdir.tmp)/imputation_chain_4.csv > $(cat outputdir.tmp)/tmp.csv
+    - mv $(cat outputdir.tmp)/tmp.csv $(cat outputdir.tmp)/imputation_chain_4.csv
+    - rm outputdir.tmp
+    deps:
+    - path: batch/pipeline2.jl
+      md5: 1049deb7b40b7bff45bef5e7664650de
+      size: 5439
+    - path: data/outputs/compiledstan/imputation
+      md5: f29437d96bf911e8ff2da84c7d5bb2da
+      size: 1619272
+    - path: data/outputs/compiledstan/imputation.hpp
+      md5: 175c805559226d2a54deba6320a8d2bb
+      size: 40383
+    - path: data/outputs/compiledstan/imputation.stan
+      md5: e8d100dbf5903ba0b3dbd933cbf023d5
+      size: 2035
+    - path: data/outputs/predictions_from_nearby/mll/SExSE/KLAS
+      md5: b537832d7ed298d5ecaad782ecd2968d.dir
+      size: 926350904
+      nfiles: 13
+    - path: src/stan_impute.jl
+      md5: bae220ecd8fa17005a3f85643892199a
+      size: 5912
+    outs:
+    - path: data/outputs/imputations/mll/SExSE/hr17/KLAS/window5/imputation
+      md5: f29437d96bf911e8ff2da84c7d5bb2da
+      size: 1619272
+      isexec: true
+    - path: data/outputs/imputations/mll/SExSE/hr17/KLAS/window5/imputation.hpp
+      md5: 175c805559226d2a54deba6320a8d2bb
+      size: 40383
+      isexec: true
+    - path: data/outputs/imputations/mll/SExSE/hr17/KLAS/window5/imputation.stan
+      md5: e8d100dbf5903ba0b3dbd933cbf023d5
+      size: 2035
+    - path: data/outputs/imputations/mll/SExSE/hr17/KLAS/window5/imputation_chain_1.csv
+      md5: 30fb1e3427ac709b2223c92d24f1c27c
+      size: 5280454
+    - path: data/outputs/imputations/mll/SExSE/hr17/KLAS/window5/imputation_chain_2.csv
+      md5: c8d0207d7dc2f10bfabc6d800b5ca13e
+      size: 5280748
+    - path: data/outputs/imputations/mll/SExSE/hr17/KLAS/window5/imputation_chain_3.csv
+      md5: 4eb069ded1493e1caf89b1cc3df64a91
+      size: 5280303
+    - path: data/outputs/imputations/mll/SExSE/hr17/KLAS/window5/imputation_chain_4.csv
+      md5: af6dcdf10a5a1b7046af1279ec3963de
+      size: 5282061
+    - path: data/outputs/imputations/mll/SExSE/hr17/KLAS/window5/imputation_data_1.R
+      md5: 7985a939a2d05787bcfabbc7cd48ae08
+      size: 2944262
+    - path: data/outputs/imputations/mll/SExSE/hr17/KLAS/window5/imputation_data_2.R
+      md5: 7985a939a2d05787bcfabbc7cd48ae08
+      size: 2944262
+    - path: data/outputs/imputations/mll/SExSE/hr17/KLAS/window5/imputation_data_3.R
+      md5: 7985a939a2d05787bcfabbc7cd48ae08
+      size: 2944262
+    - path: data/outputs/imputations/mll/SExSE/hr17/KLAS/window5/imputation_data_4.R
+      md5: 7985a939a2d05787bcfabbc7cd48ae08
+      size: 2944262
+    - path: data/outputs/imputations/mll/SExSE/hr17/KLAS/window5/timestamps.csv
+      md5: 8956e59118bc590d3e602300817d676e
+      size: 6556
+  impute_SExSE@36:
+    cmd:
+    - echo "./data/outputs/imputations/mll/SExSE/hr17/KMOB/window37" > outputdir.tmp
+    - mkdir -p $(cat outputdir.tmp)
+    - cp -RL ./data/outputs/compiledstan/* $(cat outputdir.tmp)
+    - chmod ug+x $(cat outputdir.tmp)/imputation
+    - chmod ug+x $(cat outputdir.tmp)/imputation.hpp
+    - ls -l $(cat outputdir.tmp)
+    - julia --project=batch --threads 4 batch/pipeline2.jl impute KMOB SExSE 37 ./data
+      ./data/outputs/predictions_from_nearby/mll/SExSE/KMOB $(cat outputdir.tmp) --ksmoothmax=30
+      --epsilon=0.05 --seed=37 --hr_measure_true=17 --hr_measure_impt=17 --stan_days=10
+    - grep -v ' seconds' $(cat outputdir.tmp)/imputation_chain_1.csv > $(cat outputdir.tmp)/tmp.csv
+    - mv $(cat outputdir.tmp)/tmp.csv $(cat outputdir.tmp)/imputation_chain_1.csv
+    - grep -v ' seconds' $(cat outputdir.tmp)/imputation_chain_2.csv > $(cat outputdir.tmp)/tmp.csv
+    - mv $(cat outputdir.tmp)/tmp.csv $(cat outputdir.tmp)/imputation_chain_2.csv
+    - grep -v ' seconds' $(cat outputdir.tmp)/imputation_chain_3.csv > $(cat outputdir.tmp)/tmp.csv
+    - mv $(cat outputdir.tmp)/tmp.csv $(cat outputdir.tmp)/imputation_chain_3.csv
+    - grep -v ' seconds' $(cat outputdir.tmp)/imputation_chain_4.csv > $(cat outputdir.tmp)/tmp.csv
+    - mv $(cat outputdir.tmp)/tmp.csv $(cat outputdir.tmp)/imputation_chain_4.csv
+    - rm outputdir.tmp
+    deps:
+    - path: batch/pipeline2.jl
+      md5: 1049deb7b40b7bff45bef5e7664650de
+      size: 5439
+    - path: data/outputs/compiledstan/imputation
+      md5: f29437d96bf911e8ff2da84c7d5bb2da
+      size: 1619272
+    - path: data/outputs/compiledstan/imputation.hpp
+      md5: 175c805559226d2a54deba6320a8d2bb
+      size: 40383
+    - path: data/outputs/compiledstan/imputation.stan
+      md5: e8d100dbf5903ba0b3dbd933cbf023d5
+      size: 2035
+    - path: data/outputs/predictions_from_nearby/mll/SExSE/KMOB
+      md5: 7a436816e31a8d5934fabc5551096848.dir
+      size: 1516193720
+      nfiles: 13
+    - path: src/stan_impute.jl
+      md5: bae220ecd8fa17005a3f85643892199a
+      size: 5912
+    outs:
+    - path: data/outputs/imputations/mll/SExSE/hr17/KMOB/window37/imputation
+      md5: f29437d96bf911e8ff2da84c7d5bb2da
+      size: 1619272
+      isexec: true
+    - path: data/outputs/imputations/mll/SExSE/hr17/KMOB/window37/imputation.hpp
+      md5: 175c805559226d2a54deba6320a8d2bb
+      size: 40383
+      isexec: true
+    - path: data/outputs/imputations/mll/SExSE/hr17/KMOB/window37/imputation.stan
+      md5: e8d100dbf5903ba0b3dbd933cbf023d5
+      size: 2035
+    - path: data/outputs/imputations/mll/SExSE/hr17/KMOB/window37/imputation_chain_1.csv
+      md5: df2b8d3c67fc05b036d175ca45ede2b5
+      size: 5981433
+    - path: data/outputs/imputations/mll/SExSE/hr17/KMOB/window37/imputation_chain_2.csv
+      md5: a8a9d7d41036665c1a16f854f64c0fd7
+      size: 5981644
+    - path: data/outputs/imputations/mll/SExSE/hr17/KMOB/window37/imputation_chain_3.csv
+      md5: 8695a5c37ce12826484e0ceb1cb3868f
+      size: 5982697
+    - path: data/outputs/imputations/mll/SExSE/hr17/KMOB/window37/imputation_chain_4.csv
+      md5: 7ceee8ee0b1098adb459173bbc46655d
+      size: 5982419
+    - path: data/outputs/imputations/mll/SExSE/hr17/KMOB/window37/imputation_data_1.R
+      md5: dc746515a1a5889e04a448641ccdcc7c
+      size: 3748716
+    - path: data/outputs/imputations/mll/SExSE/hr17/KMOB/window37/imputation_data_2.R
+      md5: dc746515a1a5889e04a448641ccdcc7c
+      size: 3748716
+    - path: data/outputs/imputations/mll/SExSE/hr17/KMOB/window37/imputation_data_3.R
+      md5: dc746515a1a5889e04a448641ccdcc7c
+      size: 3748716
+    - path: data/outputs/imputations/mll/SExSE/hr17/KMOB/window37/imputation_data_4.R
+      md5: dc746515a1a5889e04a448641ccdcc7c
+      size: 3748716
+    - path: data/outputs/imputations/mll/SExSE/hr17/KMOB/window37/timestamps.csv
+      md5: 354967e82aaaa517f85b5639b6d38483
+      size: 7436
+  impute_SExSE@432:
+    cmd:
+    - echo "./data/outputs/imputations/mll/SExSE/hr17/KPWM/window6" > outputdir.tmp
+    - mkdir -p $(cat outputdir.tmp)
+    - cp -RL ./data/outputs/compiledstan/* $(cat outputdir.tmp)
+    - chmod ug+x $(cat outputdir.tmp)/imputation
+    - chmod ug+x $(cat outputdir.tmp)/imputation.hpp
+    - touch $(cat outputdir.tmp)/imputation.hpp
+    - touch $(cat outputdir.tmp)/imputation
+    - ls -l $(cat outputdir.tmp)
+    - julia --project=batch --threads 4 batch/pipeline2.jl impute KPWM SExSE 6 ./data
+      ./data/outputs/predictions_from_nearby/mll/SExSE/KPWM $(cat outputdir.tmp) --ksmoothmax=30
+      --epsilon=0.05 --seed=6 --hr_measure_true=17 --hr_measure_impt=17 --stan_days=10
+    - grep -v ' seconds' $(cat outputdir.tmp)/imputation_chain_1.csv > $(cat outputdir.tmp)/tmp.csv
+    - mv $(cat outputdir.tmp)/tmp.csv $(cat outputdir.tmp)/imputation_chain_1.csv
+    - grep -v ' seconds' $(cat outputdir.tmp)/imputation_chain_2.csv > $(cat outputdir.tmp)/tmp.csv
+    - mv $(cat outputdir.tmp)/tmp.csv $(cat outputdir.tmp)/imputation_chain_2.csv
+    - grep -v ' seconds' $(cat outputdir.tmp)/imputation_chain_3.csv > $(cat outputdir.tmp)/tmp.csv
+    - mv $(cat outputdir.tmp)/tmp.csv $(cat outputdir.tmp)/imputation_chain_3.csv
+    - grep -v ' seconds' $(cat outputdir.tmp)/imputation_chain_4.csv > $(cat outputdir.tmp)/tmp.csv
+    - mv $(cat outputdir.tmp)/tmp.csv $(cat outputdir.tmp)/imputation_chain_4.csv
+    - rm outputdir.tmp
+    deps:
+    - path: batch/pipeline2.jl
+      md5: 1049deb7b40b7bff45bef5e7664650de
+      size: 5439
+    - path: data/outputs/compiledstan/imputation
+      md5: f29437d96bf911e8ff2da84c7d5bb2da
+      size: 1619272
+    - path: data/outputs/compiledstan/imputation.hpp
+      md5: 175c805559226d2a54deba6320a8d2bb
+      size: 40383
+    - path: data/outputs/compiledstan/imputation.stan
+      md5: e8d100dbf5903ba0b3dbd933cbf023d5
+      size: 2035
+    - path: data/outputs/predictions_from_nearby/mll/SExSE/KPWM
+      md5: 384ee8ccf939488830ad88a0be942473.dir
+      size: 1613049720
+      nfiles: 13
+    - path: src/stan_impute.jl
+      md5: bae220ecd8fa17005a3f85643892199a
+      size: 5912
+    outs:
+    - path: data/outputs/imputations/mll/SExSE/hr17/KPWM/window6/imputation
+      md5: f29437d96bf911e8ff2da84c7d5bb2da
+      size: 1619272
+      isexec: true
+    - path: data/outputs/imputations/mll/SExSE/hr17/KPWM/window6/imputation.hpp
+      md5: 175c805559226d2a54deba6320a8d2bb
+      size: 40383
+      isexec: true
+    - path: data/outputs/imputations/mll/SExSE/hr17/KPWM/window6/imputation.stan
+      md5: e8d100dbf5903ba0b3dbd933cbf023d5
+      size: 2035
+    - path: data/outputs/imputations/mll/SExSE/hr17/KPWM/window6/imputation_chain_1.csv
+      md5: 563efd0edee1cb110c355b32b83b3277
+      size: 7855547
+    - path: data/outputs/imputations/mll/SExSE/hr17/KPWM/window6/imputation_chain_2.csv
+      md5: cf0368dba33d6ddda1589b2b9adcb3a7
+      size: 7855836
+    - path: data/outputs/imputations/mll/SExSE/hr17/KPWM/window6/imputation_chain_3.csv
+      md5: a71fab81ac9b56272a385e321f721fb7
+      size: 7855671
+    - path: data/outputs/imputations/mll/SExSE/hr17/KPWM/window6/imputation_chain_4.csv
+      md5: 0db9dee3b8167da2b64429b42d4b9736
+      size: 7854508
+    - path: data/outputs/imputations/mll/SExSE/hr17/KPWM/window6/imputation_data_1.R
+      md5: d6a94ec5464e41de99be12ea3537e34f
+      size: 5849994
+    - path: data/outputs/imputations/mll/SExSE/hr17/KPWM/window6/imputation_data_2.R
+      md5: d6a94ec5464e41de99be12ea3537e34f
+      size: 5849994
+    - path: data/outputs/imputations/mll/SExSE/hr17/KPWM/window6/imputation_data_3.R
+      md5: d6a94ec5464e41de99be12ea3537e34f
+      size: 5849994
+    - path: data/outputs/imputations/mll/SExSE/hr17/KPWM/window6/imputation_data_4.R
+      md5: d6a94ec5464e41de99be12ea3537e34f
+      size: 5849994
+    - path: data/outputs/imputations/mll/SExSE/hr17/KPWM/window6/timestamps.csv
+      md5: 7a76a5a8fcab40bdf19e188e4c454501
+      size: 9262
