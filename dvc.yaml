@@ -118,30 +118,36 @@ stages:
     foreach: ${ICAO_stanwindows} # from batch/test_stations.json
     do:
       cmd: 
-      - echo "./data/outputs/imputations/mll/SExSE/hr17/${item.ICAO}/window${item.windownum}" > outputdir.tmp
-      - mkdir -p $(cat outputdir.tmp)
-      - cp -RL ./data/outputs/compiledstan/* $(cat outputdir.tmp)
-      - chmod ug+x $(cat outputdir.tmp)/imputation
-      - chmod ug+x $(cat outputdir.tmp)/imputation.hpp
-      - touch $(cat outputdir.tmp)/imputation.hpp # prevent recompilation
-      - touch $(cat outputdir.tmp)/imputation # prevent recompilation
-      - ls -l $(cat outputdir.tmp)
+      - mkdir -p ./data/outputs/imputations/mll/SExSE/hr17/${item.ICAO}/window${item.windownum}
+      - cp -RL ./data/outputs/compiledstan/* ./data/outputs/imputations/mll/SExSE/hr17/${item.ICAO}/window${item.windownum}
+      - chmod ug+x ./data/outputs/imputations/mll/SExSE/hr17/${item.ICAO}/window${item.windownum}/imputation
+      - chmod ug+x ./data/outputs/imputations/mll/SExSE/hr17/${item.ICAO}/window${item.windownum}/imputation.hpp
+      - touch ./data/outputs/imputations/mll/SExSE/hr17/${item.ICAO}/window${item.windownum}/imputation.hpp # prevent recompilation
+      - touch ./data/outputs/imputations/mll/SExSE/hr17/${item.ICAO}/window${item.windownum}/imputation # prevent recompilation
+      - ls -l ./data/outputs/imputations/mll/SExSE/hr17/${item.ICAO}/window${item.windownum}
       - julia --project=batch --threads 4 batch/pipeline2.jl impute ${item.ICAO} SExSE ${item.windownum} ./data 
               ./data/outputs/predictions_from_nearby/mll/SExSE/${item.ICAO} 
-              $(cat outputdir.tmp)
+              ./data/outputs/imputations/mll/SExSE/hr17/${item.ICAO}/window${item.windownum}
               --ksmoothmax=30 --epsilon=0.05 --seed=${item.windownum}
               --hr_measure_true=17 --hr_measure_impt=17 --stan_days=10
       # remove last 4 lines of Stan output, which contains timings
       # and is therefore not reproducible
-      - grep -v ' seconds' $(cat outputdir.tmp)/imputation_chain_1.csv > $(cat outputdir.tmp)/tmp.csv
-      - mv $(cat outputdir.tmp)/tmp.csv $(cat outputdir.tmp)/imputation_chain_1.csv
-      - grep -v ' seconds' $(cat outputdir.tmp)/imputation_chain_2.csv > $(cat outputdir.tmp)/tmp.csv
-      - mv $(cat outputdir.tmp)/tmp.csv $(cat outputdir.tmp)/imputation_chain_2.csv
-      - grep -v ' seconds' $(cat outputdir.tmp)/imputation_chain_3.csv > $(cat outputdir.tmp)/tmp.csv
-      - mv $(cat outputdir.tmp)/tmp.csv $(cat outputdir.tmp)/imputation_chain_3.csv
-      - grep -v ' seconds' $(cat outputdir.tmp)/imputation_chain_4.csv > $(cat outputdir.tmp)/tmp.csv
-      - mv $(cat outputdir.tmp)/tmp.csv $(cat outputdir.tmp)/imputation_chain_4.csv
-      - rm outputdir.tmp
+      - grep -v ' seconds' ./data/outputs/imputations/mll/SExSE/hr17/${item.ICAO}/window${item.windownum}/imputation_chain_1.csv 
+                         > ./data/outputs/imputations/mll/SExSE/hr17/${item.ICAO}/window${item.windownum}/tmp.csv
+      - mv ./data/outputs/imputations/mll/SExSE/hr17/${item.ICAO}/window${item.windownum}/tmp.csv
+           ./data/outputs/imputations/mll/SExSE/hr17/${item.ICAO}/window${item.windownum}/imputation_chain_1.csv
+      - grep -v ' seconds' ./data/outputs/imputations/mll/SExSE/hr17/${item.ICAO}/window${item.windownum}/imputation_chain_2.csv
+                         > ./data/outputs/imputations/mll/SExSE/hr17/${item.ICAO}/window${item.windownum}/tmp.csv
+      - mv ./data/outputs/imputations/mll/SExSE/hr17/${item.ICAO}/window${item.windownum}/tmp.csv
+           ./data/outputs/imputations/mll/SExSE/hr17/${item.ICAO}/window${item.windownum}/imputation_chain_2.csv
+      - grep -v ' seconds' ./data/outputs/imputations/mll/SExSE/hr17/${item.ICAO}/window${item.windownum}/imputation_chain_3.csv
+                         > ./data/outputs/imputations/mll/SExSE/hr17/${item.ICAO}/window${item.windownum}/tmp.csv
+      - mv ./data/outputs/imputations/mll/SExSE/hr17/${item.ICAO}/window${item.windownum}/tmp.csv
+           ./data/outputs/imputations/mll/SExSE/hr17/${item.ICAO}/window${item.windownum}/imputation_chain_3.csv
+      - grep -v ' seconds' ./data/outputs/imputations/mll/SExSE/hr17/${item.ICAO}/window${item.windownum}/imputation_chain_4.csv
+                         > ./data/outputs/imputations/mll/SExSE/hr17/${item.ICAO}/window${item.windownum}/tmp.csv
+      - mv ./data/outputs/imputations/mll/SExSE/hr17/${item.ICAO}/window${item.windownum}/tmp.csv
+           ./data/outputs/imputations/mll/SExSE/hr17/${item.ICAO}/window${item.windownum}/imputation_chain_4.csv
       deps:
       - data/outputs/predictions_from_nearby/mll/SExSE/${item.ICAO}
       - batch/pipeline2.jl
